@@ -6,6 +6,18 @@ package Starter;
 	to show you what to do for the remaining classes.
 */
 
+class Stmts {
+  public Stmt s;
+  public Stmts ss = null;
+  public Stmts(Stmt s) {
+    this.s = s;
+  }
+  public Stmts(Stmt s, Stmts ss) {
+    this.s = s;
+    this.ss = ss;
+  }
+}
+
 abstract class Stmt {}
 
 //handles the Stmt --> echo ( ExpList ) production
