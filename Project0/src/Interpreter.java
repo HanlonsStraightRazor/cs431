@@ -22,7 +22,11 @@ public class Interpreter{
       return 0;
     } else if (ss.s instanceof AssignStmt) {
       AssignStmt as = interpret(ss.s);
-      symbolTable.put(as.id, as.exp);
+      if (symbolTable.containsKey(as.id)) {
+        replace(as.id, as.exp);
+      } else {
+        symbolTable.put(as.id, as.exp);
+      }
     } else {
       interpret(ss.ss);
     }
