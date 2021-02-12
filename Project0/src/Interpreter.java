@@ -1,4 +1,5 @@
 package Starter;
+import java.util.HashMap;
 
 /*
 	Add methods to handle the traversal of other nodes in 
@@ -10,6 +11,22 @@ package Starter;
 
 public class Interpreter{
 
+  public static HashMap<String, Integer> symbolTable = new HashMap<>();
+
+  public Interpreter() {
+    symbolTable = new HashMap<>();
+  }
+
+  public int interpret(Stmts ss) {
+    if (ss == null) {
+      return 0;
+    } else if (ss.s instanceof AssignStmt) {
+      AssignStmt as = interpret(ss.s);
+      symbolTable.put(as.id, as.exp);
+    } else {
+      interpret(ss.ss);
+    }
+  }
 	//currently assumes all Stmt are PrintStmt
 	//probably needs to be updated
  	public int interpret(Stmt stm)  {
