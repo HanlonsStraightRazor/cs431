@@ -13,7 +13,11 @@ public class Interpreter{
 	//currently assumes all Stmt are PrintStmt
 	//probably needs to be updated
  	public int interpret(Stmt stm)  {
-    	return this.interpret((PrintStmt)stm);
+	   if (stm instanceof PrintStmt)
+    		return this.interpret((PrintStmt)stm);
+		else (stm instanceof AssignStmt)
+			return this.interpret((AssignStmt)stm);
+		return 0;
  	}
 
 	//each PrintStmt contains an ExpList
