@@ -40,6 +40,13 @@ class AssignStmt extends Stmt{
 
 abstract class Expression {}
 
+class IdExp extends Expression{
+    public String id;
+    public IdExp(String i){
+        id = i;
+    }
+}
+
 class NumExp extends Expression
 {
     public int num;
@@ -47,6 +54,20 @@ class NumExp extends Expression
         num = n;
     }
 }
+
+class BinOpExp extends Expression{
+    public Expression firstExp;
+    public Expression secondExp;
+    public char binOp;
+    public BinOpExp(Expression firstExp, char binOp, Expression secondExp){
+        this.firstExp = firstExp;
+        this.binOp = binOp;
+        this.secondExp = secondExp;
+    }
+}
+
+
+class 
 
 abstract class ExpList {}
 
