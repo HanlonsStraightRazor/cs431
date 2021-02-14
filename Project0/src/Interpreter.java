@@ -91,19 +91,18 @@ public class Interpreter{
         return 0;
     }
 
-    public int interpret(ExpList exp) {
-        if (exp instanceof LastExpList)
-            return interpret((LastExpList)exp);
-        else if (exp instanceof ExpListAndExp)
-            return interpret((ExpListAndExp)exp);
-        return 0;
-    }
+  public Expression interpret(ExpList exp) {
+      if (exp instanceof LastExpList)
+          return this.interpret((LastExpList)exp);
+      else if (exp instanceof ExpListAndExp)
+          return this.interpret((ExpListAndExp)exp);
+      return null;
+  }
 
-    public int interpret(ExpListAndExp oneExAndList) {
-        interpret(oneExAndList.exp);
-        interpret(oneExAndList.list);
-        return 0;
-    }
+  public Expression interpret(ExpListAndExp oneExAndList) {
+      interpret(oneExAndList.list);
+      return interpret(oneExAndList.exp);
+  }
 
     public Expression interpret(LastExpList list) {
         return interpret(list.head);
