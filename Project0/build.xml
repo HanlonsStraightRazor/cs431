@@ -14,7 +14,7 @@
     
     <target name="all">
     	<antcall target="clean"></antcall>
-	<antcall target="compile"></antcall>
-	<antcall target="run"></antcall>
+	    <antcall target="compile"></antcall>
+	    <antcall target="run"></antcall>
     </target>
 </project>
