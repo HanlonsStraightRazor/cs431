@@ -9,6 +9,8 @@
 
   <target name="run">
     <java classname="ProgramOne" classpath="build/classes"/>
+    <!--<java classname="ProgramTwo" classpath="build/classes"/>-->
+    <!--<java classname="ProgramThree" classpath="build/classes"/>-->
   </target>
 
   <target name="all">
