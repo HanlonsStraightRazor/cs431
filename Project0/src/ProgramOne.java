@@ -5,8 +5,8 @@ public class ProgramOne {
         new PrintStmt(
       	    new LastExpList(
         		    new AssignStmt(
-            	    "one",
-            	    new NumExp(30)
+            	      "one",
+            	      new NumExp(30)
                 )
             )
         );
