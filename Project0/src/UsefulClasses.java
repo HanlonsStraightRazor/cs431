@@ -86,8 +86,7 @@ class ExpListAndExp extends ExpList{
   }
 }
 
-class LastExpList extends ExpList
-{
+class LastExpList extends ExpList{
   public Expression head;
   public LastExpList(Expression h){
     head = h;

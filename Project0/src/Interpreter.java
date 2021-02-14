@@ -45,17 +45,23 @@ public class Interpreter{
       return 0;
   }
 
-  public int interpret(Expression exp) {
-      if (exp instanceof NumExp)
-          return interpret((NumExp)exp);
-      else if (exp instanceof IdExp)
-          return interpret((IdExp)exp);
-      else if (exp instanceof BinOpExp)
-          return interpret((BinOpExp)exp);
-      else if (exp instanceof UnaryOpExp)
-          return interpret((UnaryOpExp)exp);
-      return 0;
-  }
+ 	public int interpret(AssignStmt stm) {
+ 		Expression exp = stm.exp;
+ 	   	interpret(exp);
+ 	   	return 0;
+ 	}
+
+ 	public int interpret(Expression exp) {
+    	if (exp instanceof NumExp)
+      		return interpret((NumExp)exp);
+    	else if (exp instanceof IdExp)
+      		return interpret((IdExp)exp);
+    	else if (exp instanceof BinOpExp)
+      		return interpret((BinOpExp)exp);
+    	else if (exp instanceof UnaryOpExp)
+      		return interpret((UnaryOpExp)exp);
+    	return 0;
+ 	}
 
   public int interpret(NumExp exp) {
       return exp.num;
@@ -87,9 +93,19 @@ public class Interpreter{
     return 0;
   }
 
-  public ExpList interpret(ExpList list) {
-      return interpret((LastExpList)list);
-  }
+ 	public int interpret(ExpList exp) {
+    	if (exp instanceof LastExpList)
+      		return this.interpret((LastExpList)exp);
+    	else if (exp instanceof ExpListAndExp)
+      		return this.interpret((ExpListAndExp)exp);
+    	return 0;
+ 	}
+
+ 	public int interpret(ExpListAndExp oneExAndList) {
+    	interpret(oneExAndList.exp);
+		interpret(oneExAndList.list);
+		return 0;
+ 	}
 
   public Expression interpret(LastExpList list) {
       return interpret(list.head);
