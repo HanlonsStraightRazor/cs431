@@ -67,7 +67,7 @@ class BinOpExp extends Expression{
 }
 
 class UnaryOpExp extends Expression{
-    public Expression unrExp;
+    public Expression urnExp;
     public String urnOp;
     public UnaryOpExp(Expression urnExp, String urnOp){
         this.urnExp = urnExp;
