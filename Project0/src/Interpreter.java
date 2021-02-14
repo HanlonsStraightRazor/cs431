@@ -18,14 +18,13 @@ public class Interpreter{
     }
 
     public int interpret(Stmts ss) {
-        if (ss == null) {
+        if (ss == null) 
             return 0;
-        } else {
+        else
             interpret(ss.s);
-            if (ss.ss != null) {
-                interpret(ss.ss);
-            }
-        }
+            if (ss.ss != null)
+                interpret(ss.ss);  
+		return 0;
     }
     //currently assumes all Stmt are PrintStmt
     //probably needs to be updated
@@ -93,20 +92,20 @@ public class Interpreter{
         return 0;
     }
 
-    public Expression interpret(ExpList exp) {
+    public int interpret(ExpList exp) {
         if (exp instanceof LastExpList)
-            return this.interpret((LastExpList)exp);
+            return interpret((LastExpList)exp);
         else if (exp instanceof ExpListAndExp)
-            return this.interpret((ExpListAndExp)exp);
-        return null;
+            return interpret((ExpListAndExp)exp);
+        return 0;
     }
 
-    public Expression interpret(ExpListAndExp oneExAndList) {
+    public int interpret(ExpListAndExp oneExAndList) {
         interpret(oneExAndList.list);
         return interpret(oneExAndList.exp);
     }
 
-    public Expression interpret(LastExpList list) {
+    public int interpret(LastExpList list) {
         return interpret(list.head);
     }
 }
