@@ -21,7 +21,7 @@ public class ProgramTwo{
             "three",
             new BinOpExp(
               new BinOpExp(
-                new VarExp("two"),
+                new IdExp("two"),
                 '%',
                 new NumExp(4)
               ),
@@ -33,9 +33,9 @@ public class ProgramTwo{
             new PrintStmt(
               new ExpListAndExp(
                 new LastExpList(
-                  new VarExp("two")
+                  new IdExp("two")
                 ),
-                new VarExp("three")
+                new IdExp("three")
               )
             )
           )
