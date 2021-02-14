@@ -2,10 +2,10 @@ package Starter;
 import java.util.HashMap;
 
 /*
-   Add methods to handle the traversal of other nodes in 
-   the syntax tree. Some methods will need to be updated. 
-   For instance, the interpret method for a Stmt assumes 
-   that all statements are print statements. This is 
+   Add methods to handle the traversal of other nodes in
+   the syntax tree. Some methods will need to be updated.
+   For instance, the interpret method for a Stmt assumes
+   that all statements are print statements. This is
    obviously not the case and needs to be handled.
 */
 
@@ -18,13 +18,13 @@ public class Interpreter{
     }
 
     public int interpret(Stmts ss) {
-        if (ss == null) 
+        if (ss == null)
             return 0;
         else
             interpret(ss.s);
             if (ss.ss != null)
-                interpret(ss.ss);  
-		return 0;
+                interpret(ss.ss);
+        return 0;
     }
     //currently assumes all Stmt are PrintStmt
     //probably needs to be updated
@@ -45,8 +45,7 @@ public class Interpreter{
     }
 
     public int interpret(AssignStmt stm) {
-        Expression exp = stm.exp;
-        interpret(exp);
+        interpret(stm.exp);
         return 0;
     }
 
