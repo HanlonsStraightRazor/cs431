@@ -80,9 +80,9 @@ public class Interpreter{
 	}
 
  	public int interpret(UnaryOpExp exp) {
-    	if(exp.urnOp == ">>")
+    	if(exp.urnOp.equals(">>"))
         	return interpret(exp.urnExp) >> 1;
-    	else if(exp.urnOP == "<<")
+    	else if(exp.urnOP.equals("<<"))
         	return interpret(exp.urnExp) << 1;
 		return 0;
  	}
