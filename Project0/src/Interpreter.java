@@ -29,7 +29,7 @@ public class Interpreter{
   }
 	//currently assumes all Stmt are PrintStmt
 	//probably needs to be updated
- 	public int interpret(Stmt stm)  {
+ 	public int interpret(Stmt stm) {
 	   if (stm instanceof PrintStmt)
     		return this.interpret((PrintStmt)stm);
 		else if (stm instanceof AssignStmt)
@@ -48,6 +48,12 @@ public class Interpreter{
  	public int interpret(Expression exp) {
     	if (exp instanceof NumExp)
       		return this.interpret((NumExp)exp);
+    	else if (exp instanceof IdExp)
+      		return this.interpret((IdExp)exp);
+    	else if (exp instanceof BinOpExp)
+      		return this.interpret((BinOpExp)exp);
+    	else if (exp instanceof UnaryOpExp)
+      		return this.interpret((UnaryOpExp)exp);
     	return 0;
  	}
 
@@ -55,11 +61,37 @@ public class Interpreter{
     	return exp.num;
  	}
 
- 	public int interpret(ExpList list) {
+ 	public String interpret(IdExp exp) {
+    	return exp.id;
+ 	}
+
+	public int interpret(BinOpExp exp){
+    	if(exp.binOp == '+')
+        	return interpret(exp.firstExp) + interpret(exp.secondExp);
+    	else if(exp.binOp == '-')
+        	return interpret(exp.firstExp) - interpret(exp.secondExp);
+        else if(exp.binOp == '*')
+            return interpret(exp.firstExp) * interpret(exp.secondExp);
+        else if(exp.binOp == '/')
+            return interpret(exp.firstExp) / interpret(exp.secondExp);
+        else if(exp.binOp == '%')
+            return interpret(exp.firstExp) % interpret(exp.secondExp);
+		return 0;
+	}
+
+ 	public int interpret(UnaryOpExp exp) {
+    	if(exp.urnOp == ">>")
+        	return interpret(exp.urnExp) >> 1;
+    	else if(exp.urnOP == "<<")
+        	return interpret(exp.urnExp) << 1;
+		return 0;
+ 	}
+
+ 	public ExpList interpret(ExpList list) {
     	return this.interpret((LastExpList)list);
  	}
 
- 	public int interpret(LastExpList list) {
+ 	public Expression interpret(LastExpList list) {
     	return this.interpret(list.head);
   	}
 }
