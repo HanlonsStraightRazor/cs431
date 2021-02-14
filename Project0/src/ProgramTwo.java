@@ -5,7 +5,7 @@ public class ProgramTwo{
   //You should create separate programs for each tree you create.
     private static Stmts program = new Stmts(
         new AssignStmt(
-          "two",
+          new IdExp("two"),
           new BinOpExp(
             new BinOpExp(
               new NumExp(20),
@@ -18,7 +18,7 @@ public class ProgramTwo{
         ),
         new Stmts(
           new AssignStmt(
-            "three",
+            new IdExp("three"),
             new BinOpExp(
               new BinOpExp(
                 new IdExp("two"),
