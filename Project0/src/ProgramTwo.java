@@ -32,9 +32,9 @@ public class ProgramTwo{
             new Stmts(
                 new PrintStmt(
                     new ExpListAndExp(
-                        new IdExp("three"),
+                        new IdExp("two"),
                         new LastExpList(
-                            new IdExp("two")
+                            new IdExp("three")
                         )
                     )
                 )

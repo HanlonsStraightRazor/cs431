@@ -45,8 +45,7 @@ public class Interpreter{
     }
 
     public int interpret(AssignStmt stm) {
-        Expression exp = stm.exp;
-        interpret(exp);
+        interpret(stm.exp);
         return 0;
     }
 
