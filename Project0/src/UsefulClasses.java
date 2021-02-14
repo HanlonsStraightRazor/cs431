@@ -64,6 +64,14 @@ class BinOpExp extends Expression{
         this.binOp = binOp;
         this.secondExp = secondExp;
     }
+
+class UnaryOpExp extends Expression{
+    public Expression exp;
+    public char urnOp;
+    public UnaryOpExp(Expression exp, String urnOp){
+        this.exp = exp;
+        this.urnOp = urnOp;
+    }
 }
 
 abstract class ExpList {}
