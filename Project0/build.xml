@@ -1,20 +1,19 @@
 <project>
-    <target name="clean">
-        <delete dir="build"/>
-    </target>
+  <target name="clean">
+    <delete dir="build"/>
+  </target>
 
-    <target name="compile">
-        <mkdir dir="build/classes"/>
-        <javac srcdir="src" destdir="build/classes" includeantruntime="false"/>
-    </target>
+  <target name="compile">
+    <mkdir dir="build/classes"/>
+    <javac srcdir="src" destdir="build/classes" includeantruntime="false"/>
 
-    <target name="run">
-        <java classname="ProgramOne" classpath="build/classes"/>
-    </target>
-    
-    <target name="all">
-    	<antcall target="clean"></antcall>
-	    <antcall target="compile"></antcall>
-	    <antcall target="run"></antcall>
-    </target>
+  <target name="run">
+    <java classname="ProgramOne" classpath="build/classes"/>
+  </target>
+
+  <target name="all">
+    <antcall target="clean"></antcall>
+    <antcall target="compile"></antcall>
+    <antcall target="run"></antcall>
+  </target>
 </project>
