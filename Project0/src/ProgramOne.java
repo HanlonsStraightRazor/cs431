@@ -9,7 +9,8 @@ public class ProgramOne {
                     new NumExp(30)
                 )
             )
-        );
+        )
+    );
 
     public static void main(String[] args) {
         Interpreter interpreter = new Interpreter();
