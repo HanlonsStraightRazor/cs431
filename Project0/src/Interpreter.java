@@ -7,7 +7,7 @@ import java.util.HashMap;
    For instance, the interpret method for a Stmt assumes 
    that all statements are print statements. This is 
    obviously not the case and needs to be handled.
-   */
+*/
 
 public class Interpreter{
 
@@ -33,7 +33,7 @@ public class Interpreter{
         if (stm instanceof PrintStmt)
             return interpret((PrintStmt)stm);
         else if (stm instanceof AssignStmt)
-            symbolTable.put(interpret((IdExp) (((AssignStmt) stm).id)), interpret(((AssignStmt)stm).exp));
+            symbolTable.put(((AssignStmt) stm).id, interpret(((AssignStmt)stm).exp));
         return 0;
     }
 
@@ -54,6 +54,8 @@ public class Interpreter{
     public int interpret(Expression exp) {
         if (exp instanceof NumExp)
             return interpret((NumExp)exp);
+        else if (exp instanceof IdExp)
+            return interpret((IdExp)exp);
         else if (exp instanceof BinOpExp)
             return interpret((BinOpExp)exp);
         else if (exp instanceof UnaryOpExp)
@@ -65,8 +67,8 @@ public class Interpreter{
         return exp.num;
     }
 
-    public String interpret(IdExp exp) {
-        return exp.id;
+    public int interpret(IdExp exp) {
+        return symbolTable.get(exp.id);
     }
 
     public int interpret(BinOpExp exp){
@@ -91,18 +93,18 @@ public class Interpreter{
         return 0;
     }
 
-  public Expression interpret(ExpList exp) {
-      if (exp instanceof LastExpList)
-          return this.interpret((LastExpList)exp);
-      else if (exp instanceof ExpListAndExp)
-          return this.interpret((ExpListAndExp)exp);
-      return null;
-  }
+    public Expression interpret(ExpList exp) {
+        if (exp instanceof LastExpList)
+            return this.interpret((LastExpList)exp);
+        else if (exp instanceof ExpListAndExp)
+            return this.interpret((ExpListAndExp)exp);
+        return null;
+    }
 
-  public Expression interpret(ExpListAndExp oneExAndList) {
-      interpret(oneExAndList.list);
-      return interpret(oneExAndList.exp);
-  }
+    public Expression interpret(ExpListAndExp oneExAndList) {
+        interpret(oneExAndList.list);
+        return interpret(oneExAndList.exp);
+    }
 
     public Expression interpret(LastExpList list) {
         return interpret(list.head);
