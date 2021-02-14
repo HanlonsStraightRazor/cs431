@@ -3,10 +3,10 @@ package Starter;
 public class ProgramOne {
     private static Stmts program = new Stmts(
         new PrintStmt(
-      	    new LastExpList(
-        		    new AssignStmt(
-            	      "one",
-            	      new NumExp(30)
+            new LastExpList(
+                new AssignStmt(
+                    "one",
+                    new NumExp(30)
                 )
             )
         );
