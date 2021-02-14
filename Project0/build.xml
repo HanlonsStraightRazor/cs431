@@ -9,12 +9,12 @@
     </target>
 
     <target name="run">
-        <java classname="Starter.Program" classpath="build/classes"/>
+        <java classname="ProgramOne" classpath="build/classes"/>
     </target>
     
     <target name="all">
-    	<antcall target="clean"></antcall>
-	<antcall target="compile"></antcall>
-	<antcall target="run"></antcall>
+        <antcall target="clean"></antcall>
+	    <antcall target="compile"></antcall>
+	    <antcall target="run"></antcall>
     </target>
 </project>
