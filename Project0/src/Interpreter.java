@@ -32,7 +32,7 @@ public class Interpreter{
  	public int interpret(Stmt stm)  {
 	   if (stm instanceof PrintStmt)
     		return this.interpret((PrintStmt)stm);
-		else (stm instanceof AssignStmt)
+		else if (stm instanceof AssignStmt)
 			return this.interpret((AssignStmt)stm);
 		return 0;
  	}
