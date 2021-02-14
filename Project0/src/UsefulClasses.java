@@ -77,6 +77,15 @@ class UnaryOpExp extends Expression{
 
 abstract class ExpList {}
 
+class ExpListAndExp extends ExpList{
+    public Expression exp;
+    public ExpList list;
+    public ExpListAndExp(Expression exp, ExpList list){
+        this.exp = exp;
+        this.list = list;
+    }
+}
+
 class LastExpList extends ExpList
 {
     public Expression head;
