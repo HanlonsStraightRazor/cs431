@@ -66,23 +66,23 @@ public class Interpreter{
  	}
 
 	public int interpret(BinOpExp exp){
-    	if(exp.binOp == '+')
+    	if (exp.binOp == '+')
         	return interpret(exp.firstExp) + interpret(exp.secondExp);
-    	else if(exp.binOp == '-')
+    	else if (exp.binOp == '-')
         	return interpret(exp.firstExp) - interpret(exp.secondExp);
-        else if(exp.binOp == '*')
+        else if (exp.binOp == '*')
             return interpret(exp.firstExp) * interpret(exp.secondExp);
-        else if(exp.binOp == '/')
+        else if (exp.binOp == '/')
             return interpret(exp.firstExp) / interpret(exp.secondExp);
-        else if(exp.binOp == '%')
+        else if (exp.binOp == '%')
             return interpret(exp.firstExp) % interpret(exp.secondExp);
 		return 0;
 	}
 
  	public int interpret(UnaryOpExp exp) {
-    	if(exp.urnOp.equals(">>"))
+    	if (exp.urnOp.equals(">>"))
         	return interpret(exp.urnExp) >> 1;
-    	else if(exp.urnOP.equals("<<"))
+    	else if (exp.urnOP.equals("<<"))
         	return interpret(exp.urnExp) << 1;
 		return 0;
  	}
