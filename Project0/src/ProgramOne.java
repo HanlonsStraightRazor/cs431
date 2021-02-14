@@ -2,12 +2,15 @@ package Starter;
 
 public class ProgramOne {
     private static Stmts program = new Stmts(
-        new PrintStmt(
-            new LastExpList(
-                new AssignStmt(
-                    new IdExp("one"),
-                    new NumExp(30)
-                )
+        new AssignStmt(
+            new IdExp("one"),
+            new NumExp(30)
+        ),
+        new Stmts(
+            new PrintStmt(
+                new LastExpList(
+                new IdExp("one")
+            )
             )
         )
     );
