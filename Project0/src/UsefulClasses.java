@@ -64,6 +64,7 @@ class BinOpExp extends Expression{
         this.binOp = binOp;
         this.secondExp = secondExp;
     }
+}
 
 class UnaryOpExp extends Expression{
     public Expression exp;
