@@ -9,7 +9,7 @@
     </target>
 
     <target name="run">
-        <java classname="Starter.Program" classpath="build/classes"/>
+        <java classname="ProgramOne" classpath="build/classes"/>
     </target>
     
     <target name="all">
