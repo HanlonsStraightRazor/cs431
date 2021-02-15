@@ -41,8 +41,7 @@ public class Interpreter{
     //evaluate the ExpList
     public int interpret(PrintStmt stm) {
         ExpList exp = stm.exps;
-        for (Integer i : interpret(exp).toArray())
-            System.out.println(i);
+        interpret(exp).forEach((i) -> System.out.println(i));
         return 0;
     }
 
