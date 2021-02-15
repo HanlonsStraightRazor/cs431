@@ -47,16 +47,16 @@ public class ProgramThree{
                         new Stmts(
                             new AssignStmt(
                                 "five",
-                                new BinOpExp(
-                                    new UnaryOpExp(
-                                        new IdExp("four"),
-                                        "<<"
+                                new UnaryOpExp(
+                                    new BinOpExp(
+                                        new UnaryOpExp(
+                                            new IdExp("four"),
+                                            "<<"
+                                        ),
+                                        '/',
+                                        new IdExp("four")
                                     ),
-                                    '/',
-                                    new UnaryOpExp(
-                                        new IdExp("four"),
-                                        ">>"
-                                    )
+                                    ">>"
                                 )
                             ),
                             new Stmts(

@@ -40,8 +40,7 @@ public class Interpreter{
     //each PrintStmt contains an ExpList
     //evaluate the ExpList
     public int interpret(PrintStmt stm) {
-        ExpList exp = stm.exps;
-        interpret(exp).forEach((i) -> System.out.println(i));
+        interpret(stm.exps).forEach((i) -> System.out.println(i));
         return 0;
     }
 
