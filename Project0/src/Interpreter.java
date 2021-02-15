@@ -1,5 +1,6 @@
 package Starter;
 import java.util.HashMap;
+import java.util.ArrayList;
 
 /*
    Add methods to handle the traversal of other nodes in
@@ -91,12 +92,18 @@ public class Interpreter{
         return 0;
     }
 
-    public int interpret(ExpList exp) {
-        if (exp instanceof LastExpList)
-            return interpret((LastExpList)exp);
-        else if (exp instanceof ExpListAndExp)
-            return interpret((ExpListAndExp)exp);
-        return 0;
+    public ArrayList interpret(ExpList expr) {
+        ArrayList<Integer> finalList = new ArrayList<Integer>();
+        ExpList el = expr;
+        while(true){
+            if(el instanceof LastExpList){
+                finalList.add(interpret((LastExpList)el.exp));
+                return finalList;
+            } else {
+              finalList.add(interpret((ExpListAndExp)el.list));
+              el = el.list;
+            }
+        }
     }
 
     public int interpret(ExpListAndExp oneExAndList) {
