@@ -2,13 +2,6 @@ package Starter;
 import java.util.HashMap;
 import java.util.ArrayList;
 
-/*
-   Add methods to handle the traversal of other nodes in
-   the syntax tree. Some methods will need to be updated.
-   For instance, the interpret method for a Stmt assumes
-   that all statements are print statements. This is
-   obviously not the case and needs to be handled.
-*/
 
 public class Interpreter{
 
@@ -27,8 +20,7 @@ public class Interpreter{
                 interpret(ss.ss);
         return 0;
     }
-    //currently assumes all Stmt are PrintStmt
-    //probably needs to be updated
+
     public int interpret(Stmt stm) {
         if (stm instanceof PrintStmt)
             return interpret((PrintStmt)stm);
@@ -37,8 +29,6 @@ public class Interpreter{
         return 0;
     }
 
-    //each PrintStmt contains an ExpList
-    //evaluate the ExpList
     public int interpret(PrintStmt stm) {
         interpret(stm.exps).forEach((i) -> System.out.println(i));
         return 0;

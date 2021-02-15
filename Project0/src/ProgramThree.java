@@ -1,8 +1,6 @@
 package Starter;
 
 public class ProgramThree{
-    //the syntax tree representation of:  echo(34)
-    //You should create separate programs for each tree you create.
     private static Stmts program = new Stmts(
         new AssignStmt(
             "four",

@@ -1,11 +1,5 @@
 package Starter;
 
-/*
-   You will need to add many more classes to this file to get the interpreter 
-   to work. The pattern shown below for the simple example should be enough 
-   to show you what to do for the remaining classes.
-*/
-
 class Stmts {
   public Stmt s;
   public Stmts ss = null;
@@ -20,7 +14,6 @@ class Stmts {
 
 abstract class Stmt {}
 
-//handles the Stmt --> echo ( ExpList ) production
 class PrintStmt extends Stmt{
   public ExpList exps;
   public PrintStmt(ExpList e){
@@ -28,7 +21,6 @@ class PrintStmt extends Stmt{
   }
 }
 
-//handles the Stmt --> id <-- Expression production
 class AssignStmt extends Stmt{
   public String id;
   public Expression exp;
