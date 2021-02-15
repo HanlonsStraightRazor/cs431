@@ -2,7 +2,11 @@ package Starter;
 import java.util.HashMap;
 import java.util.ArrayList;
 
-
+/*
+* Project 0
+* Professor: Erik Krohn
+* Authors: Ben Pink, Martin Mueller, Isaiah Ley
+*/
 public class Interpreter{
 
     public static HashMap<String, Integer> symbolTable = new HashMap<>();
