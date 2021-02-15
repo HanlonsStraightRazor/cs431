@@ -3,7 +3,78 @@ package Starter;
 public class ProgramThree{
     //the syntax tree representation of:  echo(34)
     //You should create separate programs for each tree you create.
-    private static Stmt program = new PrintStmt(new LastExpList(new NumExp(34)));
+    private static Stmts program = new Stmts(
+        new AssignStmt(
+            "four",
+            new BinOpExp(
+                new NumExp(5),
+                '+',
+                new NumExp(10)
+            )
+        ),
+        new Stmts(
+            new AssignStmt(
+                "five",
+                new BinOpExp(
+                    new NumExp(10),
+                    '/',
+                    new NumExp(3)
+                )
+            ),
+            new Stmts(
+                new PrintStmt(
+                    new ExpListAndExp(
+                        new IdExp("four"),
+                        new LastExpList(
+                            new IdExp("five")
+                        )
+                    )
+                ),
+                new Stmts(
+                    new AssignStmt(
+                        "four",
+                        new UnaryOpExp(
+                            new IdExp("four"),
+                            ">>"
+                        )
+                    ),
+                    new Stmts(
+                        new PrintStmt(
+                            new LastExpList(
+                                new IdExp("four")
+                            )
+                        ),
+                        new Stmts(
+                            new AssignStmt(
+                                "five",
+                                new BinOpExp(
+                                    new UnaryOpExp(
+                                        new IdExp("four"),
+                                        "<<"
+                                    ),
+                                    '/',
+                                    new UnaryOpExp(
+                                        new IdExp("four"),
+                                        ">>"
+                                    )
+                                )
+                            ),
+                            new Stmts(
+                                new PrintStmt(
+                                    new ExpListAndExp(
+                                        new IdExp("four"),
+                                        new LastExpList(
+                                            new IdExp("five")
+                                        )
+                                    )
+                                )
+                            )
+                        )
+                    )
+                )
+            )
+        )
+    );
 
     public static void main(String[] args) {
         //Create a new Interpreter Object
