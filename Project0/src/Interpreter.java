@@ -97,11 +97,11 @@ public class Interpreter{
         ExpList el = expr;
         while(true){
             if(el instanceof LastExpList){
-                finalList.add(interpret((LastExpList)el.exp));
+                finalList.add(interpret((LastExpList)el.head));
                 return finalList;
             } else {
-              finalList.add(interpret((ExpListAndExp)el.list));
-              el = el.list;
+                finalList.add(interpret((ExpListAndExp)el.exp));
+                el = el.list;
             }
         }
     }
