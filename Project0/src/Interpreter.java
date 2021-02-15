@@ -41,7 +41,8 @@ public class Interpreter{
     //evaluate the ExpList
     public int interpret(PrintStmt stm) {
         ExpList exp = stm.exps;
-        System.out.println(interpret(exp));
+        for (Integer i : interpret(exp).toArray())
+            System.out.println(i);
         return 0;
     }
 
@@ -97,21 +98,12 @@ public class Interpreter{
         ExpList el = expr;
         while(true){
             if(el instanceof LastExpList){
-                finalList.add(interpret((LastExpList)el.head));
+                finalList.add(interpret(((LastExpList) el).head));
                 return finalList;
             } else {
-                finalList.add(interpret((ExpListAndExp)el.exp));
-                el = el.list;
+              finalList.add(interpret(((ExpListAndExp) el).exp));
+              el = ((ExpListAndExp) el).list;
             }
         }
-    }
-
-    public int interpret(ExpListAndExp oneExAndList) {
-        interpret(oneExAndList.list);
-        return interpret(oneExAndList.exp);
-    }
-
-    public int interpret(LastExpList list) {
-        return interpret(list.head);
     }
 }
