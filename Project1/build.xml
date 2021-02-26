@@ -12,7 +12,11 @@
   </target>
 
   <target name="run">
-    <java classname="Project1.Main" classpath="build/classes"/>
+    <java classname="Project1.Main" classpath="build/classes">
+        <arg value="src/ProjectOneSample/prog1.txt">
+        <arg value="src/ProjectOneSample/prog2.txt">
+        <arg value="src/ProjectOneSample/prog3.txt">
+    </java>
   </target>
 
   <target name="all">
