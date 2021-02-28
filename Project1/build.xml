@@ -1,25 +1,41 @@
 <project>
-  <target name="clean">
-    <delete dir="build"/>
-  </target>
 
-  <target name="compile">
-    <mkdir dir="build/classes"/>
-    <java jar="sablecc.jar" inputstring="src/Proj1.js" fork="true"/>
-    <javac srcdir="src" destdir="build/classes" includeantruntime="false"/>
-  </target>
+    <description>
+        Implementation of a lexer for an extended version of MiniJava.
+    </description>
 
-  <target name="run">
-    <java classname="Project1.Main" classpath="build/classes">
-        <arg value="src/ProjectOneSample/prog1.txt"/>
-        <arg value="src/ProjectOneSample/prog2.txt"/>
-        <arg value="src/ProjectOneSample/prog3.txt"/>
-    </java>
-  </target>
+    <property name="build" location="build"/>
+    <property name="test" location="test"/>
+    <property name="src" location="src"/>
+    <property name="regex" location="src/Proj1.js"/>
 
-  <target name="all">
-    <antcall target="clean"></antcall>
-    <antcall target="compile"></antcall>
-    <antcall target="run"></antcall>
-  </target>
+    <target name="clean">
+        <delete dir="${build}"/>
+    </target>
+
+    <target name="compile">
+        <mkdir dir="${build}"/>
+        <java
+            jar="sablecc.jar"
+            classpath="."
+            fork="true"
+            failonerror="true">
+            <arg value="-d ${build} ${regex}"/>
+        </java>
+        <javac srcdir="${src}" destdir="${build}" includeantruntime="false"/>
+    </target>
+
+    <target name="run">
+        <java classname="Project1.Main" classpath="${build}">
+            <arg value="${test}/prog1.txt"/>
+            <arg value="${test}/prog2.txt"/>
+            <arg value="${test}/prog3.txt"/>
+        </java>
+    </target>
+
+    <target name="all">
+        <antcall target="clean"></antcall>
+        <antcall target="compile"></antcall>
+        <antcall target="run"></antcall>
+    </target>
 </project>
