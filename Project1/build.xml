@@ -5,17 +5,15 @@
 
   <target name="compile">
     <mkdir dir="build/classes"/>
-    <java jar="sablecc.jar" fork="true">
-        <arg value="-d build/sablecc src/Proj1.js"/>
-    </java>
+    <java jar="sablecc.jar" inputstring="src/Proj1.js" fork="true"/>
     <javac srcdir="src" destdir="build/classes" includeantruntime="false"/>
   </target>
 
   <target name="run">
     <java classname="Project1.Main" classpath="build/classes">
-        <arg value="src/ProjectOneSample/prog1.txt">
-        <arg value="src/ProjectOneSample/prog2.txt">
-        <arg value="src/ProjectOneSample/prog3.txt">
+        <arg value="src/ProjectOneSample/prog1.txt"/>
+        <arg value="src/ProjectOneSample/prog2.txt"/>
+        <arg value="src/ProjectOneSample/prog3.txt"/>
     </java>
   </target>
 
