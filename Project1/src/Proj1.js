@@ -3,8 +3,9 @@ Package Project1;
 Helpers
     letter = ['A'..'Z'] | ['a'..'z'];
     digit = ['0'..'9'];
-    lf = 10 | 13;
+    lf = 10 | 12 | 13;
     sp = ' ';
+    tabs = 9 | 11;
     any = [0..255];
 
 Tokens
@@ -31,8 +32,9 @@ Tokens
     period = '.';
     semicolon = ';';
     equal = '=';
-    whitespace = (lf | sp);
-    number = digit+ '.' digit*;
+    whitespace = (lf | sp | tabs);
+    number = digit+;
+    real_numbers = digit+ '.' digit*;
     comments = ('//' any* lf) | ('/*' any* '*/');
     id = letter (digit | letter | '_')*;
 

@@ -20,9 +20,13 @@ public class Main{
                         (new FileReader(new File(arg)), 4096));
                 Token t = l.next();
                 while (!t.getText().equals("")){
-                    System.out.print("<"+t.toString()+">");
+                    String[] sarr = t.getClass().getName().split("\\.");
+                    if (!sarr[sarr.length - 1].equals("TWhitespace")) {
+                        System.out.print("<"+sarr[sarr.length - 1]+">");
+                    }
                     t = l.next();
                 }
+                System.out.println();
             }
         }
         catch(Exception e){ System.out.println(e.getMessage()); }
