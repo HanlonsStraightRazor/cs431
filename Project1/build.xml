@@ -16,13 +16,13 @@
 
     <target name="compile">
         <mkdir dir="${build}"/>
-        <!-- <java jar="sablecc.jar" fork="true"> -->
-        <!--     <arg value="-d ${src} ${regex}"/> -->
-        <!-- </java> -->
         <exec executable="/bin/bash">
             <arg line="-c 'java -jar sablecc.jar -d ${src} ${regex}'"/>
         </exec>
         <javac srcdir="${src}" destdir="${build}" includeantruntime="false"/>
+        <copy
+            file="${src}/Project1/lexer/lexer.dat"
+            todir="${build}/Project1/lexer"/>
     </target>
 
     <target name="run">
