@@ -19,8 +19,9 @@
         <!-- <java jar="sablecc.jar" fork="true"> -->
         <!--     <arg value="-d ${src} ${regex}"/> -->
         <!-- </java> -->
-        <chmod file="gen_lexer.sh" perm="755"/>
-        <exec executable="./gen_lexer.sh"/>
+        <exec executable="/bin/bash">
+            <arg line="-c 'java -jar sablecc.jar -d ${src} ${regex}'"/>
+        </exec>
         <javac srcdir="${src}" destdir="${build}" includeantruntime="false"/>
     </target>
 
