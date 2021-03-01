@@ -14,8 +14,8 @@ public class Main{
         try{
             // Create a lexer instance.
             for (String arg : args) {
-                String name = arg.split(".")[0];
-                System.setOut(new PrintStream(new File(name + ".answer")));
+                // String name = arg.split(".")[0];
+                // System.setOut(new PrintStream(new FileOutputStream(name + ".answer")));
                 Lexer l = new Lexer(new PushbackReader
                         (new FileReader(new File(arg)), 4096));
                 Token t = l.next();

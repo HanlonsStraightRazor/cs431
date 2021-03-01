@@ -15,12 +15,8 @@
 
     <target name="compile">
         <mkdir dir="${build}"/>
-        <java
-            jar="sablecc.jar"
-            classpath="."
-            fork="true"
-            failonerror="true">
-            <arg value="-d ${build} ${regex}"/>
+        <java jar="sablecc.jar" fork="true">
+            <arg value="-d ${src} ${regex}"/>
         </java>
         <javac srcdir="${src}" destdir="${build}" includeantruntime="false"/>
     </target>
