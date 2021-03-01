@@ -11,13 +11,15 @@
 
     <target name="clean">
         <delete dir="${build}"/>
+        <delete dir="${src}/Project1"/>
     </target>
 
     <target name="compile">
         <mkdir dir="${build}"/>
-        <java jar="sablecc.jar" fork="true">
-            <arg value="-d ${src} ${regex}"/>
-        </java>
+        <!-- <java jar="sablecc.jar" fork="true"> -->
+        <!--     <arg value="-d ${src} ${regex}"/> -->
+        <!-- </java> -->
+        <exec executable="./gen_lexer.sh"/>
         <javac srcdir="${src}" destdir="${build}" includeantruntime="false"/>
     </target>
 
