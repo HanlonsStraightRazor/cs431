@@ -21,8 +21,12 @@ Tokens
     else = 'else';
     string = 'String';
     int = 'int';
-    boolean = 'boolean';
-    add = '+';
+    bool = 'boolean';
+    true = 'true';
+    false = 'false';
+    while = 'while';
+    length = 'length';
+    plus = '+';
     minus = '-';
     times = '*';
     lparen = '(';
