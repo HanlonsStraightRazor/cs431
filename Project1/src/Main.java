@@ -26,6 +26,7 @@ public class Main{
                     }
                     t = l.next();
                 }
+                System.out.println();
             }
         }
         catch(Exception e){ System.out.println(e.getMessage()); }
