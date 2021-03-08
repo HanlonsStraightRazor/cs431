@@ -1,0 +1,20 @@
+class Factorial {
+    public static void main(String[] a) {
+        System.out.println(new Fac().ComputeFac(10));
+    }
+}
+
+//this is a comment test
+class Fac {
+    public int ComputeFac(int num) {
+        int num_aux;
+        if (num < 1)  /* this is a multi-line comment test */
+            num_aux = 1;
+        else 
+            num_aux = num * (this.ComputeFac(num-1));
+            /*this one actually
+              goes on multiple
+              lines */
+        return num_aux;
+    }
+}
