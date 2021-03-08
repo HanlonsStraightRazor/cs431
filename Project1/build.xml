@@ -6,16 +6,19 @@
 
     <property name="build" location="build"/>
     <property name="test" location="test"/>
+    <property name="output" location="output"/>
     <property name="src" location="src"/>
     <property name="regex" location="src/Proj1.js"/>
 
     <target name="clean">
         <delete dir="${build}"/>
+        <delete dir="${output}"/>
         <delete dir="${src}/Project1"/>
     </target>
 
     <target name="compile">
         <mkdir dir="${build}"/>
+        <mkdir dir="${output}"/>
         <exec executable="/bin/bash">
             <arg line="-c 'java -jar sablecc.jar -d ${src} ${regex}'"/>
         </exec>
@@ -26,13 +29,13 @@
     </target>
 
     <target name="run">
-        <java classname="Project1.Main" classpath="${build}" output="prog1a.answer">
+        <java classname="Project1.Main" classpath="${build}" output="${output}/prog1.answer">
             <arg value="${test}/prog1.txt"/>
         </java>
-        <java classname="Project1.Main" classpath="${build}" output="prog2a.answer">
+        <java classname="Project1.Main" classpath="${build}" output="${output}/prog2.answer">
             <arg value="${test}/prog2.txt"/>
         </java>
-        <java classname="Project1.Main" classpath="${build}" output="prog3a.answer">
+        <java classname="Project1.Main" classpath="${build}" output="${output}/prog3.answer">
             <arg value="${test}/prog3.txt"/>
         </java>
     </target>
