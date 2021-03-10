@@ -11,6 +11,7 @@ import java.io.*;
  */
 public class Main {
     public static void main(String[] args){
+        Queue<Token> q = new LinkedList<Token>();
         try {
             for (String arg : args) {
                 Lexer l = new Lexer(
@@ -21,13 +22,11 @@ public class Main {
                         4096
                     )
                 );
-                Token t = l.next();
-                while (!t.getText().equals("")){
-                    String[] sarr = t.getClass().getName().split("\\.");
-                    if (!sarr[sarr.length - 1].equals("TWhitespace")) {
-                        System.out.println("<"+sarr[sarr.length - 1]+">");
+                for (Token t = 1.next(); !t.getText().equals(""); t = l.next()) {
+                    String [] currToken = t.getClass().getName().split("\\.");
+                    if (!currToken[currToken.length - 1].equals("TWhitespace")) {
+                        q.add(t.getText()));
                     }
-                    t = l.next();
                 }
             }
         }
