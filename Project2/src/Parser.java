@@ -1,24 +1,27 @@
 package Project2;
 
-import java.beans.Expression;
 import java.util.Queue;
 import Project2.lexer.*;
 import Project2.node.*;
 
 class Parser {
     // Class variables
-    Queue<String> q;
-    String t;
+    Queue<Token> q;
+    Token t;
     // Constructor
-    Parser(Queue<String> q) {
+    Parser(Queue<Token> q) {
         this.q = q;
         t = q.poll();
     }
-    private String getToken() {
+    private Token getToken() {
         return q.poll();
     }
+    private String getName(Token token) {
+        String[] tokenClass = t.getClass().getName().split("\\.");
+        return tokenClass[tokenClass.length - 1];
+    }
     private void match(String matchMe) {
-        if(matchMe == t) {
+        if(matchMe == getName(t)) {
             t = getToken();
         } else {
             error();
@@ -32,15 +35,9 @@ class Parser {
         }
     }
     private void stmt(){
-        switch(t) {
-            case(id):
-                match(id);
-                break;
-            case("("):
-                match("(");
-                exp();
-                match(")");
-                break;
+        switch(getName(t)) {
+            case("TId"):
+            case("TEcho"):
             default:
                 error();
         }
@@ -96,5 +93,6 @@ class Parser {
     }
     private void error() {
         System.err.println("ERROR");
+        System.exit(1);
     }
 }

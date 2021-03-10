@@ -13,7 +13,7 @@ import java.util.LinkedList;
  */
 public class Main {
     public static void main(String[] args){
-        Queue<String> q = new LinkedList<String>();
+        Queue<Token> q = new LinkedList<Token>();
         try {
             for (String arg : args) {
                 File f = new File(arg);
@@ -24,9 +24,9 @@ public class Main {
                     )
                 );
                 for (Token t = l.next(); !t.getText().equals(""); t = l.next()) {
-                    String [] tokenClass = t.getClass().getName().split("\\.");
+                    String[] tokenClass = t.getClass().getName().split("\\.");
                     if (!tokenClass[tokenClass.length - 1].equals("TWhitespace")) {
-                        q.add(t.getText());
+                        q.add(t);
                     }
                 }
             }
