@@ -1,7 +1,7 @@
 package Project2;
 
-import Project1.lexer.*;
-import Project1.node.*;
+import Project2.lexer.*;
+import Project2.node.*;
 import java.io.*;
 
 /*
