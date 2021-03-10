@@ -30,4 +30,46 @@ public class Main {
         }
         catch(Exception e){ System.out.println(e.getMessage()); }
     }
+
+    public void parser(){
+        Token t = getToken();
+        void match(Token matchMe){
+            if(matchMe == t){
+                t = getToekn();
+            } else {
+                //error
+            }
+        }
+        void factor(){
+            switch(t){
+                case(lpar) : match(lpar); exp(); match(rpar); break;
+                case(number) : match(number); break;
+                default: error();
+            }
+        }
+        void term(){
+            switch(t){
+                case(term) : term(); multOp(); factor(); break;
+                case(factor) : factor(); break;
+                default: error();
+        }
+        void exp(){
+            switch(t){
+                case(exp) : exp(); addOp(); term(); break;
+                case(term) : term(); break;
+                default: error();
+        }
+        void multOp(){
+            switch(t){
+                case('*') : match('*'); break;
+                case('/') : match('/'); break;
+                default: error();
+        }
+        void addOp(){
+            switch(t){
+                case('+') : match('+'); break;
+                case('-') : match('-'); break;
+                default: error();
+        }
+    }
 }
