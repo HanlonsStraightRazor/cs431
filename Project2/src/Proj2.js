@@ -1,4 +1,4 @@
-Package Project1;
+Package Project2;
 
 Helpers
     letter = ['A'..'Z'] | ['a'..'z'];

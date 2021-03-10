@@ -1,4 +1,4 @@
-package Project1;
+package Project2;
 
 import Project1.lexer.*;
 import Project1.node.*;
@@ -9,7 +9,7 @@ import java.io.*;
  * Project 1
  * Authors: Ben Pink, Martin Mueller, Isaiah Ley
  */
-public class Main{
+public class Main {
     public static void main(String[] args){
         try{
             // Create a lexer instance.
