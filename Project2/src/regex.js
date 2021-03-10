@@ -15,6 +15,7 @@ Tokens
     lparen = '(';
     rparen = ')';
     num = digit+ ('.' digit+)?;
+    comma = ',';
     add = '+';
     sub = '-';
     mul = '*';
