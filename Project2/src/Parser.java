@@ -12,7 +12,7 @@ class Parser {
         this.q = q;
         t = q.poll();
     }
-    private Token getToken(Token token) {
+    private Token getToken() {
         return q.poll();
     }
     private void match(Token matchMe) {
@@ -24,21 +24,21 @@ class Parser {
     }
     private void factor(){
         switch(t){
-            case(lpar) : match(lpar); exp(); match(rpar); break;
-            case(number) : match(number); break;
+            case(lparen) : match(lparen); exp(); match(rparen); break;
+            case(num) : match(num); break;
             default: error();
         }
     }
     private void term(){
         factor();
-        while(peekToken() == multOp){
+        while(peekToken() == '*' | '/'){
             multOp();
             factor();
         }
     }
     private void exp(){
         term();
-        while(peekToken() == addOp){
+        while(peekToken() == '+' | '-'){
             addOp();
             term();
         }
