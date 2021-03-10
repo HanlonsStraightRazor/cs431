@@ -22,10 +22,10 @@ public class Main {
                         4096
                     )
                 );
-                for (Token t = 1.next(); !t.getText().equals(""); t = l.next()) {
+                for (Token t = l.next(); !t.getText().equals(""); t = l.next()) {
                     String [] currToken = t.getClass().getName().split("\\.");
                     if (!currToken[currToken.length - 1].equals("TWhitespace")) {
-                        q.add(t.getText()));
+                        q.add(t.getText());
                     }
                 }
             }
