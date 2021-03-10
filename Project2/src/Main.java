@@ -6,7 +6,7 @@ import java.io.*;
 
 /*
  * CS 431 - Compilers
- * Project 1
+ * Project 2
  * Authors: Ben Pink, Martin Mueller, Isaiah Ley
  */
 public class Main {
