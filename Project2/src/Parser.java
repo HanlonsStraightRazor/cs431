@@ -1,13 +1,14 @@
 package Project2;
 
 import java.util.Queue;
-import java.util.LinkedList;
 import Project2.lexer.*;
 import Project2.node.*;
 
 class Parser {
+    // Class variables
     Queue<String> q;
     String t;
+    // Constructor
     Parser(Queue<String> q) {
         this.q = q;
         t = q.poll();
@@ -16,45 +17,61 @@ class Parser {
         return q.poll();
     }
     private void match(String matchMe) {
-        if(matchMe == t){
+        if(matchMe == t) {
             t = getToken();
         } else {
             error();
         }
     }
-    private void factor(){
-        switch(t){
-            case(lparen) : match(lparen); exp(); match(rparen); break;
-            case(num) : match(num); break;
-            default: error();
+    private void stmts() {
+        switch(t) {
         }
     }
-    private void term(){
-        factor();
-        while(peekToken().equals("*") | peekToken().equals("/")){
-            multOp();
-            factor();
+    private void stmt(){
+        switch(t) {
+            case(id):
+                match(id);
+                break;
+            case("("):
+                match("(");
+                exp();
+                match(")");
+                break;
+            default:
+                error();
         }
     }
-    private void exp(){
+    private void expression(){
+    }
+    private void explist(){
         term();
         while(peekToken().equals("+") | peekToken().equals("-")){
             addOp();
             term();
         }
     }
-    private void multOp(){
+    private void binop(){
         switch(t){
-            case("*") : match("*"); break;
-            case("/") : match("/"); break;
-            default: error();
+            case("*"):
+                match("*");
+                break;
+            case("/"):
+                match("/");
+                break;
+            default:
+                error();
         }
     }
-    private void addOp(){
+    private void unop(){
         switch(t){
-            case("+") : match("+"); break;
-            case("-") : match("-"); break;
-            default: error();
+            case("+"):
+                match("+");
+                break;
+            case("-"):
+                match("-");
+                break;
+            default:
+                error();
         }
     }
     private void error() {
