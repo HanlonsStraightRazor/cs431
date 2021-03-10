@@ -1,14 +1,13 @@
 package Project2;
 
+import java.util.ArrayList;
 import java.util.Queue;
 import Project2.lexer.*;
 import Project2.node.*;
 
 class Parser {
-    // Class variables
     Queue<Token> q;
     Token t;
-    // Constructor
     Parser(Queue<Token> q) {
         this.q = q;
         t = q.poll();
@@ -20,79 +19,88 @@ class Parser {
         String[] tokenClass = t.getClass().getName().split("\\.");
         return tokenClass[tokenClass.length - 1];
     }
-    private void match(String matchMe) {
-        if(matchMe == getName(t)) {
+    private void match(String tokenName) {
+        if(tokenName == getName(t)) {
             t = getToken();
         } else {
-            error();
+            error(tokenName);
         }
     }
     private void stmts() {
         stmt();
         while (q.peek() != null){
-            match(semi);
-            stmts();
+            match("TSemi");
+            stmt();
         }
     }
     private void stmt(){
         switch(getName(t)) {
             case("TId"):
+                assignStmt();
+                break;
             case("TEcho"):
+                printStmt();
+                break;
             default:
-                error();
+                error("TId or TEcho");
         }
     }
-    private void expression(){
-        switch(t){
-            case(id):
-                match(id);
-                break;
-            case(number):
-                match(number);
-                break;
-            expression();
-            while(peekToken().equals("*") | peekToken().equals("/")){
-                binop();
-                expression();
-            }
-            if(peekToken().equals("<<") | peekToken().equals(">>")){
-                unop();
-            }
+    private void assignStmt(){
+    }
+    private void printStmt(){
+    }
+    private double expression(){
+        switch(getName(t)){
+            case("TId"):
+                return 0.0;
+            case("TNum"):
+                return 0.0;
+            default:
+                error("TId or TNum");
+                return 0.0;
         }
     }
-    private void explist(){
-        term();
-        while(peekToken().equals("+") | peekToken().equals("-")){
-            addOp();
-            term();
+    private ArrayList<Double> explist(){
+        ArrayList<Double> list = new ArrayList<>();
+        list.add(expression());
+        while(getName(t).equals("TComma")) {
+            match("TComma");
+            list.add(expression());
         }
+        return list;
     }
     private void binop(){
-        switch(t){
-            case("*"):
-                match("*");
+        switch(getName(t)){
+            case("TAdd"):
                 break;
-            case("/"):
-                match("/");
+            case("TSub"):
+                break;
+            case("TMul"):
+                break;
+            case("TDiv"):
+                break;
+            case("TMod"):
                 break;
             default:
-                error();
+                error("TAdd, TSub, TMul, TDiv, TMod");
         }
     }
     private void unop(){
-        switch(t){
-            case("+"):
-                match("+");
+        switch(getName(t)){
+            case("TLshift"):
                 break;
-            case("-"):
-                match("-");
+            case("TRshift"):
                 break;
             default:
-                error();
+                error("TLshift or TRshift");
         }
     }
-    private void error() {
-        System.err.println("ERROR");
+    private void error(String expected) {
+        System.err.printf(
+            "Parsing Error: Expected %s got %s\n",
+            expected,
+            getName(t)
+        );
         System.exit(1);
     }
 }
