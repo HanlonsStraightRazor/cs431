@@ -6,16 +6,16 @@ import Project2.lexer.*;
 import Project2.node.*;
 
 class Parser {
-    Queue<Token> q;
-    Token t;
-    Parser(Queue<Token> q) {
+    Queue<String> q;
+    String t;
+    Parser(Queue<String> q) {
         this.q = q;
         t = q.poll();
     }
-    private Token getToken() {
+    private String getToken() {
         return q.poll();
     }
-    private void match(Token matchMe) {
+    private void match(String matchMe) {
         if(matchMe == t){
             t = getToken();
         } else {
@@ -31,29 +31,29 @@ class Parser {
     }
     private void term(){
         factor();
-        while(peekToken() == '*' | '/'){
+        while(peekToken().equals("*") | peekToken().equals("/")){
             multOp();
             factor();
         }
     }
     private void exp(){
         term();
-        while(peekToken() == '+' | '-'){
+        while(peekToken().equals("+") | peekToken().equals("-")){
             addOp();
             term();
         }
     }
     private void multOp(){
         switch(t){
-            case('*') : match('*'); break;
-            case('/') : match('/'); break;
+            case("*") : match("*"); break;
+            case("/") : match("/"); break;
             default: error();
         }
     }
     private void addOp(){
         switch(t){
-            case('+') : match('+'); break;
-            case('-') : match('-'); break;
+            case("+") : match("+"); break;
+            case("-") : match("-"); break;
             default: error();
         }
     }
