@@ -32,7 +32,7 @@ public class Main {
     }
 
     public void parser(){
-        /*Token t = getToken();
+        /*Token t = getToken(); //will consume token
 
         void match(Token matchMe){
             if(matchMe == t){
@@ -50,16 +50,16 @@ public class Main {
         }
         void term(){
             factor();
-            while(getToken() == multOp){
+            while(peekToken() == multOp){
                 multOp();
                 factor();
             }
         }
         void exp(){
-            switch(t){
-                case(exp) : exp(); addOp(); term(); break;
-                case(term) : term(); break;
-                default: error();
+            term();
+            while(peekToken() == addOp){
+                addOp();
+                term();
             }
         }
         void multOp(){
