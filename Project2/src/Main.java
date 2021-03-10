@@ -11,13 +11,16 @@ import java.io.*;
  */
 public class Main {
     public static void main(String[] args){
-        try{
-            // Create a lexer instance.
+        try {
             for (String arg : args) {
-                // String name = arg.split(".")[0];
-                // System.setOut(new PrintStream(new FileOutputStream(name + ".answer")));
-                Lexer l = new Lexer(new PushbackReader
-                        (new FileReader(new File(arg)), 4096));
+                Lexer l = new Lexer(
+                    new PushbackReader(
+                        new FileReader(
+                            new File(arg)
+                        ),
+                        4096
+                    )
+                );
                 Token t = l.next();
                 while (!t.getText().equals("")){
                     String[] sarr = t.getClass().getName().split("\\.");
@@ -29,53 +32,5 @@ public class Main {
             }
         }
         catch(Exception e){ System.out.println(e.getMessage()); }
-    }
-
-    public void parser(){
-        /*Token t = getToken(); //will consume token
-
-        void match(Token matchMe){
-            if(matchMe == t){
-                t = getToekn();
-            } else {
-                //error
-            }
-        }
-        void factor(){
-            switch(t){
-                case(lpar) : match(lpar); exp(); match(rpar); break;
-                case(number) : match(number); break;
-                default: error();
-            }
-        }
-        void term(){
-            factor();
-            while(peekToken() == multOp){
-                multOp();
-                factor();
-            }
-        }
-        void exp(){
-            term();
-            while(peekToken() == addOp){
-                addOp();
-                term();
-            }
-        }
-        void multOp(){
-            switch(t){
-                case('*') : match('*'); break;
-                case('/') : match('/'); break;
-                default: error();
-            }
-        }
-        void addOp(){
-            switch(t){
-                case('+') : match('+'); break;
-                case('-') : match('-'); break;
-                default: error();
-            }
-        }
-        */
     }
 }
