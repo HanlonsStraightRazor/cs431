@@ -33,7 +33,7 @@ public class Main {
 
     public void parser(){
         /*Token t = getToken();
-        
+
         void match(Token matchMe){
             if(matchMe == t){
                 t = getToekn();
@@ -49,10 +49,10 @@ public class Main {
             }
         }
         void term(){
-            switch(t){
-                case(term) : term(); multOp(); factor(); break;
-                case(factor) : factor(); break;
-                default: error();
+            factor();
+            while(getToken() == multOp){
+                multOp();
+                factor();
             }
         }
         void exp(){
