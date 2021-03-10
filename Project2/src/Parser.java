@@ -24,7 +24,10 @@ class Parser {
         }
     }
     private void stmts() {
-        switch(t) {
+        stmt();
+        while (q.peek() != null){
+            match(semi);
+            stmts();
         }
     }
     private void stmt(){
