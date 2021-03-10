@@ -7,26 +7,34 @@
     <property name="build" location="build"/>
     <property name="input" location="input"/>
     <property name="src" location="src"/>
-    <property name="regex" location="src/Proj2.js"/>
+    <property name="regex" location="src/regex.js"/>
 
     <target name="clean">
         <delete dir="${build}"/>
         <delete dir="${src}/${ant.project.name}"/>
     </target>
 
-    <target name="compile">
-        <mkdir dir="${build}"/>
+    <target name="genlex">
         <exec executable="/bin/bash">
             <arg line="-c 'java -jar sablecc.jar -d ${src} ${regex}'"/>
         </exec>
-        <javac srcdir="${src}" destdir="${build}" includeantruntime="false"/>
+    </target>
+
+    <target name="compile" depends="genlex">
+        <mkdir dir="${build}"/>
+        <javac
+            srcdir="${src}"
+            destdir="${build}"
+            includeantruntime="false"/>
         <copy
             file="${src}/${ant.project.name}/lexer/lexer.dat"
             todir="${build}/${ant.project.name}/lexer"/>
     </target>
 
     <target name="run">
-        <java classname="${ant.project.name}.Main" classpath="${build}"/>
+        <java
+            classname="${ant.project.name}.Main"
+            classpath="${build}"/>
     </target>
 
     <target name="all">
