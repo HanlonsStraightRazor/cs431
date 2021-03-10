@@ -1,5 +1,6 @@
 package Project2;
 
+import java.beans.Expression;
 import java.util.Queue;
 import Project2.lexer.*;
 import Project2.node.*;
@@ -42,6 +43,22 @@ class Parser {
         }
     }
     private void expression(){
+        switch(t){
+            case(id):
+                match(id);
+                break;
+            case(number):
+                match(number);
+                break;
+            expression();
+            while(peekToken().equals("*") | peekToken().equals("/")){
+                binop();
+                expression();
+            }
+            if(peekToken().equals("<<") | peekToken().equals(">>")){
+                unop();
+            }
+        }
     }
     private void explist(){
         term();
