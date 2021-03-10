@@ -32,8 +32,8 @@ public class Main {
     }
 
     public void parser(){
-        Token t = getToken();
-        /*
+        /*Token t = getToken();
+        
         void match(Token matchMe){
             if(matchMe == t){
                 t = getToekn();
