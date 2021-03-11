@@ -108,15 +108,16 @@ class Parser {
                 error("TId or TNum");
         }
     }
-    // private ArrayList<Double> explist(){
-    //     ArrayList<Double> list = new ArrayList<>();
-    //     list.add(expression());
-    //     while(getName(t).equals("TComma")) {
-    //         match("TComma");
-    //         list.add(expression());
-    //     }
-    //     return list;
-    // }
+    /*
+    private void explist(){
+        expression();
+        while(getName(t).equals("TComma")) {
+            match("TComma");
+            expression();
+        }
+        sb.append("something");
+    }
+    */
     private void binop(){
         switch(getName(t)){
             case("TAdd"):
