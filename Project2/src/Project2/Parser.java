@@ -18,16 +18,13 @@ class Parser {
         addEndBoilerplate();
         System.out.print(sb);
     }
-    private Token getToken() {
-        return q.poll();
-    }
     private String getName(Token token) {
         String[] tokenClass = t.getClass().getName().split("\\.");
         return tokenClass[tokenClass.length - 1];
     }
     private void match(String tokenName) {
         if(tokenName == getName(t)) {
-            t = getToken();
+            t = q.poll();
         } else {
             error(tokenName);
         }
