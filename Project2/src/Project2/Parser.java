@@ -62,7 +62,7 @@ class Parser {
     private void printStmt(){
         sb.append("new PrintStmt(\n");
         match("(");
-        // explist();
+        explist();
         match(")");
         sb.append(")\n");
     }
@@ -108,16 +108,19 @@ class Parser {
                 error("TId or TNum");
         }
     }
-    /*
     private void explist(){
-        expression();
-        while(getName(t).equals("TComma")) {
-            match("TComma");
-            expression();
+        String holdingExp = expression();
+        if(getName(t).equals("TComma")){
+            sb.append("new ExpListAndExp(\n");
+            sb.append(holdingExp + ",\n");
+            explist();
+            sb.append(")");
+        } else {
+            sb.append("new LastExpList(\n");
+            sb.append(holdingExp + "\n");
+            sb.append(")\n");
         }
-        sb.append("something");
     }
-    */
     private void binop(){
         switch(getName(t)){
             case("TAdd"):
