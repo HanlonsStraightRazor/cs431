@@ -55,8 +55,13 @@ class Parser {
         }
     }
     private void assignStmt(){
+        //id
+        //exp
     }
     private void printStmt(){
+        sb.append("new PrintStmt(\n");
+        explist();
+        sb.append(")\n");
     }
     private double expression(){
         switch(getName(t)){
