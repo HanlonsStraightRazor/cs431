@@ -66,7 +66,7 @@ class Parser {
         match(")");
         sb.append(")\n");
     }
-    private void expression(){
+    private String expression(){
         switch(getName(t)){
             case("TId"):
                 sb.append("new IdExp(\"" + t.getText() + "\"");
