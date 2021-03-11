@@ -56,15 +56,19 @@ class Parser {
         }
     }
     private void assignStmt(){
-        //id
-        //exp
+        sb.append("new AssignStmt(\n");
+        ab.append("\"" + t.getText() + "\",\n");
+        match(getName(t));
+        match("<--");
+        sb.append(expression());
+        sb.append(")");
     }
     private void printStmt(){
         sb.append("new PrintStmt(\n");
         match("(");
         explist();
         match(")");
-        sb.append(")\n");
+        sb.append(")");
     }
     private String expression(){
         switch(getName(t)){
