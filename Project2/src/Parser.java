@@ -60,7 +60,9 @@ class Parser {
     }
     private void printStmt(){
         sb.append("new PrintStmt(\n");
+        match("(");
         explist();
+        match(")");
         sb.append(")\n");
     }
     private double expression(){
