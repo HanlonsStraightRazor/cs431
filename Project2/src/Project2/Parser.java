@@ -91,8 +91,8 @@ class Parser {
                     case("TRshift"):
                         unop();
                     default:
-                    sb.append("new IdExp(\"" + t.getText() + "\" )");
-                    match("TId");
+                        sb.append("new IdExp(\"" + t.getText() + "\" )");
+                        match("TId");
                 }
             case("TNum"):
                 match("TNum");
