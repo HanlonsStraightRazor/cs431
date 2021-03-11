@@ -152,6 +152,7 @@ class Parser {
         System.exit(1);
     }
     private void addStartBoilerplate() {
+        sb.append("package Interpreter;\n");
         sb.append("public class ProgExpr {\n");
     }
     private void addEndBoilerplate() {

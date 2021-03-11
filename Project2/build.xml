@@ -5,14 +5,16 @@
     </description>
 
     <property name="build" location="build"/>
-    <property name="input" location="input"/>
-    <property name="src" location="src"/>
-    <property name="regex" location="src/regex.js"/>
+    <property name="src" location="src/${ant.project.name}"/>
+    <property name="regex" location="${src}/regex.js"/>
+    <property name="intsrc" location="src/Interpreter"/>
+    <property name="input" location="input/expr.txt"/>
+    <property name="output" location="${intsrc}/ProgExpr.java"/>
 
     <target name="clean">
         <delete dir="${build}"/>
         <delete dir="${src}/${ant.project.name}"/>
-        <delete file="ProgExpr.java"/>
+        <delete file="${output}"/>
     </target>
 
     <target name="genlex">
@@ -26,19 +28,26 @@
         <javac
             srcdir="${src}"
             destdir="${build}"
-            includeantruntime="false" failonerror="true"/>
+            includeantruntime="false"
+            failonerror="true"/>
         <copy
             file="${src}/${ant.project.name}/lexer/lexer.dat"
             todir="${build}/${ant.project.name}/lexer"/>
-    </target>
-
-    <target name="run">
         <java
             classname="${ant.project.name}.Main"
             classpath="${build}"
-            output="ProgExpr.java">
-            <arg line="input/expr.txt"/>
+            output="${output}">
+            <arg line="${input}"/>
         </java>
+        <javac
+            srcdir="${intsrc}"
+            destdir="${build}"
+            includeantruntime="false"
+            failonerror="true"/>
+    </target>
+
+    <target name="run">
+        <java classname="Interpreter.ProgExpr" classpath="${build}"/>
     </target>
 
     <target name="all">
