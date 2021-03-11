@@ -30,11 +30,15 @@ class Parser {
         }
     }
     private void stmts() {
+        sb.append("private static Stmts program = new Stmts(\n");
         stmt();
         while (q.peek() != null){
             match("TSemi");
+            sb.append(",\nnew Stmts(\n");
             stmt();
+            sb.append(")\n");
         }
+        sb.append(");\n");
         addEndBoilerplate();
         System.out.print(sb);
     }
@@ -109,7 +113,13 @@ class Parser {
         System.exit(1);
     }
     private void addStartBoilerplate() {
+        sb.append("public class ProgExpr {\n");
     }
     private void addEndBoilerplate() {
+        sb.append("public static void main(String[] args) {\n");
+        sb.append("Interpreter interpreter = new Interpreter();\n");
+        sb.append("interpreter.interpreter(program);\n");
+        sb.append("}\n");
+        sb.append("}\n");
     }
 }
