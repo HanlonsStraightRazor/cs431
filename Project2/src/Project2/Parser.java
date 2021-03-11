@@ -57,7 +57,7 @@ class Parser {
     }
     private void assignStmt(){
         sb.append("new AssignStmt(\n");
-        ab.append("\"" + t.getText() + "\",\n");
+        sb.append("\"" + t.getText() + "\",\n");
         match(getName(t));
         match("<--");
         sb.append(expression());
