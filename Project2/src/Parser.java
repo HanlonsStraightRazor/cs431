@@ -14,6 +14,9 @@ class Parser {
         t = q.poll();
         sb = new StringBuilder();
         addStartBoilerplate();
+        stmts();
+        addEndBoilerplate();
+        System.out.print(sb);
     }
     private Token getToken() {
         return q.poll();
@@ -39,8 +42,6 @@ class Parser {
             sb.append(")\n");
         }
         sb.append(");\n");
-        addEndBoilerplate();
-        System.out.print(sb);
     }
     private void stmt(){
         switch(getName(t)) {
@@ -61,64 +62,61 @@ class Parser {
     private void printStmt(){
         sb.append("new PrintStmt(\n");
         match("(");
-        explist();
+        // explist();
         match(")");
         sb.append(")\n");
     }
     private void expression(){
         switch(getName(t)){
             case("TId"):
-                sb.append("new IdExp(\"" + t.getText + "\"")
+                sb.append("new IdExp(\"" + t.getText() + "\"");
                 match("TId");
                 switch(getName(t)){
                     case("TAdd"):
-                        match("TAdd")
+                        match("TAdd");
                         expression();
                         break;
                     case("TSub"):
-                        match("TSub")
+                        match("TSub");
                         expression();
                         break;
                     case("TMul"):
-                        match("TMul")
+                        match("TMul");
                         expression();
                         break;
                     case("TDiv"):
-                        match("TDiv")
+                        match("TDiv");
                         expression();
                         break;
                     case("TMod"):
-                        match("TMod")
+                        match("TMod");
                         expression();
                         break;
                     case("TLshift"):
-                        match("TLshift")
+                        match("TLshift");
                         break;
                     case("TRshift"):
-                        match("TRshift")
+                        match("TRshift");
                         break;
-                    case(null):
-                
+                    // case(null):
+                        // FIXME
                     default:
                         error("TId or TNum");
                 }
-                return 0.0;
             case("TNum"):
-                return 0.0;
             default:
                 error("TId or TNum");
-                return 0.0;
         }
     }
-    private ArrayList<Double> explist(){
-        ArrayList<Double> list = new ArrayList<>();
-        list.add(expression());
-        while(getName(t).equals("TComma")) {
-            match("TComma");
-            list.add(expression());
-        }
-        return list;
-    }
+    // private ArrayList<Double> explist(){
+    //     ArrayList<Double> list = new ArrayList<>();
+    //     list.add(expression());
+    //     while(getName(t).equals("TComma")) {
+    //         match("TComma");
+    //         list.add(expression());
+    //     }
+    //     return list;
+    // }
     private void binop(){
         switch(getName(t)){
             case("TAdd"):
