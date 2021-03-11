@@ -8,9 +8,12 @@ import Project2.node.*;
 class Parser {
     Queue<Token> q;
     Token t;
+    StringBuilder sb;
     Parser(Queue<Token> q) {
         this.q = q;
         t = q.poll();
+        sb = new StringBuilder();
+        addStartBoilerplate();
     }
     private Token getToken() {
         return q.poll();
@@ -32,6 +35,8 @@ class Parser {
             match("TSemi");
             stmt();
         }
+        addEndBoilerplate();
+        System.out.print(sb);
     }
     private void stmt(){
         switch(getName(t)) {
@@ -82,7 +87,7 @@ class Parser {
             case("TMod"):
                 break;
             default:
-                error("TAdd, TSub, TMul, TDiv, TMod");
+                error("TAdd, TSub, TMul, TDiv, or TMod");
         }
     }
     private void unop(){
@@ -102,5 +107,9 @@ class Parser {
             getName(t)
         );
         System.exit(1);
+    }
+    private void addStartBoilerplate() {
+    }
+    private void addEndBoilerplate() {
     }
 }
