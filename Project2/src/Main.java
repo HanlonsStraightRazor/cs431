@@ -13,23 +13,25 @@ import java.util.LinkedList;
  */
 public class Main {
     public static void main(String[] args){
+        if (args.length != 1) {
+            System.err.println("Main takes exactly one argument!");
+        }
         Queue<Token> q = new LinkedList<Token>();
         try {
-            for (String arg : args) {
-                File f = new File(arg);
-                Lexer l = new Lexer(
-                    new PushbackReader(
-                        new FileReader(f),
-                        (int) f.length()
-                    )
-                );
-                for (Token t = l.next(); !t.getText().equals(""); t = l.next()) {
-                    String[] tokenClass = t.getClass().getName().split("\\.");
-                    if (!tokenClass[tokenClass.length - 1].equals("TWhitespace")) {
-                        q.add(t);
-                    }
+            File f = new File(args[0]);
+            Lexer l = new Lexer(
+                new PushbackReader(
+                    new FileReader(f),
+                    (int) f.length()
+                )
+            );
+            for (Token t = l.next(); !t.getText().equals(""); t = l.next()) {
+                String[] tokenClass = t.getClass().getName().split("\\.");
+                if (!tokenClass[tokenClass.length - 1].equals("TWhitespace")) {
+                    q.add(t);
                 }
             }
+            Parser p = new Parser(q);
         }
         catch(Exception e){
             System.out.println(e.getMessage());
