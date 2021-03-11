@@ -70,41 +70,56 @@ class Parser {
     private String expression(){
         switch(getName(t)){
             case("TId"):
-                sb.append("new IdExp(\"" + t.getText() + "\"");
-                match("TId");
                 switch(getName(t)){
                     case("TAdd"):
-                        match("TAdd");
+                        binop();
                         expression();
-                        break;
                     case("TSub"):
-                        match("TSub");
+                        binop();
                         expression();
-                        break;
                     case("TMul"):
-                        match("TMul");
+                        binop();
                         expression();
-                        break;
                     case("TDiv"):
-                        match("TDiv");
+                        binop();
                         expression();
-                        break;
                     case("TMod"):
-                        match("TMod");
+                        binop();
                         expression();
-                        break;
                     case("TLshift"):
-                        match("TLshift");
-                        break;
+                        unop();
                     case("TRshift"):
-                        match("TRshift");
-                        break;
-                    // case(null):
-                        // FIXME
+                        unop();
                     default:
-                        error("TId or TNum");
+                    sb.append("new IdExp(\"" + t.getText() + "\" )");
+                    match("TId");
                 }
             case("TNum"):
+                match("TNum");
+                switch(getName(t)){
+                    case("TAdd"):
+                        binop();
+                        expression();
+                    case("TSub"):
+                        binop();
+                        expression();
+                    case("TMul"):
+                        binop();
+                        expression();
+                    case("TDiv"):
+                        binop();
+                        expression();
+                    case("TMod"):
+                        binop();
+                        expression();
+                    case("TLshift"):
+                        unop();
+                    case("TRshift"):
+                        unop();
+                    default:
+                        sb.append("new NumExp(" + t.getText() +  ")");
+                        match("TNum");
+                }
             default:
                 error("TId or TNum");
         }
