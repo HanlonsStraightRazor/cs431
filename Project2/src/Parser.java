@@ -65,9 +65,43 @@ class Parser {
         match(")");
         sb.append(")\n");
     }
-    private double expression(){
+    private void expression(){
         switch(getName(t)){
             case("TId"):
+                sb.append("new IdExp(\"" + t.getText + "\"")
+                match("TId");
+                switch(getName(t)){
+                    case("TAdd"):
+                        match("TAdd")
+                        expression();
+                        break;
+                    case("TSub"):
+                        match("TSub")
+                        expression();
+                        break;
+                    case("TMul"):
+                        match("TMul")
+                        expression();
+                        break;
+                    case("TDiv"):
+                        match("TDiv")
+                        expression();
+                        break;
+                    case("TMod"):
+                        match("TMod")
+                        expression();
+                        break;
+                    case("TLshift"):
+                        match("TLshift")
+                        break;
+                    case("TRshift"):
+                        match("TRshift")
+                        break;
+                    case(null):
+                
+                    default:
+                        error("TId or TNum");
+                }
                 return 0.0;
             case("TNum"):
                 return 0.0;
