@@ -12,10 +12,11 @@
     <target name="clean">
         <delete dir="${build}"/>
         <delete dir="${src}/${ant.project.name}"/>
+        <delete file="ProgExpr.java"/>
     </target>
 
     <target name="genlex">
-        <exec executable="/bin/bash">
+        <exec executable="/bin/bash" failonerror="true">
             <arg line="-c 'java -jar sablecc.jar -d ${src} ${regex}'"/>
         </exec>
     </target>
@@ -25,7 +26,7 @@
         <javac
             srcdir="${src}"
             destdir="${build}"
-            includeantruntime="false"/>
+            includeantruntime="false" failonerror="true"/>
         <copy
             file="${src}/${ant.project.name}/lexer/lexer.dat"
             todir="${build}/${ant.project.name}/lexer"/>
@@ -34,7 +35,10 @@
     <target name="run">
         <java
             classname="${ant.project.name}.Main"
-            classpath="${build}"/>
+            classpath="${build}"
+            output="ProgExpr.java">
+            <arg line="input/expr.txt"/>
+        </java>
     </target>
 
     <target name="all">
