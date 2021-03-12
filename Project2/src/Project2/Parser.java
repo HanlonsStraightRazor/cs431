@@ -1,7 +1,9 @@
 package Project2;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.Queue;
+import java.util.Stack;
 import Project2.lexer.*;
 import Project2.node.*;
 
@@ -9,7 +11,7 @@ class Parser {
     Queue<Token> q;
     Token t;
     StringBuilder sb;
-    Parser(Queue<Token> q) {
+    void parse(Queue<Token> q) {
         this.q = q;
         t = q.poll();
         sb = new StringBuilder();
@@ -59,73 +61,112 @@ class Parser {
         sb.append("new AssignStmt(\n");
         sb.append("\"" + t.getText() + "\",\n");
         match(getName(t));
-        match("<--");
+        match("TEquals");
         sb.append(expression());
         sb.append(")");
     }
     private void printStmt(){
         sb.append("new PrintStmt(\n");
-        match("(");
+        match("TLparen");
         explist();
-        match(")");
+        match("TRparen");
         sb.append(")");
     }
     private String expression(){
-        switch(getName(t)){
-            case("TId"):
-                switch(getName(t)){
-                    case("TAdd"):
-                        binop();
-                        expression();
-                    case("TSub"):
-                        binop();
-                        expression();
-                    case("TMul"):
-                        binop();
-                        expression();
-                    case("TDiv"):
-                        binop();
-                        expression();
-                    case("TMod"):
-                        binop();
-                        expression();
-                    case("TLshift"):
-                        unop();
-                    case("TRshift"):
-                        unop();
-                    default:
-                        sb.append("new IdExp(\"" + t.getText() + "\" )");
-                        match("TId");
-                }
-            case("TNum"):
-                match("TNum");
-                switch(getName(t)){
-                    case("TAdd"):
-                        binop();
-                        expression();
-                    case("TSub"):
-                        binop();
-                        expression();
-                    case("TMul"):
-                        binop();
-                        expression();
-                    case("TDiv"):
-                        binop();
-                        expression();
-                    case("TMod"):
-                        binop();
-                        expression();
-                    case("TLshift"):
-                        unop();
-                    case("TRshift"):
-                        unop();
-                    default:
-                        sb.append("new NumExp(" + t.getText() +  ")");
-                        match("TNum");
-                }
-            default:
-                error("TId or TNum");
+        Queue<Token> expression = infixToPostfix();
+        Stack<String> stack = new Stack<>();
+        while (!expression.isEmpty()) {
+            Token token = expression.poll();
+            switch (getName(token)) {
+                case ("TId"):
+                    stack.push(
+                        "new IdExp("
+                        + token.getText()
+                        + ")"
+                    );
+                    break;
+                case ("TNum"):
+                    stack.push(
+                        "new NumExp("
+                        + token.getText()
+                        + ")"
+                    );
+                    break;
+                case ("TAdd"):
+                    String addend = stack.pop();
+                    String augend = stack.pop();
+                    stack.push(
+                        "new BinOpExp(\n"
+                        + augend
+                        + ",\n'+',\n"
+                        + addend
+                        + "\n)"
+                    );
+                    break;
+                case ("TSub"):
+                    String subtrahend = stack.pop();
+                    String minuend = stack.pop();
+                    stack.push(
+                        "new BinOpExp(\n"
+                        + minuend
+                        + ",\n'-',\n"
+                        + subtrahend
+                        + "\n)"
+                    );
+                    break;
+                case ("TMul"):
+                    String multiplier = stack.pop();
+                    String multiplicand = stack.pop();
+                    stack.push(
+                        "new BinOpExp(\n"
+                        + multiplicand
+                        + ",\n'*',\n"
+                        + multiplier
+                        + "\n)"
+                    );
+                    break;
+                case ("TDiv"):
+                    String divisor = stack.pop();
+                    String dividend = stack.pop();
+                    stack.push(
+                        "new BinOpExp(\n"
+                        + dividend
+                        + ",\n'/',\n"
+                        + divisor
+                        + "\n)"
+                    );
+                    break;
+                case ("TMod"):
+                    String mdivisor = stack.pop();
+                    String mdividend = stack.pop();
+                    stack.push(
+                        "new BinOpExp(\n"
+                        + mdividend
+                        + ",\n'%',\n"
+                        + mdivisor
+                        + "\n)"
+                    );
+                    break;
+                case ("TLshift"):
+                    String loperand = stack.pop();
+                    stack.push(
+                        "new UnaryOpExp(\n"
+                        + loperand
+                        + ",\n\"<<\""
+                        + "\n)"
+                    );
+                    break;
+                case ("TRshift"):
+                    String roperand = stack.pop();
+                    stack.push(
+                        "new UnaryOpExp(\n"
+                        + roperand
+                        + ",\n\">>\""
+                        + "\n)"
+                    );
+            }
         }
+        return stack.pop();
     }
     private void explist(){
         String holdingExp = expression();
@@ -140,31 +181,94 @@ class Parser {
             sb.append(")\n");
         }
     }
-    private void binop(){
-        switch(getName(t)){
-            case("TAdd"):
-                break;
-            case("TSub"):
-                break;
-            case("TMul"):
-                break;
-            case("TDiv"):
-                break;
-            case("TMod"):
-                break;
-            default:
-                error("TAdd, TSub, TMul, TDiv, or TMod");
+    private Queue<Token> infixToPostfix() {
+        Queue<Token> expression = new LinkedList<>();
+        Stack<Token> stack = new Stack<>();
+        while (getName(t) != null
+                && !getName(t).equals("TSemi")
+                && !getName(t).equals("TComma")
+                && !getName(t).equals("TRparen")) {
+            switch (getName(t)) {
+                case ("TId"):
+                    expression.add(t);
+                    match("TId");
+                    break;
+                case ("TNum"):
+                    expression.add(t);
+                    match("TNum");
+                    break;
+                case ("TAdd"):
+                    while (!stack.empty()) {
+                        expression.add(stack.pop());
+                    }
+                    stack.push(t);
+                    match("TAdd");
+                    break;
+                case ("TSub"):
+                    while (!stack.empty()) {
+                        expression.add(stack.pop());
+                    }
+                    stack.push(t);
+                    match("TSub");
+                    break;
+                case ("TMul"):
+                    if (!stack.empty()) {
+                        while (!getName(stack.peek()).equals("TAdd")
+                                && !getName(stack.peek()).equals("TSub")) {
+                            expression.add(stack.pop());
+                        }
+                    }
+                    stack.push(t);
+                    match("TSub");
+                    break;
+                case ("TDiv"):
+                    if (!stack.empty()) {
+                        while (!getName(stack.peek()).equals("TAdd")
+                                && !getName(stack.peek()).equals("TSub")) {
+                            expression.add(stack.pop());
+                        }
+                    }
+                    stack.push(t);
+                    match("TDiv");
+                    break;
+                case ("TMod"):
+                    if (!stack.empty()) {
+                        while (!getName(stack.peek()).equals("TAdd")
+                                && !getName(stack.peek()).equals("TSub")) {
+                            expression.add(stack.pop());
+                        }
+                    }
+                    stack.push(t);
+                    match("TMod");
+                    break;
+                case ("TLshift"):
+                    if (!stack.empty()) {
+                        while (stack.peek().equals("TLShift")
+                                || stack.peek().equals("TRshift")) {
+                            expression.add(stack.pop());
+                        }
+                    }
+                    stack.push(t);
+                    match("TLshift");
+                    break;
+                case ("TRshift"):
+                    if (!stack.empty()) {
+                        while (stack.peek().equals("TLShift")
+                                || stack.peek().equals("TRshift")) {
+                            expression.add(stack.pop());
+                        }
+                    }
+                    stack.push(t);
+                    match("TRshift");
+                    break;
+                default:
+                    error("operator or operand");
+            }
         }
-    }
-    private void unop(){
-        switch(getName(t)){
-            case("TLshift"):
-                break;
-            case("TRshift"):
-                break;
-            default:
-                error("TLshift or TRshift");
+        while (!stack.empty()) {
+            expression.add(stack.pop());
         }
+        return expression;
     }
     private void error(String expected) {
         System.err.printf(
