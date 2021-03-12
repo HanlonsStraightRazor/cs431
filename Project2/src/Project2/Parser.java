@@ -79,7 +79,6 @@ class Parser {
         Stack<String> stack = new Stack<>();
         while (!tokens.isEmpty()) {
             Token token = tokens.poll();
-            System.out.println(token);
             switch (getName(token)) {
                 case ("TId"):
                     stack.push(
