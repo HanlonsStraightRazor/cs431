@@ -69,56 +69,41 @@ class Parser {
     }
     private String expression(){
         switch(getName(t)){
+            Token curr = t;
+            match();
             case("TId"):
+                match("TId");
                 switch(getName(t)){
                     case("TAdd"):
-                        binop();
-                        expression();
                     case("TSub"):
-                        binop();
-                        expression();
                     case("TMul"):
-                        binop();
-                        expression();
                     case("TDiv"):
-                        binop();
-                        expression();
                     case("TMod"):
-                        binop();
-                        expression();
+                        return(binop(curr) + expression());
+                        break;
                     case("TLshift"):
-                        unop();
                     case("TRshift"):
-                        unop();
+                        return(unop(curr) + "new IdExp(\"" + t.getText() + "\" )";
+                        break;
                     default:
-                        sb.append("new IdExp(\"" + t.getText() + "\" )");
-                        match("TId");
+                        return("new IdExp(\"" + t.getText() + "\" )");
                 }
             case("TNum"):
                 match("TNum");
                 switch(getName(t)){
                     case("TAdd"):
-                        binop();
-                        expression();
                     case("TSub"):
-                        binop();
-                        expression();
                     case("TMul"):
-                        binop();
-                        expression();
                     case("TDiv"):
-                        binop();
-                        expression();
                     case("TMod"):
-                        binop();
-                        expression();
+                        return(binop() + expression());
+                        break;
                     case("TLshift"):
-                        unop();
                     case("TRshift"):
-                        unop();
+                        return(unop() + "new NumExp(" + t.getText() +  ")";
+                        break;
                     default:
                         sb.append("new NumExp(" + t.getText() +  ")");
-                        match("TNum");
                 }
             default:
                 error("TId or TNum");
@@ -137,13 +122,26 @@ class Parser {
             sb.append(")\n");
         }
     }
-    private void binop(){
+    private String binop(Token val){
+        Token opp = t;
         switch(getName(t)){
             case("TAdd"):
+                match("TAdd")
+                return("new BinOpExp(");
                 break;
             case("TSub"):
+                match("TSub")
+                return("new BinOpExp(");
+                break;
                 break;
             case("TMul"):
+                match("TMul")
+                if (getName(q.peek()) == "TAdd" || getName(q.peek()) == "TSub"){
+                    return(expression() + "new BinOpExp(");
+                }
+                if (getName(q.peek()) == "TLshfit" || getName(q.peek()) == "Trshift"){
+                    return("new BinOpExp(" + expression());
+                }
                 break;
             case("TDiv"):
                 break;
@@ -153,11 +151,15 @@ class Parser {
                 error("TAdd, TSub, TMul, TDiv, or TMod");
         }
     }
-    private void unop(){
+    private String unop(Token val){
         switch(getName(t)){
             case("TLshift"):
+                match("TLshift");
+                return(expression() + "new UnaryOp(");
                 break;
             case("TRshift"):
+                match("TRshift");
+                return(expression() + "new UnaryOp(");
                 break;
             default:
                 error("TLshift or TRshift");
