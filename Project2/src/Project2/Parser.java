@@ -9,16 +9,25 @@ import Project2.node.*;
 
 class Parser {
     Queue<Token> q;
-    Token t;
     StringBuilder sb;
     void parse(Queue<Token> q) {
         this.q = q;
-        t = q.poll();
         sb = new StringBuilder("");
         addStartBoilerplate();
         stmts();
         addEndBoilerplate();
         System.out.print(sb);
+    }
+    Token getToken() {
+        return q.peek();
+    }
+    Token consume() {
+        return q.poll();
+    }
+    private void match(String name, String expected) {
+        if (!name.equals(getName(getToken())) {
+            error(expected);
+        }
     }
     private String getName(Token token) {
         if (t == null) {
@@ -27,18 +36,12 @@ class Parser {
         String[] tokenClass = t.getClass().getName().split("\\.");
         return tokenClass[tokenClass.length - 1];
     }
-    private void match(String tokenName) {
-        if(tokenName.equals(getName(t))) {
-            t = q.poll();
-        } else {
-            error(tokenName);
-        }
-    }
     private void stmts() {
         sb.append("private static Stmts program = new Stmts(\n");
         stmt();
-        while (q.peek() != null){
-            match("TSemi");
+        while (getToken() != null){
+            match("TSemi", "semicolon");
+            consume();
             sb.append(",\nnew Stmts(\n");
             stmt();
             sb.append(")\n");
@@ -46,7 +49,7 @@ class Parser {
         sb.append(");\n");
     }
     private void stmt(){
-        switch(getName(t)) {
+        switch(getName(getToken())) {
             case("TId"):
                 assignStmt();
                 break;
@@ -54,14 +57,14 @@ class Parser {
                 printStmt();
                 break;
             default:
-                error("identifer or print statement");
+                match("identifer or print statement");
         }
     }
     private void assignStmt(){
         sb.append("new AssignStmt(\n");
-        sb.append("\"" + t.getText() + "\",\n");
-        match(getName(t));
-        match("TEquals");
+        sb.append("\"" + getToken().getText() + "\",\n");
+        match(getName(getToken()));
+        match("<--");
         // sb.append("new NumExp(30)");
         // match("TNum");
         sb.append(expression());
@@ -69,9 +72,9 @@ class Parser {
     }
     private void printStmt(){
         sb.append("new PrintStmt(\n");
-        match("TLparen");
+        match("(");
         explist();
-        match("TRparen");
+        match(")");
         sb.append(")");
     }
     private String expression(){
