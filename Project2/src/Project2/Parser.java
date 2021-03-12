@@ -46,6 +46,7 @@ class Parser {
         sb.append(");\n");
     }
     private void stmt(){
+        assignStmt();
         switch(getName(t)) {
             case("TId"):
                 assignStmt();
@@ -62,7 +63,8 @@ class Parser {
         sb.append("\"" + t.getText() + "\",\n");
         match(getName(t));
         match("TEquals");
-        sb.append(expression());
+        sb.append(30);
+        //sb.append(expression());
         sb.append(")");
     }
     private void printStmt(){
