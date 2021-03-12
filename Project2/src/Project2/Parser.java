@@ -46,7 +46,6 @@ class Parser {
         sb.append(");\n");
     }
     private void stmt(){
-        assignStmt();
         switch(getName(t)) {
             case("TId"):
                 assignStmt();
@@ -63,7 +62,8 @@ class Parser {
         sb.append("\"" + t.getText() + "\",\n");
         match(getName(t));
         match("TEquals");
-        sb.append(30);
+        sb.append("new NumExp(30)");
+        match("TNum");
         //sb.append(expression());
         sb.append(")");
     }
@@ -287,7 +287,7 @@ class Parser {
     private void addEndBoilerplate() {
         sb.append("public static void main(String[] args) {\n");
         sb.append("Interpreter interpreter = new Interpreter();\n");
-        sb.append("interpreter.interpreter(program);\n");
+        sb.append("interpreter.interpret(program);\n");
         sb.append("}\n");
         sb.append("}\n");
     }
