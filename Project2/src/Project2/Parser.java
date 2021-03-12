@@ -19,11 +19,14 @@ class Parser {
         System.out.print(sb);
     }
     private String getName(Token token) {
+        if (t == null) {
+            return null;
+        }
         String[] tokenClass = t.getClass().getName().split("\\.");
         return tokenClass[tokenClass.length - 1];
     }
     private void match(String tokenName) {
-        if(tokenName == getName(t)) {
+        if(tokenName.equals(getName(t))) {
             t = q.poll();
         } else {
             error(tokenName);
