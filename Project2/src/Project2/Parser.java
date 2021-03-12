@@ -68,8 +68,8 @@ class Parser {
         sb.append(")");
     }
     private String expression(){
+        Token curr = t;
         switch(getName(t)){
-            Token curr = t;
             case("TId"):
                 match("TId");
                 switch(getName(t)){
@@ -82,7 +82,7 @@ class Parser {
                         break;
                     case("TLshift"):
                     case("TRshift"):
-                        return(unop(curr) + "new IdExp(\"" + t.getText() + "\" )";
+                        return(unop(curr) + "new IdExp(\"" + t.getText() + "\" )");
                         break;
                     default:
                         return("new IdExp(\"" + t.getText() + "\" )");
@@ -99,7 +99,7 @@ class Parser {
                         break;
                     case("TLshift"):
                     case("TRshift"):
-                        return(unop() + "new NumExp(" + t.getText() +  ")";
+                        return(unop() + "new NumExp(" + t.getText() +  ")");
                         break;
                     default:
                         sb.append("new NumExp(" + t.getText() +  ")");
@@ -125,16 +125,15 @@ class Parser {
         Token opp = t;
         switch(getName(t)){
             case("TAdd"):
-                match("TAdd")
+                match("TAdd");
                 return("new BinOpExp(" + expression());
                 break;
             case("TSub"):
                 match("TSub")
                 return("new BinOpExp(" + expression());
                 break;
-                break;
             case("TMul"):
-                match("TMul")
+                match("TMul");
                 if(getName(q.peek()) == "TAdd" || getName(q.peek()) == "TSub"){
                     return(expression() + "new BinOpExp(");
                 }
