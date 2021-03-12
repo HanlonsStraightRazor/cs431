@@ -46,7 +46,6 @@ class Parser {
         sb.append(");\n");
     }
     private void stmt(){
-        assignStmt();
         switch(getName(t)) {
             case("TId"):
                 assignStmt();
