@@ -127,11 +127,11 @@ class Parser {
         switch(getName(t)){
             case("TAdd"):
                 match("TAdd")
-                return("new BinOpExp(");
+                return("new BinOpExp(" + expression());
                 break;
             case("TSub"):
                 match("TSub")
-                return("new BinOpExp(");
+                return("new BinOpExp(" + expression());
                 break;
                 break;
             case("TMul"):
