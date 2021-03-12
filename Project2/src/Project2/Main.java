@@ -31,7 +31,8 @@ public class Main {
                     q.add(t);
                 }
             }
-            Parser p = new Parser(q);
+            Parser p = new Parser();
+            p.parse(q);
         }
         catch(Exception e){
             System.out.println(e.getMessage());

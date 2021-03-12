@@ -29,7 +29,8 @@
             srcdir="${src}"
             destdir="${build}"
             includeantruntime="false"
-            failonerror="true"/>
+            failonerror="true"
+            debug="on"/>
         <copy
             file="${src}/${ant.project.name}/lexer/lexer.dat"
             todir="${build}/${ant.project.name}/lexer"/>
