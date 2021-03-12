@@ -62,9 +62,9 @@ class Parser {
         sb.append("\"" + t.getText() + "\",\n");
         match(getName(t));
         match("TEquals");
-        sb.append("new NumExp(30)");
-        match("TNum");
-        //sb.append(expression());
+        // sb.append("new NumExp(30)");
+        // match("TNum");
+        sb.append(expression());
         sb.append(")");
     }
     private void printStmt(){
@@ -75,10 +75,11 @@ class Parser {
         sb.append(")");
     }
     private String expression(){
-        Queue<Token> expression = infixToPostfix();
+        Queue<Token> tokens = infixToPostfix();
         Stack<String> stack = new Stack<>();
-        while (!expression.isEmpty()) {
-            Token token = expression.poll();
+        while (!tokens.isEmpty()) {
+            Token token = tokens.poll();
+            System.out.println(token);
             switch (getName(token)) {
                 case ("TId"):
                     stack.push(
@@ -184,7 +185,7 @@ class Parser {
         }
     }
     private Queue<Token> infixToPostfix() {
-        Queue<Token> expression = new LinkedList<>();
+        Queue<Token> tokens = new LinkedList<>();
         Stack<Token> stack = new Stack<>();
         while (getName(t) != null
                 && !getName(t).equals("TSemi")
@@ -192,23 +193,23 @@ class Parser {
                 && !getName(t).equals("TRparen")) {
             switch (getName(t)) {
                 case ("TId"):
-                    expression.add(t);
+                    tokens.add(t);
                     match("TId");
                     break;
                 case ("TNum"):
-                    expression.add(t);
+                    tokens.add(t);
                     match("TNum");
                     break;
                 case ("TAdd"):
                     while (!stack.empty()) {
-                        expression.add(stack.pop());
+                        tokens.add(stack.pop());
                     }
                     stack.push(t);
                     match("TAdd");
                     break;
                 case ("TSub"):
                     while (!stack.empty()) {
-                        expression.add(stack.pop());
+                        tokens.add(stack.pop());
                     }
                     stack.push(t);
                     match("TSub");
@@ -217,7 +218,7 @@ class Parser {
                     if (!stack.empty()) {
                         while (!getName(stack.peek()).equals("TAdd")
                                 && !getName(stack.peek()).equals("TSub")) {
-                            expression.add(stack.pop());
+                            tokens.add(stack.pop());
                         }
                     }
                     stack.push(t);
@@ -227,7 +228,7 @@ class Parser {
                     if (!stack.empty()) {
                         while (!getName(stack.peek()).equals("TAdd")
                                 && !getName(stack.peek()).equals("TSub")) {
-                            expression.add(stack.pop());
+                            tokens.add(stack.pop());
                         }
                     }
                     stack.push(t);
@@ -237,7 +238,7 @@ class Parser {
                     if (!stack.empty()) {
                         while (!getName(stack.peek()).equals("TAdd")
                                 && !getName(stack.peek()).equals("TSub")) {
-                            expression.add(stack.pop());
+                            tokens.add(stack.pop());
                         }
                     }
                     stack.push(t);
@@ -247,7 +248,7 @@ class Parser {
                     if (!stack.empty()) {
                         while (stack.peek().equals("TLShift")
                                 || stack.peek().equals("TRshift")) {
-                            expression.add(stack.pop());
+                            tokens.add(stack.pop());
                         }
                     }
                     stack.push(t);
@@ -257,7 +258,7 @@ class Parser {
                     if (!stack.empty()) {
                         while (stack.peek().equals("TLShift")
                                 || stack.peek().equals("TRshift")) {
-                            expression.add(stack.pop());
+                            tokens.add(stack.pop());
                         }
                     }
                     stack.push(t);
@@ -268,9 +269,9 @@ class Parser {
             }
         }
         while (!stack.empty()) {
-            expression.add(stack.pop());
+            tokens.add(stack.pop());
         }
-        return expression;
+        return tokens;
     }
     private void error(String expected) {
         System.err.printf(
