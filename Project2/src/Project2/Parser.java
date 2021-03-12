@@ -14,7 +14,7 @@ class Parser {
     void parse(Queue<Token> q) {
         this.q = q;
         t = q.poll();
-        sb = new StringBuilder();
+        sb = new StringBuilder("");
         addStartBoilerplate();
         stmts();
         addEndBoilerplate();
@@ -54,7 +54,7 @@ class Parser {
                 printStmt();
                 break;
             default:
-                error("TId or TEcho");
+                error("identifer or print statement");
         }
     }
     private void assignStmt(){
