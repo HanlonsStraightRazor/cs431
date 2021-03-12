@@ -24,24 +24,18 @@ class Parser {
     Token consume() {
         return q.poll();
     }
-    private void match(String name, String expected) {
-        if (!name.equals(getName(getToken())) {
-            error(expected);
-        }
-    }
     private String getName(Token token) {
-        if (t == null) {
+        if (token == null) {
             return null;
         }
-        String[] tokenClass = t.getClass().getName().split("\\.");
+        String[] tokenClass = token.getClass().getName().split("\\.");
         return tokenClass[tokenClass.length - 1];
     }
     private void stmts() {
         sb.append("private static Stmts program = new Stmts(\n");
         stmt();
         while (getToken() != null){
-            match("TSemi", "semicolon");
-            consume();
+            fail("TSemi", "semicolon");
             sb.append(",\nnew Stmts(\n");
             stmt();
             sb.append(")\n");
@@ -57,24 +51,24 @@ class Parser {
                 printStmt();
                 break;
             default:
-                match("identifer or print statement");
+                error("identifer or print statement");
         }
     }
     private void assignStmt(){
         sb.append("new AssignStmt(\n");
-        sb.append("\"" + getToken().getText() + "\",\n");
-        match(getName(getToken()));
-        match("<--");
+        sb.append("\"" + consume().getText() + "\",\n");
+        fail("TEquals", "<--");
         // sb.append("new NumExp(30)");
         // match("TNum");
         sb.append(expression());
         sb.append(")");
     }
     private void printStmt(){
+        consume();
         sb.append("new PrintStmt(\n");
-        match("(");
+        fail("TLparen", "(");
         explist();
-        match(")");
+        fail("TRparen", ")");
         sb.append(")");
     }
     private String expression(){
@@ -173,9 +167,90 @@ class Parser {
         }
         return stack.pop();
     }
+    private Queue<Token> infixToPostfix() {
+        Queue<Token> tokens = new LinkedList<>();
+        Stack<Token> stack = new Stack<>();
+        while (getName(getToken()) != null
+                && !getName(getToken()).equals("TSemi")
+                && !getName(getToken()).equals("TComma")
+                && !getName(getToken()).equals("TRparen")) {
+            switch (getName(getToken())) {
+                case ("TId"):
+                    tokens.add(getToken());
+                    break;
+                case ("TNum"):
+                    tokens.add(getToken());
+                    break;
+                case ("TAdd"):
+                    while (!stack.empty()) {
+                        tokens.add(stack.pop());
+                    }
+                    stack.push(getToken());
+                    break;
+                case ("TSub"):
+                    while (!stack.empty()) {
+                        tokens.add(stack.pop());
+                    }
+                    stack.push(getToken());
+                    break;
+                case ("TMul"):
+                    if (!stack.empty()) {
+                        while (!getName(stack.peek()).equals("TAdd")
+                                && !getName(stack.peek()).equals("TSub")) {
+                            tokens.add(stack.pop());
+                        }
+                    }
+                    stack.push(getToken());
+                    break;
+                case ("TDiv"):
+                    if (!stack.empty()) {
+                        while (!getName(stack.peek()).equals("TAdd")
+                                && !getName(stack.peek()).equals("TSub")) {
+                            tokens.add(stack.pop());
+                        }
+                    }
+                    stack.push(getToken());
+                    break;
+                case ("TMod"):
+                    if (!stack.empty()) {
+                        while (!getName(stack.peek()).equals("TAdd")
+                                && !getName(stack.peek()).equals("TSub")) {
+                            tokens.add(stack.pop());
+                        }
+                    }
+                    stack.push(getToken());
+                    break;
+                case ("TLshift"):
+                    if (!stack.empty()) {
+                        while (stack.peek().equals("TLShift")
+                                || stack.peek().equals("TRshift")) {
+                            tokens.add(stack.pop());
+                        }
+                    }
+                    stack.push(getToken());
+                    break;
+                case ("TRshift"):
+                    if (!stack.empty()) {
+                        while (stack.peek().equals("TLShift")
+                                || stack.peek().equals("TRshift")) {
+                            tokens.add(stack.pop());
+                        }
+                    }
+                    stack.push(getToken());
+                    break;
+                default:
+                    error("operator or operand");
+            }
+            consume();
+        }
+        while (!stack.empty()) {
+            tokens.add(stack.pop());
+        }
+        return tokens;
+    }
     private void explist(){
         String holdingExp = expression();
-        if(getName(t).equals("TComma")){
+        if(getName(consume()).equals("TComma")){
             sb.append("new ExpListAndExp(\n");
             sb.append(holdingExp + ",\n");
             explist();
@@ -186,100 +261,17 @@ class Parser {
             sb.append(")\n");
         }
     }
-    private Queue<Token> infixToPostfix() {
-        Queue<Token> tokens = new LinkedList<>();
-        Stack<Token> stack = new Stack<>();
-        while (getName(t) != null
-                && !getName(t).equals("TSemi")
-                && !getName(t).equals("TComma")
-                && !getName(t).equals("TRparen")) {
-            switch (getName(t)) {
-                case ("TId"):
-                    tokens.add(t);
-                    match("TId");
-                    break;
-                case ("TNum"):
-                    tokens.add(t);
-                    match("TNum");
-                    break;
-                case ("TAdd"):
-                    while (!stack.empty()) {
-                        tokens.add(stack.pop());
-                    }
-                    stack.push(t);
-                    match("TAdd");
-                    break;
-                case ("TSub"):
-                    while (!stack.empty()) {
-                        tokens.add(stack.pop());
-                    }
-                    stack.push(t);
-                    match("TSub");
-                    break;
-                case ("TMul"):
-                    if (!stack.empty()) {
-                        while (!getName(stack.peek()).equals("TAdd")
-                                && !getName(stack.peek()).equals("TSub")) {
-                            tokens.add(stack.pop());
-                        }
-                    }
-                    stack.push(t);
-                    match("TSub");
-                    break;
-                case ("TDiv"):
-                    if (!stack.empty()) {
-                        while (!getName(stack.peek()).equals("TAdd")
-                                && !getName(stack.peek()).equals("TSub")) {
-                            tokens.add(stack.pop());
-                        }
-                    }
-                    stack.push(t);
-                    match("TDiv");
-                    break;
-                case ("TMod"):
-                    if (!stack.empty()) {
-                        while (!getName(stack.peek()).equals("TAdd")
-                                && !getName(stack.peek()).equals("TSub")) {
-                            tokens.add(stack.pop());
-                        }
-                    }
-                    stack.push(t);
-                    match("TMod");
-                    break;
-                case ("TLshift"):
-                    if (!stack.empty()) {
-                        while (stack.peek().equals("TLShift")
-                                || stack.peek().equals("TRshift")) {
-                            tokens.add(stack.pop());
-                        }
-                    }
-                    stack.push(t);
-                    match("TLshift");
-                    break;
-                case ("TRshift"):
-                    if (!stack.empty()) {
-                        while (stack.peek().equals("TLShift")
-                                || stack.peek().equals("TRshift")) {
-                            tokens.add(stack.pop());
-                        }
-                    }
-                    stack.push(t);
-                    match("TRshift");
-                    break;
-                default:
-                    error("operator or operand");
-            }
+    private void fail(String name, String msg) {
+        if (!getName(getToken()).equals(name)) {
+            error(msg);
         }
-        while (!stack.empty()) {
-            tokens.add(stack.pop());
-        }
-        return tokens;
+        consume();
     }
     private void error(String expected) {
         System.err.printf(
             "Parsing Error: Expected %s got %s\n",
             expected,
-            getName(t)
+            getToken().getText()
         );
         System.exit(1);
     }
