@@ -5,13 +5,14 @@ public class ProgramTwo{
         new AssignStmt(
             "two",
             new BinOpExp(
-                new BinOpExp(
-                    new NumExp(20),
+                new NumExp(20),
                     '-',
-                    new NumExp(10)
-                ),
-                '*',
-                new NumExp(5)
+                        new BinOpExp(
+                            new NumExp(20),
+                            '*',
+                            new NumExp(5)
+                )
+
             )
         ),
         new Stmts(

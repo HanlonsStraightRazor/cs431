@@ -135,12 +135,13 @@ class Parser {
                 break;
             case("TMul"):
                 match("TMul")
-                if (getName(q.peek()) == "TAdd" || getName(q.peek()) == "TSub"){
+                if(getName(q.peek()) == "TAdd" || getName(q.peek()) == "TSub"){
                     return(expression() + "new BinOpExp(");
                 }
-                if (getName(q.peek()) == "TLshfit" || getName(q.peek()) == "Trshift"){
+                else(getName(q.peek()) == "TLshfit" || getName(q.peek()) == "Trshift"){
                     return("new BinOpExp(" + expression());
                 }
+
                 break;
             case("TDiv"):
                 break;
