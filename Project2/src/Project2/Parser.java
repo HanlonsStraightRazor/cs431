@@ -266,16 +266,15 @@ class Parser {
         Token opp = t;
         switch(getName(t)){
             case("TAdd"):
-                match("TAdd")
+                match("TAdd");
                 return("new BinOpExp(" + expression());
                 break;
             case("TSub"):
                 match("TSub")
                 return("new BinOpExp(" + expression());
                 break;
-                break;
             case("TMul"):
-                match("TMul")
+                match("TMul");
                 if(getName(q.peek()) == "TAdd" || getName(q.peek()) == "TSub"){
                     return(expression() + "new BinOpExp(");
                 }
