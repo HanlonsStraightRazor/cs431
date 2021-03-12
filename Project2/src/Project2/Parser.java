@@ -261,53 +261,9 @@ class Parser {
             sb.append(")\n");
         }
     }
-<<<<<<< HEAD
-    private String binop(Token val){
-        Token opp = t;
-        switch(getName(t)){
-            case("TAdd"):
-                match("TAdd");
-                return("new BinOpExp(" + expression());
-                break;
-            case("TSub"):
-                match("TSub")
-                return("new BinOpExp(" + expression());
-                break;
-            case("TMul"):
-                match("TMul");
-                if(getName(q.peek()) == "TAdd" || getName(q.peek()) == "TSub"){
-                    return(expression() + "new BinOpExp(");
-                }
-                else(getName(q.peek()) == "TLshfit" || getName(q.peek()) == "Trshift"){
-                    return("new BinOpExp(" + expression());
-                }
-
-                break;
-            case("TDiv"):
-                break;
-            case("TMod"):
-                break;
-            default:
-                error("TAdd, TSub, TMul, TDiv, or TMod");
-        }
-    }
-    private String unop(Token val){
-        switch(getName(t)){
-            case("TLshift"):
-                match("TLshift");
-                return(expression() + "new UnaryOp(");
-                break;
-            case("TRshift"):
-                match("TRshift");
-                return(expression() + "new UnaryOp(");
-                break;
-            default:
-                error("TLshift or TRshift");
-=======
     private void fail(String name, String msg) {
         if (!getName(getToken()).equals(name)) {
             error(msg);
->>>>>>> stack
         }
         consume();
     }
