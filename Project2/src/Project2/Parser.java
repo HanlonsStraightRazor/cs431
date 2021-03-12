@@ -17,8 +17,8 @@ class Parser {
         sb = new StringBuilder("");
         addStartBoilerplate();
         stmts();
-        addEndBoilerplate();
         System.out.print(sb);
+        addEndBoilerplate();
     }
     private String getName(Token token) {
         if (t == null) {
