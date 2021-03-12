@@ -70,7 +70,6 @@ class Parser {
     private String expression(){
         switch(getName(t)){
             Token curr = t;
-            match();
             case("TId"):
                 match("TId");
                 switch(getName(t)){
