@@ -35,7 +35,7 @@ class Parser {
         sb.append("private static Stmts program = new Stmts(\n");
         stmt();
         while (getToken() != null){
-            fail("TSemi", "semicolon");
+            //fail("TSemi", "semicolon");
             sb.append(",\nnew Stmts(\n");
             stmt();
             sb.append(")\n");
@@ -53,22 +53,27 @@ class Parser {
             default:
                 error("identifer or print statement");
         }
+        consume();
     }
     private void assignStmt(){
         sb.append("new AssignStmt(\n");
         sb.append("\"" + consume().getText() + "\",\n");
-        fail("TEquals", "<--");
+        //fail("TEquals", "<--");
         // sb.append("new NumExp(30)");
         // match("TNum");
+        consume();
         sb.append(expression());
         sb.append(")");
+        return;
     }
     private void printStmt(){
         consume();
+        consume();
         sb.append("new PrintStmt(\n");
-        fail("TLparen", "(");
+        //fail("TLparen", "(");
         explist();
-        fail("TRparen", ")");
+        consume();
+        //fail("TRparen", ")");
         sb.append(")");
     }
     private String expression(){
@@ -79,9 +84,9 @@ class Parser {
             switch (getName(token)) {
                 case ("TId"):
                     stack.push(
-                        "new IdExp("
+                        "new IdExp(\""
                         + token.getText()
-                        + ")"
+                        + "\")"
                     );
                     break;
                 case ("TNum"):
