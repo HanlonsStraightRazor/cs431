@@ -64,7 +64,6 @@ class Parser {
         consume();
         sb.append(expression());
         sb.append(")");
-        return;
     }
     private void printStmt(){
         consume();
