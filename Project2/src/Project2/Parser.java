@@ -258,7 +258,8 @@ class Parser {
     }
     private void explist(){
         String holdingExp = expression();
-        if(getName(consume()).equals("TComma")){
+        if(getName(getToken()).equals("TComma")){
+            consume();
             sb.append("new ExpListAndExp(\n");
             sb.append(holdingExp + ",\n");
             explist();
