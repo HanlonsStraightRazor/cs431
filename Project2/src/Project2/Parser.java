@@ -34,10 +34,14 @@ class Parser {
     private void stmts() {
         sb.append("private static Stmts program = new Stmts(\n");
         stmt();
+        int i = 0;
         while (getToken() != null){
             //fail("TSemi", "semicolon");
             sb.append(",\nnew Stmts(\n");
             stmt();
+            i++;
+        }
+        for(int x = 0; x != i; x++){
             sb.append(")\n");
         }
         sb.append(");\n");
