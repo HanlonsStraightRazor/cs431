@@ -11,7 +11,7 @@ Tokens
     semi = ';';
     id = letter+;
     equals = '<--';
-    echo = 'echo ';
+    echo = 'echo' (linefeed | space | tab)*;
     lparen = '(';
     rparen = ')';
     num = digit+ ('.' digit+)?;
