@@ -35,13 +35,12 @@ class Parser {
         sb.append("private static Stmts program = new Stmts(\n");
         stmt();
         int i = 0;
-        while (getToken() != null){
+        for (; getToken() != null; i++){
             //fail("TSemi", "semicolon");
             sb.append(",\nnew Stmts(\n");
             stmt();
-            i++;
         }
-        for(int x = 0; x != i; x++){
+        for(int x = 0; x < i; x++){
             sb.append(")\n");
         }
         sb.append(");\n");
@@ -184,49 +183,49 @@ class Parser {
                 && !getName(getToken()).equals("TRparen")) {
             switch (getName(getToken())) {
                 case ("TId"):
-                    tokens.add(getToken());
+                    tokens.add(consume());
                     break;
                 case ("TNum"):
-                    tokens.add(getToken());
+                    tokens.add(consume());
                     break;
                 case ("TAdd"):
                     while (!stack.empty()) {
                         tokens.add(stack.pop());
                     }
-                    stack.push(getToken());
+                    stack.push(consume());
                     break;
                 case ("TSub"):
                     while (!stack.empty()) {
                         tokens.add(stack.pop());
                     }
-                    stack.push(getToken());
+                    stack.push(consume());
                     break;
                 case ("TMul"):
                     if (!stack.empty()) {
-                        while (!getName(stack.peek()).equals("TAdd")
-                                && !getName(stack.peek()).equals("TSub")) {
+                        while (!(getName(stack.peek()).equals("TAdd")
+                                || getName(stack.peek()).equals("TSub"))) {
                             tokens.add(stack.pop());
                         }
                     }
-                    stack.push(getToken());
+                    stack.push(consume());
                     break;
                 case ("TDiv"):
                     if (!stack.empty()) {
-                        while (!getName(stack.peek()).equals("TAdd")
-                                && !getName(stack.peek()).equals("TSub")) {
+                        while (!(getName(stack.peek()).equals("TAdd")
+                                || getName(stack.peek()).equals("TSub"))) {
                             tokens.add(stack.pop());
                         }
                     }
-                    stack.push(getToken());
+                    stack.push(consume());
                     break;
                 case ("TMod"):
                     if (!stack.empty()) {
-                        while (!getName(stack.peek()).equals("TAdd")
-                                && !getName(stack.peek()).equals("TSub")) {
+                        while (!(getName(stack.peek()).equals("TAdd")
+                                || getName(stack.peek()).equals("TSub"))) {
                             tokens.add(stack.pop());
                         }
                     }
-                    stack.push(getToken());
+                    stack.push(consume());
                     break;
                 case ("TLshift"):
                     if (!stack.empty()) {
@@ -235,7 +234,7 @@ class Parser {
                             tokens.add(stack.pop());
                         }
                     }
-                    stack.push(getToken());
+                    stack.push(consume());
                     break;
                 case ("TRshift"):
                     if (!stack.empty()) {
@@ -244,16 +243,20 @@ class Parser {
                             tokens.add(stack.pop());
                         }
                     }
-                    stack.push(getToken());
+                    stack.push(consume());
                     break;
                 default:
                     error("operator or operand");
             }
-            consume();
         }
         while (!stack.empty()) {
             tokens.add(stack.pop());
         }
+        for (Object tok : tokens.toArray()) {
+            System.out.print(((Token) tok).getText() + " ");
+        }
+        System.out.println();
+        System.exit(0);
         return tokens;
     }
     private void explist(){
