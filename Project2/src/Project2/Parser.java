@@ -201,47 +201,37 @@ class Parser {
                     stack.push(consume());
                     break;
                 case ("TMul"):
-                    if (!stack.empty()) {
-                        while (!stack.empty() && !(getName(stack.peek()).equals("TAdd")
-                                || getName(stack.peek()).equals("TSub"))) {
-                            tokens.add(stack.pop());
-                        }
+                    while (!stack.empty() && !(getName(stack.peek()).equals("TAdd")
+                            || getName(stack.peek()).equals("TSub"))) {
+                        tokens.add(stack.pop());
                     }
                     stack.push(consume());
                     break;
                 case ("TDiv"):
-                    if (!stack.empty()) {
-                        while (!stack.empty() && !(getName(stack.peek()).equals("TAdd")
-                                || getName(stack.peek()).equals("TSub"))) {
-                            tokens.add(stack.pop());
-                        }
+                    while (!stack.empty() && !(getName(stack.peek()).equals("TAdd")
+                            || getName(stack.peek()).equals("TSub"))) {
+                        tokens.add(stack.pop());
                     }
                     stack.push(consume());
                     break;
                 case ("TMod"):
-                    if (!stack.empty()) {
-                        while (!stack.empty() && !(getName(stack.peek()).equals("TAdd")
-                                || getName(stack.peek()).equals("TSub"))) {
-                            tokens.add(stack.pop());
-                        }
+                    while (!stack.empty() && !(getName(stack.peek()).equals("TAdd")
+                            || getName(stack.peek()).equals("TSub"))) {
+                        tokens.add(stack.pop());
                     }
                     stack.push(consume());
                     break;
                 case ("TLshift"):
-                    if (!stack.empty()) {
-                        while (!stack.empty() && stack.peek().equals("TLshift")
-                                || stack.peek().equals("TRshift")) {
-                            tokens.add(stack.pop());
-                        }
+                    while (!stack.empty() && (stack.peek().equals("TLshift")
+                            || stack.peek().equals("TRshift"))) {
+                        tokens.add(stack.pop());
                     }
                     stack.push(consume());
                     break;
                 case ("TRshift"):
-                    if (!stack.empty()) {
-                        while (!stack.empty() && stack.peek().equals("TLshift")
-                                || stack.peek().equals("TRshift")) {
-                            tokens.add(stack.pop());
-                        }
+                    while (!stack.empty() && (stack.peek().equals("TLshift")
+                            || stack.peek().equals("TRshift"))) {
+                        tokens.add(stack.pop());
                     }
                     stack.push(consume());
                     break;
