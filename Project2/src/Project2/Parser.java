@@ -202,7 +202,7 @@ class Parser {
                     break;
                 case ("TMul"):
                     if (!stack.empty()) {
-                        while (!(getName(stack.peek()).equals("TAdd")
+                        while (!stack.empty() && !(getName(stack.peek()).equals("TAdd")
                                 || getName(stack.peek()).equals("TSub"))) {
                             tokens.add(stack.pop());
                         }
@@ -211,7 +211,7 @@ class Parser {
                     break;
                 case ("TDiv"):
                     if (!stack.empty()) {
-                        while (!(getName(stack.peek()).equals("TAdd")
+                        while (!stack.empty() && !(getName(stack.peek()).equals("TAdd")
                                 || getName(stack.peek()).equals("TSub"))) {
                             tokens.add(stack.pop());
                         }
@@ -220,7 +220,7 @@ class Parser {
                     break;
                 case ("TMod"):
                     if (!stack.empty()) {
-                        while (!(getName(stack.peek()).equals("TAdd")
+                        while (!stack.empty() && !(getName(stack.peek()).equals("TAdd")
                                 || getName(stack.peek()).equals("TSub"))) {
                             tokens.add(stack.pop());
                         }
@@ -229,7 +229,7 @@ class Parser {
                     break;
                 case ("TLshift"):
                     if (!stack.empty()) {
-                        while (stack.peek().equals("TLShift")
+                        while (!stack.empty() && stack.peek().equals("TLshift")
                                 || stack.peek().equals("TRshift")) {
                             tokens.add(stack.pop());
                         }
@@ -238,7 +238,7 @@ class Parser {
                     break;
                 case ("TRshift"):
                     if (!stack.empty()) {
-                        while (stack.peek().equals("TLShift")
+                        while (!stack.empty() && stack.peek().equals("TLshift")
                                 || stack.peek().equals("TRshift")) {
                             tokens.add(stack.pop());
                         }
@@ -252,11 +252,6 @@ class Parser {
         while (!stack.empty()) {
             tokens.add(stack.pop());
         }
-        for (Object tok : tokens.toArray()) {
-            System.out.print(((Token) tok).getText() + " ");
-        }
-        System.out.println();
-        System.exit(0);
         return tokens;
     }
     private void explist(){
