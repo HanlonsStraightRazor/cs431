@@ -15,6 +15,8 @@ public class Main{
             Parser parser = new Parser(lexer);
 
             Start ast = parser.parse();
+            // So the line under the comments this is wack, that is just the wrong output.
+            // Also why the '!' ? We expect this to work right? *denies PR*
             System.out.println("It's valid!");
       }
       catch(Exception e){ System.out.println("NOT VALID: " + e.getMessage()); }
