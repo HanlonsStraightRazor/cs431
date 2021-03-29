@@ -70,10 +70,10 @@ Productions
 
 
 
-    Prog = BEGIN ClassMethodStmts END;
+    Prog = begin ClassMethodStmts end;
     ClassMethodStmts = ClassMethodStmts ClassMethodStmt |
         lambda;
-    ClassMethodStmt = CLASS Id{MethodStmtSeqs}|
+    ClassMethodStmt = class Id {MethodStmtSeqs}|
         Type Id(VarList){StmtSeq}|
         Id(,Id)∗:Type semicolon;
     MethodStmtSeqs = MethodStmtSeqs MethodStmtSeq|
@@ -85,19 +85,19 @@ Productions
     Stmt = Id( [Int] )? :=Expr semicolon|
         Id( [Int] )? := “AnyChars” semicolon|
         Id(,Id)∗:Type( [Int] )? semicolon|
-        IF (Boolean) THEN{StmtSeq}|
-        IF (Boolean) THEN{StmtSeq}ELSE{StmtSeq}|
-        WHILE (Boolean){StmtSeq}|
-        FOR ( (Type)?Id:=Expr semicolon Boolean Semi (Id++|Id−− |Id:=Expr) ){StmtSeq}|
-        Id( [Int] )? := GET() semicolon |
+        if (Boolean) then {StmtSeq}|
+        if (Boolean) then {StmtSeq}ELSE{StmtSeq}|
+        while (Boolean){StmtSeq}|
+        for ( (Type)?Id:=Expr semicolon Boolean Semi (Id++|Id−− |Id:=Expr) ){StmtSeq}|
+        Id( [Int] )? := get() semicolon |
         PUT (Id( [Int] )? ) semicolon |
         Id( [Int] )?++ semicolon |
         Id( [Int] )?−− semicolon |
-        Id( [Int] )? := NEW Id() Semi |
+        Id( [Int] )? := new Id() Semi |
         Id(VarListTwo) semicolon |
         Id( [Int] )? .Id (VarListTwo) ( .Id (VarListTwo) )∗ semicolon | RETURN Expr semicolon |
         Id( [Int] )? :=Boolean semicolon |
-        SWITCH (Expr){CASE(Int) :StmtSeq(BREAK semicolon)? ( CASE(Int) :StmtSeq(BREAK semicolon)?)∗DEFAULT :StmtSeq};
+        switch (Expr){case(Int) :StmtSeq(break semicolon)? ( case(Int) :StmtSeq(break semicolon)?)default :StmtSeq};
     VarList = (Id:Type( [Int] )? (,Id:Type( [Int] )? )∗)?;
     VarListTwo = (Expr(,Expr)∗)?;
     Expr = Expr AddOp Term|
