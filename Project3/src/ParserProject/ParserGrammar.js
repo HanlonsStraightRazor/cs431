@@ -70,10 +70,10 @@ Productions
 
 
 
-    Prog = BEGIN ClassMethodStmts END;
+    Prog = begin ClassMethodStmts end;
     ClassMethodStmts = ClassMethodStmts ClassMethodStmt |
         lambda;
-    ClassMethodStmt = CLASS Id{MethodStmtSeqs}|
+    ClassMethodStmt = class Id{MethodStmtSeqs}|
         Type Id(VarList){StmtSeq}|
         Id(,Id)∗:Type semicolon;
     MethodStmtSeqs = MethodStmtSeqs MethodStmtSeq|
