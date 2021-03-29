@@ -15,6 +15,8 @@ public class Main{
             Parser parser = new Parser(lexer);
 
             Start ast = parser.parse();
+            // So the line under these comments is just wack, its just not the output we are looking for.  
+            // And there is no need to get excited, we expect it to work anyways ._.
             System.out.println("It's valid!");
       }
       catch(Exception e){ System.out.println("NOT VALID: " + e.getMessage()); }
