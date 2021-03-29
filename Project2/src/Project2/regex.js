@@ -9,7 +9,6 @@ Helpers
 
 Tokens
     semi = ';';
-    id = letter+;
     equals = '<--';
     echo = 'echo' (linefeed | space | tab)*;
     lparen = '(';
@@ -23,4 +22,5 @@ Tokens
     mod = '%';
     lshift = '<<';
     rshift = '>>';
+    id = letter+;
     whitespace = (linefeed | space | tab);
