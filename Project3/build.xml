@@ -1,0 +1,47 @@
+<project name="ParserProject" basedir="." default="all">
+
+    <description>
+    </description>
+
+    <property name="build" location="build"/>
+    <property name="src" location="src/${ant.project.name}"/>
+    <property name="regex" location="${src}/ParserGrammar.js"/>
+    <!-- <property name="input" location="input"/> -->
+    <!-- <property name="output" location="output"/> -->
+
+    <target name="clean">
+        <delete dir="${build}"/>
+        <delete dir="${src}/${ant.project.name}"/>
+        <delete file="${output}"/>
+    </target>
+
+    <target name="genlex">
+        <exec executable="/bin/bash" failonerror="true">
+            <arg line="-c 'java -jar sablecc.jar -d ${src} ${regex}'"/>
+        </exec>
+    </target>
+
+    <target name="compile" depends="genlex">
+        <mkdir dir="${build}"/>
+        <javac
+            srcdir="${src}"
+            destdir="${build}"
+            includeantruntime="false"
+            failonerror="true"
+            debug="on"/>
+        <copy
+            file="${src}/${ant.project.name}/lexer/lexer.dat"
+            todir="${build}/${ant.project.name}/lexer"/>
+    </target>
+
+    <target name="run">
+        <echo message="RUNNING TEST(S)..."/>
+        <java classname="${ant.project.name}.Main" classpath="${build}"/>
+    </target>
+
+    <target name="all">
+        <antcall target="clean"/>
+        <antcall target="compile"/>
+        <antcall target="run"/>
+    </target>
+</project>
