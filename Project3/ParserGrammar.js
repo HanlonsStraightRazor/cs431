@@ -70,14 +70,17 @@ Productions
 
 
     Prog = BEGIN ClassMethodStmts END;
-    ClassMethodStmts = ClassMethodStmts ClassMethodStmt |lambda;
+    ClassMethodStmts = ClassMethodStmts ClassMethodStmt |
+        lambda;
     ClassMethodStmt = CLASS Id{MethodStmtSeqs}|
         Type Id(VarList){StmtSeq}|
         Id(,Id)∗:Type semicolon;
-    MethodStmtSeqs = MethodStmtSeqs MethodStmtSeq|lambda;
+    MethodStmtSeqs = MethodStmtSeqs MethodStmtSeq|
+        lambda;
     MethodStmtSeq = Type Id(VarList){StmtSeq}|
         Id(,Id)∗:Type semicolon;
-    StmtSeq = Stmt StmtSeq|lambda;
+    StmtSeq = Stmt StmtSeq|
+        lambda;
     Stmt = Id( [Int] )? :=Expr semicolon|
         Id( [Int] )? := “AnyChars” semicolon|
         Id(,Id)∗:Type( [Int] )? semicolon|
@@ -96,8 +99,10 @@ Productions
         SWITCH (Expr){CASE(Int) :StmtSeq(BREAK semicolon)? ( CASE(Int) :StmtSeq(BREAK semicolon)?)∗DEFAULT :StmtSeq};
     VarList = (Id:Type( [Int] )? (,Id:Type( [Int] )? )∗)?;
     VarListTwo = (Expr(,Expr)∗)?;
-    Expr = Expr AddOp Term|Term;
-    Term = Term MultOp Factor|Factor;
+    Expr = Expr AddOp Term|
+        Term;
+    Term = Term MultOp Factor|
+        Factor;
     Factor = (Expr)|
         -Factor|
         Int|
@@ -106,7 +111,10 @@ Productions
         Id( [Int] )?|
         Id(VarListTwo)|
         Id( [Int] )? .Id(VarListTwo);
-    Boolean = TRUE|FALSE|Expr Cond Expr|Id;
+    Boolean = TRUE|
+        FALSE|
+        Expr Cond Expr|
+        Id;
     Cond = ==|
         !=|
         >=|
