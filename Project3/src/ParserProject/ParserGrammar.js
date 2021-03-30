@@ -73,54 +73,57 @@ Ignored Tokens
 
 Productions
     prog = begin classmethodstmts end;
-    classmethodstmts = classmethodstmts classmethodstmt |
-        lambda;
-    classmethodstmt = class id {methodstmtseqs} |
-        type id(varlist){stmtseq}|
-        id(,id)∗:type semicolon;
-    methodstmtseqs = methodstmtseqs methodstmtseq |
-        lambda;
-    methodstmtseq = type id ( varlist ) { stmtseq } |
-        id ( , id ) ∗ : type semicolon;
-    stmtseq = stmt stmtseq |
-        lambda;
-    stmt = id ( [ int ] ) ? : = expr semicolon |
-        id ( [ int ] ) ? : = “anychars” semicolon |
-        id ( , id ) ∗ : type ( [ int ] )? semicolon |
-        if ( boolean ) then { stmtseq } |
-        if ( boolean ) then { stmtseq } else { stmtseq } |
-        while ( boolean ) { stmtseq } |
-        for ( ( type )? id := expr semicolon boolean semi (id++ | id−− | id := expr ) ) { stmtseq } |
-        id ( [ int ] )? := get() semicolon |
-        put ( id( [ int ] )? ) semicolon |
-        id ( [ int ] )?++ semicolon |
-        id ( [ int ] )?−− semicolon |
-        id ( [ int ] )? := new id() semi |
-        id ( varlisttwo ) semicolon |
-        id ( [ int ] )? .id (varlisttwo) ( .id (varlisttwo) )∗ semicolon | return expr semicolon |
-        id ( [ int ] )? := boolean semicolon |
-        switch ( expr ) { case ( int ) : stmtseq (break semicolon)? ( case ( int ) : stmtseq ( break semicolon )? )default : stmtseq };
-    varlist = ( id:type ( [ int ] )? ( ,id : type ( [ int ] )? )∗)?;
-    varlisttwo = ( expr ( ,expr )∗)?;
-    expr = expr addop term |
-        term;
-    term = term multop factor |
-        factor;
-    factor = ( expr ) |
-        -factor |
-        int |
-        real |
-        boolean |
-        id( [int] )? |
-        id( varlisttwo ) |
-        id( [ int ] )? .id (varlisttwo);
-    boolean = true |
-        false |
-        expr cond expr |
-        id;
-    type = int |
-        real |
-        string |
-        boolean |
-        void |
-        id;
+    classmethodstmts = classmethodstmts classmethodstmt
+        | ;
+    classmethodstmt = class id lcurlymethodstmtseqsrcurly
+        | type idlparenvarlistrparenlcurlystmtseqrcurly
+        | idlparen comma idrparen*:type semicolon;
+    methodstmtseqs = methodstmtseqs methodstmtseq
+        | ;
+    methodstmtseq = type id lparen varlist rparen lcurly stmtseq rcurly
+        | id lparen comma id rparen * : type semicolon;
+    stmtseq = stmt stmtseq
+        | ;
+    stmt = id lparen [ int ] rparen ? : = expr semicolon
+        | id lparen [ int ] rparen ? : = “anychars” semicolon
+        | id lparen comma id rparen * : type lparen [ int ] rparen? semicolon
+        | if lparen boolean rparen then lcurly stmtseq rcurly
+        | if lparen boolean rparen then lcurly stmtseq rcurly else lcurly stmtseq rcurly
+        | while lparen boolean rparen lcurly stmtseq rcurly
+        | for lparen lparen type rparen? id := expr semicolon boolean semi lparenid++
+        | id−−
+        | id := expr rparen rparen lcurly stmtseq rcurly
+        | id lparen [ int ] rparen? := getlparenrparen semicolon
+        | put lparen idlparen [ int ] rparen? rparen semicolon
+        | id lparen [ int ] rparen?++ semicolon
+        | id lparen [ int ] rparen?−− semicolon
+        | id lparen [ int ] rparen? := new idlparenrparen semi
+        | id lparen varlisttwo rparen semicolon
+        | id lparen [ int ] rparen? .id lparenvarlisttworparen lparen .id lparenvarlisttworparen rparen∗ semicolon
+        | return expr semicolon
+        | id lparen [ int ] rparen? := boolean semicolon
+        | switch lparen expr rparen lcurly case lparen int rparen : stmtseq lparenbreak semicolonrparen? lparen case lparen int rparen : stmtseq lparen break semicolon rparen? rparendefault : stmtseq rcurly;
+    varlist = lparen id:type lparen [ int ] rparen? lparen comma id : type lparen [ int ] rparen? rparen∗rparen?;
+    varlisttwo = lparen expr lparen comma expr rparen∗rparen?;
+    expr = expr addop term
+        | term;
+    term = term multop factor
+        | factor;
+    factor = lparen expr rparen
+        | -factor
+        | int
+        | real
+        | boolean
+        | idlparen [int] rparen?
+        | idlparen varlisttwo rparen
+        | idlparen [ int ] rparen? .id lparenvarlisttworparen;
+    boolean = true
+        | false
+        | expr cond expr
+        | id;
+    type = int
+        | real
+        | string
+        | boolean
+        | void
+        | id;
