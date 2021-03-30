@@ -56,7 +56,7 @@ Tokens
     whitespace = (lf | sp | tabs);
     anychars = [35..255]+;
     int = digit ( digit )*;
-    real = ( digit )+ .( digit )+;
+    real = ( digit )+ '.' ( digit )+;
     cond = '==' |
         '!=' |
         '>=' |
