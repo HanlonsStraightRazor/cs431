@@ -35,6 +35,8 @@ Tokens
     plus = '+';
     minus = '-';
     times = '*';
+    plusOne = '++';
+    minusOne = '--';
     lparen = '(';
     rparen = ')';
     lbracket = '[';
