@@ -4,9 +4,9 @@ Helpers
     lf = 10 | 12 | 13;
     sp = ' ';
     tabs = 9 | 11;
-    number = ['0'..'9'];
+    digit = ['0'..'9'];
     letter = ['a'..'z'] | ['A'..'Z'];
-    alphanumeric = letter | number;
+    alphanumeric = letter | digit;
 
 Tokens
     class = 'CLASS';
@@ -52,25 +52,27 @@ Tokens
     equal = '=';
     eq = '==';
     neq = '!=';
-    id = letter (letter | number)*;
-    digit = number+;
+    id = letter ( letter | digit | _ )∗;
     whitespace = (lf | sp | tabs);
     anychars = [35..255]+;
+    int = digit ( digit )∗;
+    real = ( digit )+ .( digit )+;
+    digit = [ '0'..'9' ];
+    cond = '==' |
+        '!=' |
+        '>=' |
+        '<=' |
+        '>' |
+        '<';
+    addop = '+' |
+        '-';
+    multop = '*' |
+        '/';
 
 Ignored Tokens
     whitespace;
 
 Productions
-    prog = {first} id digit |
-           {second} lotnumbers |
-           {third} [eachsymbolisuniqueinaproduction]:id [secondid]:id [digitone]:digit [digittwo]:digit ;
-    lotnumbers = digit morenumbers;
-    morenumbers = {fourth} digit morenumbers |
-              {emptyproduction} ;
-
-
-
-
     prog = begin classmethodstmts end;
     classmethodstmts = classmethodstmts classmethodstmt |
         lambda;
@@ -117,23 +119,10 @@ Productions
         false |
         expr cond expr |
         id;
-    cond = == |
-        != |
-        >= |
-        <= |
-        > |
-        <;
-    addop = + |
-        -;
-    multop = * |
-        /;
     type = int |
         real |
         string |
         boolean |
         void |
         id;
-    id = letter ( letter | digit | _ )∗;
-    int = digit ( digit )∗;
-    real = ( digit )+ .( digit )+;
-    digit = [ '0'..'9' ];
+    
