@@ -48,8 +48,7 @@ Tokens
     lte = '<=';
     gte = '>=';
     comma = ',';
-    lquote = '"';
-    rquote = '"';
+    quote = '"';
     colon = ':';
     walrus = ':='
     not = '!';
