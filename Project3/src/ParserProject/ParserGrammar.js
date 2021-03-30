@@ -50,8 +50,8 @@ Tokens
     and = '&&';
     semicolon = ';';
     equal = '=';
-    eq = '==';
-    neq = '!=';
+    eqv = '==';
+    neqv = '!=';
     id = letter ( letter | digit | '_' )*;
     whitespace = (lf | sp | tabs);
     anychars = [35..255]+;
