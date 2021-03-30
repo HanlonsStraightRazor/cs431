@@ -33,7 +33,9 @@ Tokens
     get = 'GET';
     put = 'PUT';
     plus = '+';
+    inc = '++';
     minus = '-';
+    dec = '--';
     times = '*';
     lparen = '(';
     rparen = ')';
@@ -46,6 +48,10 @@ Tokens
     lte = '<=';
     gte = '>=';
     comma = ',';
+    lquote = '"';
+    rquote = '"';
+    colon = ':';
+    walrus = ':=';
     not = '!';
     and = '&&';
     semicolon = ';';
@@ -75,48 +81,46 @@ Productions
     prog = begin classmethodstmts end;
     classmethodstmts = classmethodstmts classmethodstmt
         | ;
-    classmethodstmt = class id lcurlymethodstmtseqsrcurly
-        | type idlparenvarlistrparenlcurlystmtseqrcurly
-        | idlparen comma idrparen*:type semicolon;
+    classmethodstmt = class id lcurly methodstmtseqs rcurly
+        | type id lparen varlist rparen lcurly stmtseq rcurly
+        | id ( comma id )* colon type semicolon;
     methodstmtseqs = methodstmtseqs methodstmtseq
         | ;
     methodstmtseq = type id lparen varlist rparen lcurly stmtseq rcurly
-        | id lparen comma id rparen * : type semicolon;
+        | id ( comma id )* colon type semicolon;
     stmtseq = stmt stmtseq
         | ;
-    stmt = id lparen [ int ] rparen ? : = expr semicolon
-        | id lparen [ int ] rparen ? : = “anychars” semicolon
-        | id lparen comma id rparen * : type lparen [ int ] rparen? semicolon
+    stmt = id ( lbracket int rbracket )? walrus expr semicolon
+        | id ( lbracket int rbracket )? walrus lquote anychars rquote semicolon
+        | id ( comma id )* colon type ( lbracket int rbracket )? semicolon
         | if lparen boolean rparen then lcurly stmtseq rcurly
         | if lparen boolean rparen then lcurly stmtseq rcurly else lcurly stmtseq rcurly
         | while lparen boolean rparen lcurly stmtseq rcurly
-        | for lparen lparen type rparen? id := expr semicolon boolean semi lparenid++
-        | id−−
-        | id := expr rparen rparen lcurly stmtseq rcurly
-        | id lparen [ int ] rparen? := getlparenrparen semicolon
-        | put lparen idlparen [ int ] rparen? rparen semicolon
-        | id lparen [ int ] rparen?++ semicolon
-        | id lparen [ int ] rparen?−− semicolon
-        | id lparen [ int ] rparen? := new idlparenrparen semi
+        | for lparen ( type )? id walrus expr semicolon boolean semicolon ( id inc | id dec | id walrus expr ) rparen lcurly stmtseq rcurly
+        | id ( lbracket int rbracket )? walrus get lparen rparen semicolon
+        | put lparen id ( lbracket int rbracket )? rparen semicolon
+        | id ( lbracket int rbracket )? inc semicolon
+        | id ( lbracket int rbracket )? dec semicolon
+        | id ( lbracket int rbracket )? walrus new id lparenrparen semicolon
         | id lparen varlisttwo rparen semicolon
-        | id lparen [ int ] rparen? .id lparenvarlisttworparen lparen .id lparenvarlisttworparen rparen∗ semicolon
+        | id ( lbracket int rbracket )? '.' id lparen varlisttwo rparen ( '.' id lparen varlisttwo rparen )∗ semicolon
         | return expr semicolon
-        | id lparen [ int ] rparen? := boolean semicolon
-        | switch lparen expr rparen lcurly case lparen int rparen : stmtseq lparenbreak semicolonrparen? lparen case lparen int rparen : stmtseq lparen break semicolon rparen? rparendefault : stmtseq rcurly;
-    varlist = lparen id:type lparen [ int ] rparen? lparen comma id : type lparen [ int ] rparen? rparen∗rparen?;
-    varlisttwo = lparen expr lparen comma expr rparen∗rparen?;
+        | id ( lbracket int rbracket )? walrus boolean semicolon
+        | switch lparen expr rparen lcurly case lparen int rparen colon stmtseq ( break semicolon )? ( case lparen int rparen colon stmtseq ( break semicolon )?)* default colon stmtseq rcurly;
+    varlist = ( id colon type ( lbracket int rbracket )? ( comma id colon type ( lbracket int rbracket )? )∗ )?;
+    varlisttwo = ( expr ( comma expr )∗ )?;
     expr = expr addop term
         | term;
     term = term multop factor
         | factor;
     factor = lparen expr rparen
-        | -factor
+        | '-' factor
         | int
         | real
         | boolean
-        | idlparen [int] rparen?
-        | idlparen varlisttwo rparen
-        | idlparen [ int ] rparen? .id lparenvarlisttworparen;
+        | id ( lbracket int rbracket )?
+        | id lparen varlisttwo rparen
+        | id ( lbracket int rbracket )? '.' id lparen varlisttwo rparen;
     boolean = true
         | false
         | expr cond expr
