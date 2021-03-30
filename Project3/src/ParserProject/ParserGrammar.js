@@ -52,7 +52,7 @@ Tokens
     equal = '=';
     eq = '==';
     neq = '!=';
-    id = letter ( letter | digit | _ )∗;
+    id = letter ( letter | digit | '_' )∗;
     whitespace = (lf | sp | tabs);
     anychars = [35..255]+;
     int = digit ( digit )∗;
