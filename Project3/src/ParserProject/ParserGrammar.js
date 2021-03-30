@@ -55,6 +55,7 @@ Tokens
     id = letter (letter | number)*;
     digit = number+;
     whitespace = (lf | sp | tabs);
+    anychars = [35..255]+;
 
 Ignored Tokens
     whitespace;
@@ -70,71 +71,69 @@ Productions
 
 
 
-    Prog = begin ClassMethodStmts end;
-    ClassMethodStmts = ClassMethodStmts ClassMethodStmt |
+    prog = begin classmethodstmts end;
+    classmethodstmts = classmethodstmts classmethodstmt |
         lambda;
-    ClassMethodStmt = class Id {MethodStmtSeqs}|
-        Type Id(VarList){StmtSeq}|
-        Id(,Id)∗:Type semicolon;
-    MethodStmtSeqs = MethodStmtSeqs MethodStmtSeq|
+    classmethodstmt = class id {methodstmtseqs} |
+        type id(varlist){stmtseq}|
+        id(,id)∗:type semicolon;
+    methodstmtseqs = methodstmtseqs methodstmtseq |
         lambda;
-    MethodStmtSeq = Type Id(VarList){StmtSeq}|
-        Id(,Id)∗:Type semicolon;
-    StmtSeq = Stmt StmtSeq|
+    methodstmtseq = type id ( varlist ) { stmtseq } |
+        id ( , id ) ∗ : type semicolon;
+    stmtseq = stmt stmtseq |
         lambda;
-    Stmt = Id( [Int] )? :=Expr semicolon|
-        Id( [Int] )? := “AnyChars” semicolon|
-        Id(,Id)∗:Type( [Int] )? semicolon|
-        if (Boolean) then {StmtSeq}|
-        if (Boolean) then {StmtSeq}ELSE{StmtSeq}|
-        while (Boolean){StmtSeq}|
-        for ( (Type)?Id:=Expr semicolon Boolean Semi (Id++|Id−− |Id:=Expr) ){StmtSeq}|
-        Id( [Int] )? := get() semicolon |
-        PUT (Id( [Int] )? ) semicolon |
-        Id( [Int] )?++ semicolon |
-        Id( [Int] )?−− semicolon |
-        Id( [Int] )? := new Id() Semi |
-        Id(VarListTwo) semicolon |
-        Id( [Int] )? .Id (VarListTwo) ( .Id (VarListTwo) )∗ semicolon | RETURN Expr semicolon |
-        Id( [Int] )? :=Boolean semicolon |
-        switch (Expr){case(Int) :StmtSeq(break semicolon)? ( case(Int) :StmtSeq(break semicolon)?)default :StmtSeq};
-    VarList = (Id:Type( [Int] )? (,Id:Type( [Int] )? )∗)?;
-    VarListTwo = (Expr(,Expr)∗)?;
-    Expr = Expr AddOp Term|
-        Term;
-    Term = Term MultOp Factor|
-        Factor;
-    Factor = (Expr)|
-        -Factor|
-        Int|
-        Real|
-        Boolean|
-        Id( [Int] )?|
-        Id(VarListTwo)|
-        Id( [Int] )? .Id(VarListTwo);
-    Boolean = TRUE|
-        FALSE|
-        Expr Cond Expr|
-        Id;
-    Cond = ==|
-        !=|
-        >=|
-        <=|
-        >|
+    stmt = id ( [ int ] ) ? : = expr semicolon |
+        id ( [ int ] ) ? : = “anychars” semicolon |
+        id ( , id ) ∗ : type ( [ int ] )? semicolon |
+        if ( boolean ) then { stmtseq } |
+        if ( boolean ) then { stmtseq } else { stmtseq } |
+        while ( boolean ) { stmtseq } |
+        for ( ( type )? id := expr semicolon boolean semi (id++ | id−− | id := expr ) ) { stmtseq } |
+        id ( [ int ] )? := get() semicolon |
+        put ( id( [ int ] )? ) semicolon |
+        id ( [ int ] )?++ semicolon |
+        id ( [ int ] )?−− semicolon |
+        id ( [ int ] )? := new id() semi |
+        id ( varlisttwo ) semicolon |
+        id ( [ int ] )? .id (varlisttwo) ( .id (varlisttwo) )∗ semicolon | return expr semicolon |
+        id ( [ int ] )? := boolean semicolon |
+        switch ( expr ) { case ( int ) : stmtseq (break semicolon)? ( case ( int ) : stmtseq ( break semicolon )? )default : stmtseq };
+    varlist = ( id:type ( [ int ] )? ( ,id : type ( [ int ] )? )∗)?;
+    varlisttwo = ( expr ( ,expr )∗)?;
+    expr = expr addop term |
+        term;
+    term = term multop factor |
+        factor;
+    factor = ( expr ) |
+        -factor |
+        int |
+        real |
+        boolean |
+        id( [int] )? |
+        id( varlisttwo ) |
+        id( [ int ] )? .id (varlisttwo);
+    boolean = true |
+        false |
+        expr cond expr |
+        id;
+    cond = == |
+        != |
+        >= |
+        <= |
+        > |
         <;
-    AddOp = +|
+    addop = + |
         -;
-    MultOp = *|
+    multop = * |
         /;
-    Type = INT|
-        REAL|
-        STRING|
-        BOOLEAN|
-        VOID|
-        Id;
-    Id = Letter(Letter|Digit|)∗2;
-    Int = Digit(Digit)∗;
-    Real = (Digit)+.(Digit)+;
-    AnyChars = [35..255]+;
-    Letter = [‘a’..‘z’]|[‘A’..‘Z’];
-    Digit = [‘0’..‘9’];
+    type = int |
+        real |
+        string |
+        boolean |
+        void |
+        id;
+    id = letter ( letter | digit | _ )∗;
+    int = digit ( digit )∗;
+    real = ( digit )+ .( digit )+;
+    digit = [ '0'..'9' ];
