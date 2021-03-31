@@ -84,6 +84,10 @@ Productions
     idinc_iddec_idwalrusexpr = id inc
         | id dec
         | id walrus expr;
+    comma_expr_star = comma expr comma_expr_star
+        | ;
+    expr_commaexprstar_question = expr comma_expr_star
+        | ;
 
     prog = begin classmethodstmts end;
     classmethodstmts = classmethodstmts classmethodstmt
@@ -115,7 +119,7 @@ Productions
         | id lbracket_int_rbracket_question walrus boolean semicolon
         | switch lparen expr rparen lcurly case lparen int rparen colon stmtseq break_semicolon_question ( case lparen int rparen colon stmtseq )* default colon stmtseq rcurly;
     varlist = ( id colon type lbracket_int_rbracket_question ( comma id colon type lbracket_int_rbracket_question )* )?;
-    varlisttwo = ( expr ( comma expr )* )?;
+    varlisttwo = expr_commaexprstar_question;
     expr = expr addop term
         | term;
     term = term multop factor
