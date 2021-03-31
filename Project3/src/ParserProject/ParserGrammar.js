@@ -72,6 +72,7 @@ Ignored Tokens
 Productions
     comma_id_star = comma id commaid | ;
     lbracket_int_rbracket_question = lbracket int rbracket | ;
+    type_question = type | ;
 
     prog = begin classmethodstmts end;
     classmethodstmts = classmethodstmts classmethodstmt
@@ -87,23 +88,23 @@ Productions
         | ;
     stmt = id lbracket_int_rbracket_question walrus expr semicolon
         | id lbracket_int_rbracket_question walrus lquote anychars rquote semicolon
-        | id ( comma id )* colon type lbracket_int_rbracket_question semicolon
+        | id comma_id_star colon type lbracket_int_rbracket_question semicolon
         | if lparen boolean rparen then lcurly stmtseq rcurly
         | if lparen boolean rparen then lcurly stmtseq rcurly else lcurly stmtseq rcurly
         | while lparen boolean rparen lcurly stmtseq rcurly
-        | for lparen ( type )? id walrus expr semicolon boolean semicolon ( id inc | id dec | id walrus expr ) rparen lcurly stmtseq rcurly
+        | for lparen type_question id walrus expr semicolon boolean semicolon ( id inc | id dec | id walrus expr ) rparen lcurly stmtseq rcurly
         | id lbracket_int_rbracket_question walrus get lparen rparen semicolon
         | put lparen id lbracket_int_rbracket_question rparen semicolon
         | id lbracket_int_rbracket_question inc semicolon
         | id lbracket_int_rbracket_question dec semicolon
         | id lbracket_int_rbracket_question walrus new id lparenrparen semicolon
         | id lparen varlisttwo rparen semicolon
-        | id lbracket_int_rbracket_question '.' id lparen varlisttwo rparen ( '.' id lparen varlisttwo rparen )∗ semicolon
+        | id lbracket_int_rbracket_question '.' id lparen varlisttwo rparen ( '.' id lparen varlisttwo rparen )* semicolon
         | return expr semicolon
         | id lbracket_int_rbracket_question walrus boolean semicolon
         | switch lparen expr rparen lcurly case lparen int rparen colon stmtseq ( break semicolon )? ( case lparen int rparen colon stmtseq ( break semicolon )?)* default colon stmtseq rcurly;
-    varlist = ( id colon type lbracket_int_rbracket_question ( comma id colon type lbracket_int_rbracket_question )∗ )?;
-    varlisttwo = ( expr ( comma expr )∗ )?;
+    varlist = ( id colon type lbracket_int_rbracket_question ( comma id colon type lbracket_int_rbracket_question )* )?;
+    varlisttwo = ( expr ( comma expr )* )?;
     expr = expr addop term
         | term;
     term = term multop factor
