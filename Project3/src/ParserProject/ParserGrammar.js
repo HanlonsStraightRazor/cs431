@@ -70,7 +70,9 @@ Ignored Tokens
     whitespace;
 
 Productions
-    commaid_star = comma id commaid | ;
+    comma_id_star = comma id commaid | ;
+    lbracket_int_rbracket_question = lbracket int rbracket | ;
+
     prog = begin classmethodstmts end;
     classmethodstmts = classmethodstmts classmethodstmt
         | ;
@@ -83,24 +85,24 @@ Productions
         | id commaid_star colon type semicolon;
     stmtseq = stmt stmtseq
         | ;
-    stmt = id ( lbracket int rbracket )? walrus expr semicolon
-        | id ( lbracket int rbracket )? walrus lquote anychars rquote semicolon
-        | id ( comma id )* colon type ( lbracket int rbracket )? semicolon
+    stmt = id lbracket_int_rbracket_question walrus expr semicolon
+        | id lbracket_int_rbracket_question walrus lquote anychars rquote semicolon
+        | id ( comma id )* colon type lbracket_int_rbracket_question semicolon
         | if lparen boolean rparen then lcurly stmtseq rcurly
         | if lparen boolean rparen then lcurly stmtseq rcurly else lcurly stmtseq rcurly
         | while lparen boolean rparen lcurly stmtseq rcurly
         | for lparen ( type )? id walrus expr semicolon boolean semicolon ( id inc | id dec | id walrus expr ) rparen lcurly stmtseq rcurly
-        | id ( lbracket int rbracket )? walrus get lparen rparen semicolon
-        | put lparen id ( lbracket int rbracket )? rparen semicolon
-        | id ( lbracket int rbracket )? inc semicolon
-        | id ( lbracket int rbracket )? dec semicolon
-        | id ( lbracket int rbracket )? walrus new id lparenrparen semicolon
+        | id lbracket_int_rbracket_question walrus get lparen rparen semicolon
+        | put lparen id lbracket_int_rbracket_question rparen semicolon
+        | id lbracket_int_rbracket_question inc semicolon
+        | id lbracket_int_rbracket_question dec semicolon
+        | id lbracket_int_rbracket_question walrus new id lparenrparen semicolon
         | id lparen varlisttwo rparen semicolon
-        | id ( lbracket int rbracket )? '.' id lparen varlisttwo rparen ( '.' id lparen varlisttwo rparen )∗ semicolon
+        | id lbracket_int_rbracket_question '.' id lparen varlisttwo rparen ( '.' id lparen varlisttwo rparen )∗ semicolon
         | return expr semicolon
-        | id ( lbracket int rbracket )? walrus boolean semicolon
+        | id lbracket_int_rbracket_question walrus boolean semicolon
         | switch lparen expr rparen lcurly case lparen int rparen colon stmtseq ( break semicolon )? ( case lparen int rparen colon stmtseq ( break semicolon )?)* default colon stmtseq rcurly;
-    varlist = ( id colon type ( lbracket int rbracket )? ( comma id colon type ( lbracket int rbracket )? )∗ )?;
+    varlist = ( id colon type lbracket_int_rbracket_question ( comma id colon type lbracket_int_rbracket_question )∗ )?;
     varlisttwo = ( expr ( comma expr )∗ )?;
     expr = expr addop term
         | term;
@@ -111,9 +113,9 @@ Productions
         | int
         | real
         | boolean
-        | id ( lbracket int rbracket )?
+        | id lbracket_int_rbracket_question
         | id lparen varlisttwo rparen
-        | id ( lbracket int rbracket )? '.' id lparen varlisttwo rparen;
+        | id lbracket_int_rbracket_question '.' id lparen varlisttwo rparen;
     boolean = true
         | false
         | expr cond expr
