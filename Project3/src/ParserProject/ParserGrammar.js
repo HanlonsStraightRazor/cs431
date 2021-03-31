@@ -77,6 +77,7 @@ Productions
         | ;
     break_semicolon_question = break semicolon
         | ;
+    idinc_iddec_idwalrusexpr = id inc | id dec | id walrus expr;
 
     prog = begin classmethodstmts end;
     classmethodstmts = classmethodstmts classmethodstmt
@@ -96,7 +97,7 @@ Productions
         | if lparen boolean rparen then lcurly stmtseq rcurly
         | if lparen boolean rparen then lcurly stmtseq rcurly else lcurly stmtseq rcurly
         | while lparen boolean rparen lcurly stmtseq rcurly
-        | for lparen type_question id walrus expr semicolon boolean semicolon ( id inc | id dec | id walrus expr ) rparen lcurly stmtseq rcurly
+        | for lparen type_question id walrus expr semicolon boolean semicolon idinc_iddec_idwalrusexpr rparen lcurly stmtseq rcurly
         | id lbracket_int_rbracket_question walrus get lparen rparen semicolon
         | put lparen id lbracket_int_rbracket_question rparen semicolon
         | id lbracket_int_rbracket_question inc semicolon
