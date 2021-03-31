@@ -61,7 +61,7 @@ Tokens
     whitespace = (lf | sp | tabs);
     anychars = [35..255]+;
     integer = digit ( digit )*;
-    real = ( digit )+ '.' ( digit )+;
+    real_num = ( digit )+ '.' ( digit )+;
     cond = '==' | '!=' | '>=' | '<=' | '>' | '<';
     addop = '+' | '-';
     multop = '*' | '/';
@@ -98,11 +98,11 @@ Productions
         | ;
     classmethodstmt = class id lcurly methodstmtseqs rcurly
         | type id lparen varlist rparen lcurly stmtseq rcurly
-        | id commaid_star colon type semicolon;
+        | id comma_id_star colon type semicolon;
     methodstmtseqs = methodstmtseqs methodstmtseq
         | ;
     methodstmtseq = type id lparen varlist rparen lcurly stmtseq rcurly
-        | id commaid_star colon type semicolon;
+        | id comma_id_star colon type semicolon;
     stmtseq = stmt stmtseq
         | ;
     stmt = id lbracket_integer_rbracket_question walrus expr semicolon
@@ -131,7 +131,7 @@ Productions
     factor = lparen expr rparen
         | minus factor
         | integer
-        | real
+        | real_num
         | boolean
         | id lbracket_integer_rbracket_question
         | id lparen varlisttwo rparen
