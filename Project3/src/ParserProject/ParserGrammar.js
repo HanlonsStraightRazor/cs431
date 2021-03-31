@@ -62,16 +62,9 @@ Tokens
     anychars = [35..255]+;
     int = digit ( digit )*;
     real = ( digit )+ '.' ( digit )+;
-    cond = '==' |
-        '!=' |
-        '>=' |
-        '<=' |
-        '>' |
-        '<';
-    addop = '+' |
-        '-';
-    multop = '*' |
-        '/';
+    cond = '==' | '!=' | '>=' | '<=' | '>' | '<';
+    addop = '+' | '-';
+    multop = '*' | '/';
 
 Ignored Tokens
     whitespace;
