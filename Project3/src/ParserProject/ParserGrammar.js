@@ -70,7 +70,7 @@ Ignored Tokens
     whitespace;
 
 Productions
-    comma_id_star = comma id commaid | ;
+    comma_id_star = comma id comma_id_star | ;
     lbracket_int_rbracket_question = lbracket int rbracket | ;
     type_question = type | ;
 
