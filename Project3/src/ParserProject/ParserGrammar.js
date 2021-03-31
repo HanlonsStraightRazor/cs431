@@ -70,13 +70,13 @@ Ignored Tokens
     whitespace;
 
 Productions
+    commaid_star = comma id commaid | ;
     prog = begin classmethodstmts end;
     classmethodstmts = classmethodstmts classmethodstmt
         | ;
     classmethodstmt = class id lcurly methodstmtseqs rcurly
         | type id lparen varlist rparen lcurly stmtseq rcurly
         | id commaid_star colon type semicolon;
-    commaid_star = comma id commaid | ;
     methodstmtseqs = methodstmtseqs methodstmtseq
         | ;
     methodstmtseq = type id lparen varlist rparen lcurly stmtseq rcurly
