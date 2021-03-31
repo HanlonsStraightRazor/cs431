@@ -90,6 +90,10 @@ Productions
         | ;
     expr_commaexprstar_question = expr comma_expr_star
         | ;
+    comma_id_colon_type_lbracketintrbracketquestion_star = comma id colon type lbracket_int_rbracket_question comma_id_colon_type_lbracketintrbracketquestion_star
+        | ;
+    id_colon_type_lbracketintrbracketquestion_commaidcolontypelbracketintrbracketquestionstar_question = id colon type lbracket_int_rbracket_question comma_id_colon_type_lbracketintrbracketquestion_star
+        | ;
 
     prog = begin classmethodstmts end;
     classmethodstmts = classmethodstmts classmethodstmt
@@ -119,8 +123,8 @@ Productions
         | id lbracket_int_rbracket_question dot id lparen varlisttwo rparen dot_id_lparen_varlisttwo_rparen_star semicolon
         | return expr semicolon
         | id lbracket_int_rbracket_question walrus boolean semicolon
-        | switch lparen expr rparen lcurly case lparen int rparen colon stmtseq break_semicolon_question case_lparen_int_rparen_colon_stmtseq default colon stmtseq rcurly;
-    varlist = ( id colon type lbracket_int_rbracket_question ( comma id colon type lbracket_int_rbracket_question )* )?;
+        | switch lparen expr rparen lcurly case lparen int rparen colon stmtseq break_semicolon_question ( case lparen int rparen colon stmtseq )* default colon stmtseq rcurly;
+    varlist = id_colon_type_lbracketintrbracketquestion_commaidcolontypelbracketintrbracketquestionstar_question;
     varlisttwo = expr_commaexprstar_question;
     expr = expr addop term
         | term;
