@@ -84,6 +84,8 @@ Productions
     idinc_iddec_idwalrusexpr = id inc
         | id dec
         | id walrus expr;
+    case_lparen_int_rparen_colon_stmtseq = case lparen int rparen colon stmtseq case_lparen_int_rparen_colon_stmtseq
+        | ;
     comma_expr_star = comma expr comma_expr_star
         | ;
     expr_commaexprstar_question = expr comma_expr_star
@@ -117,7 +119,7 @@ Productions
         | id lbracket_int_rbracket_question dot id lparen varlisttwo rparen dot_id_lparen_varlisttwo_rparen_star semicolon
         | return expr semicolon
         | id lbracket_int_rbracket_question walrus boolean semicolon
-        | switch lparen expr rparen lcurly case lparen int rparen colon stmtseq break_semicolon_question ( case lparen int rparen colon stmtseq )* default colon stmtseq rcurly;
+        | switch lparen expr rparen lcurly case lparen int rparen colon stmtseq break_semicolon_question case_lparen_int_rparen_colon_stmtseq default colon stmtseq rcurly;
     varlist = ( id colon type lbracket_int_rbracket_question ( comma id colon type lbracket_int_rbracket_question )* )?;
     varlisttwo = expr_commaexprstar_question;
     expr = expr addop term
