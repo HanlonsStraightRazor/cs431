@@ -75,12 +75,12 @@ Productions
         | ;
     classmethodstmt = class id lcurly methodstmtseqs rcurly
         | type id lparen varlist rparen lcurly stmtseq rcurly
-        | id commaid colon type semicolon;
-    commaid = comma id commaid | ;
+        | id commaid_star colon type semicolon;
+    commaid_star = comma id commaid | ;
     methodstmtseqs = methodstmtseqs methodstmtseq
         | ;
     methodstmtseq = type id lparen varlist rparen lcurly stmtseq rcurly
-        | id commaid colon type semicolon;
+        | id commaid_star colon type semicolon;
     stmtseq = stmt stmtseq
         | ;
     stmt = id ( lbracket int rbracket )? walrus expr semicolon
