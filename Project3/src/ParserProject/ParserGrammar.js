@@ -182,12 +182,11 @@ Productions
         | {integer} integer
         | {float} float
         | {bool} bool
-        | {id} id factorid
+        | {id} id factorid?
         | {varlist} lparen varlisttwo? rparen
         ;
     factorid =
-        {intbrack} intbrack? factorintbrack?
-        | {empty}
+        intbrack? factorintbrack?
         ;
     factorintbrack =
         dot id lparen varlisttwo? rparen
