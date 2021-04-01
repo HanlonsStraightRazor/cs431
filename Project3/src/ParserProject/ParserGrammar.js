@@ -70,16 +70,11 @@ Ignored Tokens
 
 Productions
     prog =
-        begin classmethods end
-        ;
-    classmethods = classmethod*
+        begin classmethod* end
         ;
     classmethod =
-        {classs} classs id lcurly methodstmts rcurly
+        {classs} classs id lcurly methodstmt* rcurly
         | {methodstmt} methodstmt
-        ;
-    methodstmts =
-        methodstmt*
         ;
     methodstmt =
         {method} type id lparen varlist? rparen lcurly stmt* rcurly
