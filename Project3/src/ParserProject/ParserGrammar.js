@@ -61,8 +61,8 @@ Tokens
     id = letter ( letter | digit | '_' )*;
     whitespace = (lf | sp | tabs);
     anychars = [35..255]+;
-    whole_num = digit+;
-    real_num = digit+ '.' digit+;
+    integer = digit+;
+    float = digit+ '.' digit+;
     dot = '.';
 
 Ignored Tokens
@@ -70,17 +70,17 @@ Ignored Tokens
 
 Productions
     prog = begin classmethodstmts end;
-    classmethodstmts = {recursive} classmethodstmts classmethodstmt
+    classmethodstmts = {rec} classmethodstmts classmethodstmt
         | {empty};
     classmethodstmt = {classs} classs id lcurly methodstmtseqs rcurly
         | {methodstmtseq} methodstmtseq;
     commaidstar = {commaid} comma id
         | {empty};
-    methodstmtseqs = {recursive} methodstmtseqs methodstmtseq
+    methodstmtseqs = {rec} methodstmtseqs methodstmtseq
         | {empty};
     methodstmtseq = {method} type id lparen varlist rparen lcurly stmtseq rcurly
         | {statement} id commaidstar colon type semicolon;
-    stmtseq = {recursive} stmt stmtseq
+    stmtseq = {rec} stmtseq stmt
         | {empty};
     stmt = {idoptintbrack} id optintbrack idintq semicolon
         | {idcommaidstar} id commaidstar colon type optintbrack semicolon
@@ -90,10 +90,11 @@ Productions
         | {put} put lparen id optintbrack rparen semicolon
         | {varlist} id lparen varlisttwo rparen semicolon
         | {return} return expr semicolon
-        | {switch} switch [leftlparen]:lparen expr [leftrparen]:rparen lcurly case [rightlparen]:lparen integer [rightrparen]:rparen [leftcolon]:colon [left]:stmtseq optbreaksemi casebreakstar default [rightcolon]:colon [right]:stmtseq rcurly;
+        | {switch} switch [leftlparen]:lparen expr [leftrparen]:rparen lcurly case [rightlparen]:lparen integer [rightrparen]:rparen [leftcolon]:colon stmtseq optbreaksemi endcase rcurly;
     optbreaksemi = {full} break semicolon
         | {empty};
-    casebreakstar = {recursive} case lparen integer rparen colon stmtseq optbreaksemi casebreakstar
+    endcase = casebreakstar default colon stmtseq;
+    casebreakstar = {rec} case lparen integer rparen colon stmtseq optbreaksemi casebreakstar
         | {empty};
     incdecexpr = {inc} id inc
         | {dec} id dec
@@ -110,22 +111,25 @@ Productions
         | {dec} dec;
     optelsestmt = {full} else lcurly stmtseq rcurly
         | {empty};
-    idvarlisttwostar = dot;
-    expr = {addop} expr addop term
+    idvarlisttwostar = {rec} idvarlisttwostar dot id lparen varlisttwo rparen
+        | {empty};
+    expr = {add} expr plus term
+        | {sub} expr minus term
         | {term} term;
-    term = {multop} term multop factor
+    term = {mul} term times factor
+        | {div} term divide factor
         | {factor} factor;
     varlist = {full} id colon type optintbrack commaidtypestar
         | {empty};
-    commaidtypestar = {recursive} comma id colon type optintbrack commaidtypestar
+    commaidtypestar = {rec} comma id colon type optintbrack commaidtypestar
         | {empty};
     varlisttwo = {full} expr commaexprstar
         | {empty};
-    commaexprstar = {recursive} comma expr commaexprstar
+    commaexprstar = {rec} commaexprstar comma expr
         | {empty};
     boolean = {true} true
         | {false} false
-        | {expr} [left]:expr cond [right]:expr
+        | {expr} [left]:expr cond [right]:expr /* WATCH: May be a problem later... */
         | {id} id;
     cond = {eqv} eqv
         | {neqv} neqv
@@ -133,24 +137,21 @@ Productions
         | {lte} lte
         | {gt} gt
         | {lt} lt;
-    addop = {plus} plus
-        | {minus} minus;
-    multop = {times} times
-        | {divide} divide;
     type = {int} int
         | {real} real
         | {string} string
         | {bool} bool
         | {void} void
         | {id} id;
-    factor = {lparen} lparen expr rparen
-        | {id} id factorid
+    /* FIXME */
+    factor = {lparen} lparen expr rparen /* <- shift/reduce conflict with commaexprstar on rparen */
+        | {minus} minus factor
         | {integer} integer
-        | {real} real
+        | {float} float
         | {bool} bool
-        | {minus} minus factor;
+        /* | {id} id factorid <- major reduce/reduce conflicts */
+        | {varlist} lparen varlisttwo rparen;
     factorid = {optintbrack} optintbrack factoroptintbrack
-        | {lparen} lparen varlisttwo rparen;
+        | {empty};
     factoroptintbrack = {dot} dot id lparen varlisttwo rparen
         | {empty};
-    integer = whole_num;
