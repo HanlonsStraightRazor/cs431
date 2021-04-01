@@ -133,9 +133,9 @@ Productions
         | {lte} lte
         | {gt} gt
         | {lt} lt;
-    addop = {plus} plus 
+    addop = {plus} plus
         | {minus} minus;
-    multop = {times} times 
+    multop = {times} times
         | {divide} divide;
     type = {int} int
         | {real} real
@@ -153,4 +153,4 @@ Productions
         | {lparen} lparen varlisttwo rparen;
     factoroptintbrack = {dot} dot id lparen varlisttwo rparen
         | {empty};
-    integer = whole_num+;
+    integer = whole_num;
