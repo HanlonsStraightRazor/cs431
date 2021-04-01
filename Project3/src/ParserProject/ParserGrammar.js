@@ -86,7 +86,6 @@ Productions
         | {empty};
     stmt = dot;
     varlist = dot;
-    stmtseq = dot;
     type = {int} int
         | {real} real
         | {string} string
