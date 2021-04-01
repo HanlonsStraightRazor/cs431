@@ -37,6 +37,7 @@ Tokens
     minus = '-';
     dec = '--';
     times = '*';
+    divide = '/';
     lparen = '(';
     rparen = ')';
     lbracket = '[';
@@ -62,8 +63,6 @@ Tokens
     anychars = [35..255]+;
     integer = digit ( digit )*;
     real_num = ( digit )+ '.' ( digit )+;
-    addop = '+' | '-';
-    multop = '*' | '/';
     dot = '.';
 
 Ignored Tokens
@@ -115,6 +114,10 @@ Productions
         | {lte} lte
         | {gt} gt
         | {lt} lt;
+    addop = {plus} plus 
+        | {minus} minus;
+    multop = {times} times 
+        | {divide} divide;
     type = {int} int
         | {real} real
         | {string} string
