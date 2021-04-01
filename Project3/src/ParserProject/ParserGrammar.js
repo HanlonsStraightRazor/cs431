@@ -75,31 +75,36 @@ Productions
         | {empty};
     classmethodstmt = {classs} classs id lcurly methodstmtseqs rcurly
         | {methodstmtseq} methodstmtseq;
-    comma_id_star = {comma_id} comma id
+    commaidstar = {comma_id} comma id
         | {empty};
     methodstmtseqs = {recursive} methodstmtseqs methodstmtseq
         | {empty};
     methodstmtseq = {method} type id lparen varlist rparen lcurly stmtseq rcurly
-        | {statement} id comma_id_star colon type semicolon;
+        | {statement} id commaidstar colon type semicolon;
     stmtseq = {recursive} stmt stmtseq
         | {empty};
-    stmt = {id_lbracket} id lbracket int? rbracket idintq
+    stmt = {id} id optintbrack idintq
         |  {id_comma_int} id comma_int* colon type int?
         |  {if} if lparen boolean rparen then lcurly stmtseq rcurly poss_else
         ;
+    optintbrack = {full} lbracket int rbracket
+        | {empty};
     idintq = {number} walrus expr semicolon
         | {string} walrus [left]:quote anychars [right]:quote semicolon
         | {get} walrus get lparen rparen semicolon
         | {new} walrus new id lparen rparen semicolon
-        | {dot} dot id lparen varlisttwo rparen id_varlist_two_star semicolon
+        | {dot} dot id lparen varlisttwo rparen idvarlisttwostar semicolon
         | {inc} inc
         | {dec} dec;
-    comma_int = comma int;
-    poss_else = {else} else rcurly stmtseq lcurly
+    commaint = comma int;
+    posselse = {else} else rcurly stmtseq lcurly
         | {empty} ;
-    id_varlist_two_star = dot;
+    idvarlisttwostar = dot;
     expr = dot;
-    varlist = dot;
+    varlist = {full} id colon type optintbrack commaidtypestar
+        | {empty};
+    commaidtypestar = {recursive} comma id colon type optintbrack commaidtypestar
+        | {empty};
     varlisttwo = dot;
     boolean = {true} true
         | {false} false
