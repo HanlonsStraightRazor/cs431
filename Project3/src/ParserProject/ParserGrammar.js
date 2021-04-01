@@ -84,7 +84,8 @@ Productions
         | {statement} id comma_id_star colon type semicolon;
     stmtseq = {recursive} stmt stmtseq
         | {empty};
-    stmt = dot;
+    stmt = id int? walrus expr;
+    expr = dot;
     varlist = dot;
     type = {int} int
         | {real} real
