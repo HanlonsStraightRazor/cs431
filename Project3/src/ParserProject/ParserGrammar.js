@@ -136,3 +136,16 @@ Productions
         | {void} void
         | {id} id
         ;
+    factor = {lparen} lparen expr rparen
+        | {id} id factorid
+        | {int} int
+        | {real} real
+        | {bool} bool
+        | {minus} minus factor
+        ;
+    factorid = {optintbrack} optintbrack factoroptintbrack
+        | {lparen} lparen varlisttwo rparen
+        ;
+    factoroptintbrack = {dot} dot id lparen varlisttwo rparen
+        | {empty}
+        ;
