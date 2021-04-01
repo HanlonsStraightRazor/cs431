@@ -111,10 +111,10 @@ Productions
     optelsestmt = {full} else lcurly stmtseq rcurly
         | {empty};
     idvarlisttwostar = dot;
-    expr = dot /*{addop} expr addop term
-        | {term} term*/;
-    term = dot /*{multop} term multop factor
-        | {factor} factor*/;
+    expr = {addop} expr addop term
+        | {term} term;
+    term = {multop} term multop factor
+        | {factor} factor;
     varlist = {full} id colon type optintbrack commaidtypestar
         | {empty};
     commaidtypestar = {recursive} comma id colon type optintbrack commaidtypestar
