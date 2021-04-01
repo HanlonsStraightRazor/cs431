@@ -62,7 +62,6 @@ Tokens
     anychars = [35..255]+;
     integer = digit ( digit )*;
     real_num = ( digit )+ '.' ( digit )+;
-    cond = '==' | '!=' | '>=' | '<=' | '>' | '<';
     addop = '+' | '-';
     multop = '*' | '/';
     dot = '.';
@@ -86,7 +85,7 @@ Productions
         | {empty};
     stmt = {idoptintbrack} id optintbrack idintq semicolon
         | {idcommaidstar} id commaidstar colon type optintbrack
-        | {if} if lparen boolean rparen optelsestmt;
+        | {if} if lparen boolean rparen then optelsestmt;
     optintbrack = {full} lbracket int rbracket
         | {empty};
     idintq = {number} walrus expr
@@ -106,7 +105,16 @@ Productions
     commaidtypestar = {recursive} comma id colon type optintbrack commaidtypestar
         | {empty};
     varlisttwo = dot;
-    boolean = dot;
+    boolean = {true} true
+        | {false} false
+        | {expr} [left]:expr cond [right]:expr
+        | {id} id;
+    cond = {eqv} eqv
+        | {neqv} neqv
+        | {gte} gte
+        | {lte} lte
+        | {gt} gt
+        | {lt} lt;
     type = {int} int
         | {real} real
         | {string} string
