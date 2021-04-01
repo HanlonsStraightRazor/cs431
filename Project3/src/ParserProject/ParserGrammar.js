@@ -74,59 +74,53 @@ Productions
         | {empty};
     classmethodstmt = {classs} classs id lcurly methodstmtseqs rcurly
         | {methodstmtseq} methodstmtseq;
-    commaidstar = {commaid} comma id
+    commaid = {commaid} comma id
         | {empty};
     methodstmtseqs = {rec} methodstmtseqs methodstmtseq
         | {empty};
     methodstmtseq = {method} type id lparen varlist rparen lcurly stmtseq rcurly
-        | {statement} id commaidstar colon type semicolon;
+        | {statement} id commaid* colon type semicolon;
     stmtseq = {rec} stmtseq stmt
         | {empty};
-    stmt = {idoptintbrack} id optintbrack idintq semicolon
-        | {idcommaidstar} id commaidstar colon type optintbrack semicolon
-        | {if} if lparen boolean rparen then lcurly stmtseq rcurly optelsestmt
+    stmt = {idintbrack} id intbrack? idintq semicolon
+        | {idcommaidstar} id commaid colon type intbrack? semicolon
+        | {if} if lparen boolean rparen then lcurly stmtseq rcurly elsestmt?
         | {while} while lparen boolean rparen lcurly stmtseq rcurly
         | {for} for lparen type? id walrus expr [left]:semicolon boolean [right]:semicolon incdecexpr rparen lcurly stmtseq rcurly
-        | {put} put lparen id optintbrack rparen semicolon
+        | {put} put lparen id intbrack? rparen semicolon
         | {varlist} id lparen varlisttwo rparen semicolon
         | {return} return expr semicolon
-        | {switch} switch [leftlparen]:lparen expr [leftrparen]:rparen lcurly case [rightlparen]:lparen integer [rightrparen]:rparen [leftcolon]:colon stmtseq optbreaksemi endcase rcurly;
-    optbreaksemi = {full} break semicolon
-        | {empty};
-    endcase = casebreakstar default colon stmtseq;
-    casebreakstar = {rec} case lparen integer rparen colon stmtseq optbreaksemi casebreakstar
-        | {empty};
+        | {switch} switch [leftlparen]:lparen expr [leftrparen]:rparen lcurly case [rightlparen]:lparen integer [rightrparen]:rparen colon stmtseq breaksemi? endcase rcurly;
+    breaksemi = {full} break semicolon;
+    endcase = casebreak* default colon stmtseq;
+    casebreak = case lparen integer rparen colon stmtseq breaksemi?;
     incdecexpr = {inc} id inc
         | {dec} id dec
         | {walrus} id walrus expr;
-    optintbrack = {full} lbracket int rbracket
+    intbrack = {full} lbracket int rbracket
         | {empty};
     idintq = {number} walrus expr
         | {boolean} walrus boolean
         | {string} walrus [left]:quote anychars [right]:quote
         | {get} walrus get lparen rparen
         | {new} walrus new id lparen rparen
-        | {dot} dot id lparen varlisttwo rparen idvarlisttwostar
+        | {dot} dot id lparen varlisttwo rparen idvarlisttwo*
         | {inc} inc
         | {dec} dec;
-    optelsestmt = {full} else lcurly stmtseq rcurly
-        | {empty};
-    idvarlisttwostar = {rec} idvarlisttwostar dot id lparen varlisttwo rparen
-        | {empty};
+    elsestmt = {full} else lcurly stmtseq rcurly;
+    idvarlisttwo = dot id lparen varlisttwo rparen;
     expr = {add} expr plus term
         | {sub} expr minus term
         | {term} term;
     term = {mul} term times factor
         | {div} term divide factor
         | {factor} factor;
-    varlist = {full} id colon type optintbrack commaidtypestar
+    varlist = {full} id colon type intbrack? commaidtype
         | {empty};
-    commaidtypestar = {rec} comma id colon type optintbrack commaidtypestar
+    commaidtype = comma id colon type intbrack?;
+    varlisttwo = {full} expr commaexpr*
         | {empty};
-    varlisttwo = {full} expr commaexprstar
-        | {empty};
-    commaexprstar = {rec} commaexprstar comma expr
-        | {empty};
+    commaexpr = comma expr;
     boolean = {true} true
         | {false} false
         | {expr} [left]:expr cond [right]:expr /* WATCH: May be a problem later... */
@@ -151,7 +145,6 @@ Productions
         | {bool} bool
         /* | {id} id factorid <- major reduce/reduce conflicts */
         | {varlist} lparen varlisttwo rparen;
-    factorid = {optintbrack} optintbrack factoroptintbrack
+    /* factorid = {intbrack} intbrack? factorintbrack?
         | {empty};
-    factoroptintbrack = {dot} dot id lparen varlisttwo rparen
-        | {empty};
+    factorintbrack = dot id lparen varlisttwo rparen; */
