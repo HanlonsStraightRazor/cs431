@@ -103,7 +103,10 @@ Productions
         | {empty};
     commaidtypestar = {recursive} comma id colon type optintbrack commaidtypestar
         | {empty};
-    varlisttwo = dot;
+    varlisttwo = {full} expr commaexprstar
+        | {empty};
+    commaexprstar = {recursive} comma expr commaexprstar
+        | {empty};
     boolean = {true} true
         | {false} false
         | {expr} [left]:expr cond [right]:expr
