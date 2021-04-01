@@ -84,8 +84,8 @@ Productions
     stmtseq = {recursive} stmt stmtseq
         | {empty};
     stmt = {id} id optintbrack idintq
-        |  {id_comma_int} id comma_int* colon type int?
-        |  {if} if lparen boolean rparen then lcurly stmtseq rcurly poss_else
+        |  {id_comma_int} id commaint* colon type int?
+        |  {if} if lparen boolean rparen then lcurly stmtseq rcurly posselse
         ;
     optintbrack = {full} lbracket int rbracket
         | {empty};
