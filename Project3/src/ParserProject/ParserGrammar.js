@@ -86,7 +86,8 @@ Productions
         | {eighth} id walrus expr;
     case_lparen_integer_rparen_colon_stmtseq =  {ninth} case lparen integer rparen colon stmtseq case_lparen_integer_rparen_colon_stmtseq
         | ;
-    comma_expr_star = {tenth} comma expr comma_expr_star
+    comma_expr = comma expr;
+    comma_expr_star = {tenth} comma_expr comma_expr_star
         | ;
     comma_id_colon_type_lbracketintegerrbracketquestion_star = {eleventh} comma id colon type lbracket_integer_rbracket_question comma_id_colon_type_lbracketintegerrbracketquestion_star
         | ;
@@ -122,14 +123,16 @@ Productions
         | {thirtyfifth} return expr semicolon
         | {thirtysixth} id lbracket_integer_rbracket_question walrus boolean semicolon
         | {thirtyseventh} switch lparen expr rparen lcurly case lparen integer rparen colon stmtseq break_semicolon_question case_lparen_integer_rparen_colon_stmtseq default colon stmtseq rcurly;*/
-    varlist = ;/*id colon type lbracket_int_rbracket_question comma_id_colon_type_lbracketintrbracketquestion_star
+    id_colon_type = id colon type;/* added this */
+    /*varlist =  id_colon_type lbracket_int_rbracket_question comma_id_colon_type_lbracketintrbracketquestion_star
         | ;*/
-    varlisttwo = ;/*expr comma_expr_star
-        | ;*/
+    varlisttwo = expr comma_expr_star
+        | ;
     expr = {thirtyeighth} expr addop term
         | {thirtyninth} term;
     term = {fourtith} term multop factor
         | {fourtyfirst} factor;
+    dot_id = dot id;/* added this */
     factor = {fourtysecond} lparen expr rparen
         | {fourtythird} minus factor
         | {fourtyfourth} integer
@@ -137,10 +140,11 @@ Productions
         | {fourtysixth} boolean
         | {fourtyseventh} id lbracket_integer_rbracket_question
         | {fourtyeighth} id lparen varlisttwo rparen
-        /*| {fourtyninth} id lbracket_integer_rbracket_question dot id lparen varlisttwo rparen*/;
+        | {fourtyninth} id lbracket_integer_rbracket_question dot_id lparen varlisttwo rparen;
+    expr_cond = expr cond;/* added this */
     boolean = {fifty} true
         | {fiftyfirst} false
-        /*| {fifthsecondth} expr cond expr*/
+        | {fifthsecondth} expr_cond expr
         | {fiftythird} id;
     type = {fiftyfourth} int
         | {fiftyfifth} real
