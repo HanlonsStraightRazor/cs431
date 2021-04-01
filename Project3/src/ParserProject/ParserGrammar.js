@@ -76,7 +76,7 @@ Productions
         | {empty};
     classmethodstmt = {classs} classs id lcurly methodstmtseqs rcurly
         | {methodstmtseq} methodstmtseq;
-    commaidstar = {comma_id} comma id
+    commaidstar = {commaid} comma id
         | {empty};
     methodstmtseqs = {recursive} methodstmtseqs methodstmtseq
         | {empty};
@@ -84,17 +84,21 @@ Productions
         | {statement} id commaidstar colon type semicolon;
     stmtseq = {recursive} stmt stmtseq
         | {empty};
-    stmt = id optintbrack idintq;
+    stmt = {idoptintbrack} id optintbrack idintq semicolon
+        | {idcommaidstar} id commaidstar colon type optintbrack
+        | {if} if lparen boolean rparen optelsestmt;
     optintbrack = {full} lbracket int rbracket
         | {empty};
-    idintq = {number} walrus expr semicolon
-        | {bool} walrus bool semicolon
-        | {string} walrus [left]:quote anychars [right]:quote semicolon
-        | {get} walrus get lparen rparen semicolon
-        | {new} walrus new id lparen rparen semicolon
-        | {dot} dot id lparen varlisttwo rparen idvarlisttwostar semicolon
+    idintq = {number} walrus expr
+        | {boolean} walrus boolean
+        | {string} walrus [left]:quote anychars [right]:quote
+        | {get} walrus get lparen rparen
+        | {new} walrus new id lparen rparen
+        | {dot} dot id lparen varlisttwo rparen idvarlisttwostar
         | {inc} inc
         | {dec} dec;
+    optelsestmt = {full} else lcurly stmtseq rcurly
+        | {empty};
     idvarlisttwostar = dot;
     expr = dot;
     varlist = {full} id colon type optintbrack commaidtypestar
@@ -102,6 +106,7 @@ Productions
     commaidtypestar = {recursive} comma id colon type optintbrack commaidtypestar
         | {empty};
     varlisttwo = dot;
+    boolean = dot;
     type = {int} int
         | {real} real
         | {string} string
