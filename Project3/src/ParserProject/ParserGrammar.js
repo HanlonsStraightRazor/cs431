@@ -61,8 +61,8 @@ Tokens
     id = letter ( letter | digit | '_' )*;
     whitespace = (lf | sp | tabs);
     anychars = [35..255]+;
-    integer = digit ( digit )*;
-    real_num = ( digit )+ '.' ( digit )+;
+    whole_num = digit+;
+    real_num = digit+ '.' digit+;
     dot = '.';
 
 Ignored Tokens
@@ -153,3 +153,4 @@ Productions
         | {lparen} lparen varlisttwo rparen;
     factoroptintbrack = {dot} dot id lparen varlisttwo rparen
         | {empty};
+    integer = whole_num+;
