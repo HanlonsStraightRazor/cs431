@@ -83,9 +83,22 @@ Productions
     stmtseq = {recursive} stmt stmtseq
         | {empty};
     stmt = {idoptintbrack} id optintbrack idintq semicolon
-        | {idcommaidstar} id commaidstar colon type optintbrack
-        | {if} if lparen boolean rparen then lcurly stmtseq rcurly optelsestmt;
-    optintbrack = {full} lbracket integer rbracket
+        | {idcommaidstar} id commaidstar colon type optintbrack semicolon
+        | {if} if lparen boolean rparen then lcurly stmtseq rcurly optelsestmt
+        | {while} while lparen boolean rparen lcurly stmtseq rcurly
+        | {for} for lparen type? id walrus expr [left]:semicolon boolean [right]:semicolon incdecexpr rparen lcurly stmtseq rcurly
+        | {put} put lparen id optintbrack rparen semicolon
+        | {varlist} id lparen varlisttwo rparen semicolon
+        | {return} return expr semicolon
+        | {switch} switch [leftlparen]:lparen expr [leftrparen]:rparen lcurly case [rightlparen]:lparen integer [rightrparen]:rparen [leftcolon]:colon [left]:stmtseq optbreaksemi casebreakstar default [rightcolon]:colon [right]:stmtseq rcurly;
+    optbreaksemi = {full} break semicolon
+        | {empty};
+    casebreakstar = {recursive} case lparen integer rparen colon stmtseq optbreaksemi casebreakstar
+        | {empty};
+    incdecexpr = {inc} id inc
+        | {dec} id dec
+        | {walrus} id walrus expr;
+    optintbrack = {full} lbracket int rbracket
         | {empty};
     idintq = {number} walrus expr
         | {boolean} walrus boolean
