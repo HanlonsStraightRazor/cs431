@@ -141,8 +141,11 @@ Productions
         | {int} int
         | {real} real
         | {bool} bool
-        | {minus} minus factor;
+        | {minus} minus factor
+        ;
     factorid = {optintbrack} optintbrack factoroptintbrack
-        | {lparen} lparen varlisttwo rparen;
+        | {lparen} lparen varlisttwo rparen
+        ;
     factoroptintbrack = {dot} dot id lparen varlisttwo rparen
-        | {empty} ;
+        | {empty}
+        ;
