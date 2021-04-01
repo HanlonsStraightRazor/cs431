@@ -72,80 +72,62 @@ Ignored Tokens
 Productions
     prog = begin classmethodstmts end;
     classmethodstmts = {recursive} classmethodstmts classmethodstmt
-        | {empty}
-        ;
+        | {empty};
     classmethodstmt = {classs} classs id lcurly methodstmtseqs rcurly
-        | {methodstmtseq} methodstmtseq
-        ;
+        | {methodstmtseq} methodstmtseq;
     commaidstar = {comma_id} comma id
-        | {empty}
-        ;
+        | {empty};
     methodstmtseqs = {recursive} methodstmtseqs methodstmtseq
-        | {empty}
-        ;
+        | {empty};
     methodstmtseq = {method} type id lparen varlist rparen lcurly stmtseq rcurly
-        | {statement} id commaidstar colon type semicolon
-        ;
+        | {statement} id commaidstar colon type semicolon;
     stmtseq = {recursive} stmt stmtseq
-        | {empty}
-        ;
+        | {empty};
     stmt = {id} id optintbrack idintq
         |  {id_comma_int} id commaint* colon type int?
-        |  {if} if lparen boolean rparen then lcurly stmtseq rcurly posselse
-        ;
+        |  {if} if lparen boolean rparen then lcurly stmtseq rcurly posselse;
     optintbrack = {full} lbracket int rbracket
-        | {empty}
-        ;
+        | {empty};
     idintq = {number} walrus expr semicolon
         | {string} walrus [left]:quote anychars [right]:quote semicolon
         | {get} walrus get lparen rparen semicolon
         | {new} walrus new id lparen rparen semicolon
         | {dot} dot id lparen varlisttwo rparen idvarlisttwostar semicolon
         | {inc} inc
-        | {dec} dec
-        ;
+        | {dec} dec;
     commaint = comma int;
     posselse = {else} else rcurly stmtseq lcurly
-        | {empty}
-        ;
+        | {empty};
     idvarlisttwostar = dot;
     expr = dot;
     varlist = {full} id colon type optintbrack commaidtypestar
-        | {empty}
-        ;
+        | {empty};
     commaidtypestar = {recursive} comma id colon type optintbrack commaidtypestar
-        | {empty}
-        ;
+        | {empty};
     varlisttwo = dot;
     boolean = {true} true
         | {false} false
         | {expr} [firstexpr]:expr cond [secondexpr]:expr
-        | {id} id
-        ;
+        | {id} id;
     cond = {eqv} eqv 
         | {neqv} neqv
         | {gte} gte 
         | {lte} lte
         | {gt} gt 
-        | {lt} lt
-        ;
+        | {lt} lt;
     type = {int} int
         | {real} real
         | {string} string
         | {bool} bool
         | {void} void
-        | {id} id
-        ;
+        | {id} id;
     factor = {lparen} lparen expr rparen
         | {id} id factorid
         | {int} int
         | {real} real
         | {bool} bool
-        | {minus} minus factor
-        ;
+        | {minus} minus factor;
     factorid = {optintbrack} optintbrack factoroptintbrack
-        | {lparen} lparen varlisttwo rparen
-        ;
+        | {lparen} lparen varlisttwo rparen;
     factoroptintbrack = {dot} dot id lparen varlisttwo rparen
-        | {empty}
-        ;
+        | {empty};
