@@ -85,7 +85,7 @@ Productions
         | {empty};
     stmt = {idoptintbrack} id optintbrack idintq semicolon
         | {idcommaidstar} id commaidstar colon type optintbrack
-        | {if} if lparen boolean rparen then optelsestmt;
+        | {if} if lparen boolean rparen then lcurly stmtseq rcurly optelsestmt;
     optintbrack = {full} lbracket int rbracket
         | {empty};
     idintq = {number} walrus expr
@@ -121,3 +121,13 @@ Productions
         | {bool} bool
         | {void} void
         | {id} id;
+    factor = {lparen} lparen expr rparen
+        | {id} id factorid
+        | {int} int
+        | {real} real
+        | {bool} bool
+        | {minus} minus factor;
+    factorid = {optintbrack} optintbrack factoroptintbrack
+        | {lparen} lparen varlisttwo rparen;
+    factoroptintbrack = {dot} dot id lparen varlisttwo rparen
+        | {empty};
