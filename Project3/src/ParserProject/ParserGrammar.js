@@ -106,7 +106,7 @@ Productions
         | {nineteenth} id comma_id_star colon type semicolon;
     stmtseq = {twentith} stmt stmtseq
         | ;
-    stmt = {twentyfirst} id lbracket_integer_rbracket_question walrus expr semicolon
+    stmt = {twentyfirst} ;/*id lbracket_integer_rbracket_question walrus expr semicolon
         | {twentysecond} id lbracket_integer_rbracket_question walrus lquote anychars rquote semicolon
         | {twentythird} id comma_id_star colon type lbracket_integer_rbracket_question semicolon
         | {twentyfourth} if lparen boolean rparen then lcurly stmtseq rcurly poss_else 
@@ -121,11 +121,11 @@ Productions
         | {thirtyfourth} id lbracket_integer_rbracket_question dot id lparen varlisttwo rparen dot_id_lparen_varlisttwo_rparen_star semicolon
         | {thirtyfifth} return expr semicolon
         | {thirtysixth} id lbracket_integer_rbracket_question walrus boolean semicolon
-        | {thirtyseventh} switch lparen expr rparen lcurly case lparen integer rparen colon stmtseq break_semicolon_question case_lparen_integer_rparen_colon_stmtseq default colon stmtseq rcurly;
-    varlist = id colon type lbracket_int_rbracket_question comma_id_colon_type_lbracketintrbracketquestion_star
-        | ;
-    varlisttwo = expr comma_expr_star
-        | ;
+        | {thirtyseventh} switch lparen expr rparen lcurly case lparen integer rparen colon stmtseq break_semicolon_question case_lparen_integer_rparen_colon_stmtseq default colon stmtseq rcurly;*/
+    varlist = ;/*id colon type lbracket_int_rbracket_question comma_id_colon_type_lbracketintrbracketquestion_star
+        | ;*/
+    varlisttwo = ;/*expr comma_expr_star
+        | ;*/
     expr = {thirtyeighth} expr addop term
         | {thirtyninth} term;
     term = {fourtith} term multop factor
@@ -137,10 +137,10 @@ Productions
         | {fourtysixth} boolean
         | {fourtyseventh} id lbracket_integer_rbracket_question
         | {fourtyeighth} id lparen varlisttwo rparen
-        | {fourtyninth} id lbracket_integer_rbracket_question dot id lparen varlisttwo rparen;
+        /*| {fourtyninth} id lbracket_integer_rbracket_question dot id lparen varlisttwo rparen*/;
     boolean = {fifty} true
         | {fiftyfirst} false
-        | {fifthsecondth} expr cond expr
+        /*| {fifthsecondth} expr cond expr*/
         | {fiftythird} id;
     type = {fiftyfourth} int
         | {fiftyfifth} real
