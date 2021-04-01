@@ -69,81 +69,126 @@ Ignored Tokens
     whitespace;
 
 Productions
-    prog = begin classmethodstmts end;
-    classmethodstmts = {rec} classmethodstmts classmethodstmt
-        | {empty};
-    classmethodstmt = {classs} classs id lcurly methodstmtseqs rcurly
-        | {methodstmtseq} methodstmtseq;
-    commaid = {commaid} comma id;
-    methodstmtseqs = {rec} methodstmtseqs methodstmtseq
-        | {empty};
-    methodstmtseq = {method} type id lparen varlist rparen lcurly stmtseq rcurly
-        | {statement} id commaid* colon type semicolon;
-    stmtseq = {rec} stmtseq stmt
-        | {empty};
-    stmt = {idintbrack} id intbrack? idintq semicolon
+    prog =
+        begin classmethods end
+        ;
+    classmethods = classmethod*
+        ;
+    classmethod =
+        {classs} classs id lcurly methodstmts rcurly
+        | {methodstmt} methodstmt
+        ;
+    methodstmts =
+        methodstmt*
+        ;
+    methodstmt =
+        {method} type id lparen varlist? rparen lcurly stmt* rcurly
+        | {statement} id commaid* colon type semicolon
+        ;
+    stmt =
+        {idintbrack} id intbrack? idintq semicolon
         | {idcommaid} id commaid colon type intbrack? semicolon
-        | {if} if lparen boolean rparen then lcurly stmtseq rcurly elsestmt?
-        | {while} while lparen boolean rparen lcurly stmtseq rcurly
-        | {for} for lparen type? id walrus expr [left]:semicolon boolean [right]:semicolon incdecexpr rparen lcurly stmtseq rcurly
+        | {if} if lparen boolean rparen then lcurly stmt* rcurly elsestmt?
+        | {while} while lparen boolean rparen lcurly stmt* rcurly
+        | {for} for lparen type? id walrus expr [left]:semicolon boolean [right]:semicolon incdecexpr rparen lcurly stmt* rcurly
         | {put} put lparen id intbrack? rparen semicolon
-        | {varlist} id lparen varlisttwo rparen semicolon
+        | {varlist} id lparen varlisttwo? rparen semicolon
         | {return} return expr semicolon
-        | {switch} switch [leftlparen]:lparen expr [leftrparen]:rparen lcurly case [rightlparen]:lparen integer [rightrparen]:rparen colon stmtseq breaksemi? endcase rcurly;
-    breaksemi = {full} break semicolon;
-    endcase = casebreak* default colon stmtseq;
-    casebreak = case lparen integer rparen colon stmtseq breaksemi?;
-    incdecexpr = {inc} id inc
+        | {switch} switch [leftlp]:lparen expr [leftrp]:rparen lcurly case [rightlp]:lparen integer [rightrp]:rparen colon stmt* breaksemi? endcase rcurly
+        ;
+    commaid =
+        comma id
+        ;
+    breaksemi =
+        break semicolon
+        ;
+    endcase =
+        casebreak* default colon stmt*
+        ;
+    casebreak =
+        case lparen integer rparen colon stmt* breaksemi?
+        ;
+    incdecexpr =
+        {inc} id inc
         | {dec} id dec
-        | {walrus} id walrus expr;
-    intbrack = {full} lbracket int rbracket
-        | {empty};
-    idintq = {number} walrus expr
+        | {walrus} id walrus expr
+        ;
+    intbrack =
+        lbracket int rbracket
+        ;
+    idintq =
+        {number} walrus expr
         | {boolean} walrus boolean
         | {string} walrus [left]:quote anychars [right]:quote
         | {get} walrus get lparen rparen
         | {new} walrus new id lparen rparen
-        | {dot} dot id lparen varlisttwo rparen idvarlisttwo*
+        | {dot} dot id lparen varlisttwo? rparen idvarlisttwo*
         | {inc} inc
-        | {dec} dec;
-    elsestmt = {full} else lcurly stmtseq rcurly;
-    idvarlisttwo = dot id lparen varlisttwo rparen;
-    expr = {add} expr plus term
+        | {dec} dec
+        ;
+    elsestmt =
+        else lcurly stmt* rcurly
+        ;
+    idvarlisttwo =
+        dot id lparen varlisttwo? rparen
+        ;
+    expr =
+        {add} expr plus term
         | {sub} expr minus term
-        | {term} term;
-    term = {mul} term times factor
+        | {term} term
+        ;
+    term =
+        {mul} term times factor
         | {div} term divide factor
-        | {factor} factor;
-    varlist = {full} id colon type intbrack? commaidtype
-        | {empty};
-    commaidtype = comma id colon type intbrack?;
-    varlisttwo = {full} expr commaexpr*
-        | {empty};
-    commaexpr = comma expr;
-    boolean = {true} true
+        | {factor} factor
+        ;
+    varlist =
+        id colon type intbrack? commaidtype
+        ;
+    commaidtype =
+        comma id colon type intbrack?
+        ;
+    varlisttwo =
+        expr commaexpr*
+        ;
+    commaexpr =
+        comma expr
+        ;
+    boolean =
+        {true} true
         | {false} false
-        | {expr} [left]:expr cond [right]:expr /* WATCH: May be a problem later... */
-        | {id} id;
-    cond = {eqv} eqv
+        | {expr} [left]:expr cond [right]:expr
+        | {id} id
+        ;
+    cond =
+        {eqv} eqv
         | {neqv} neqv
         | {gte} gte
         | {lte} lte
         | {gt} gt
-        | {lt} lt;
-    type = {int} int
+        | {lt} lt
+        ;
+    type =
+        {int} int
         | {real} real
         | {string} string
         | {bool} bool
         | {void} void
-        | {id} id;
-    /* FIXME */
-    factor = {lparen} lparen expr rparen /* <- shift/reduce conflict with commaexprstar on rparen */
+        | {id} id
+        ;
+    factor =
+        {lparen} lparen expr rparen
         | {minus} minus factor
         | {integer} integer
         | {float} float
         | {bool} bool
-        /* | {id} id factorid <- major reduce/reduce conflicts */
-        | {varlist} lparen varlisttwo rparen;
-    /* factorid = {intbrack} intbrack? factorintbrack?
-        | {empty};
-    factorintbrack = dot id lparen varlisttwo rparen; */
+        | {id} id factorid
+        | {varlist} lparen varlisttwo? rparen
+        ;
+    factorid =
+        {intbrack} intbrack? factorintbrack?
+        | {empty}
+        ;
+    factorintbrack =
+        dot id lparen varlisttwo? rparen
+        ;
