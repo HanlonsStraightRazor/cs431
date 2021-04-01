@@ -76,25 +76,30 @@ Productions
         | {empty};
     classmethodstmt = {classs} classs id lcurly methodstmtseqs rcurly
         | {methodstmtseq} methodstmtseq;
-    comma_id_star = {comma_id} comma id
+    commaidstar = {comma_id} comma id
         | {empty};
     methodstmtseqs = {recursive} methodstmtseqs methodstmtseq
         | {empty};
     methodstmtseq = {method} type id lparen varlist rparen lcurly stmtseq rcurly
-        | {statement} id comma_id_star colon type semicolon;
+        | {statement} id commaidstar colon type semicolon;
     stmtseq = {recursive} stmt stmtseq
         | {empty};
-    stmt = id lbracket int? rbracket idintq;
+    stmt = id optintbrack idintq;
+    optintbrack = {full} lbracket int rbracket
+        | {empty};
     idintq = {number} walrus expr semicolon
         | {string} walrus [left]:quote anychars [right]:quote semicolon
         | {get} walrus get lparen rparen semicolon
         | {new} walrus new id lparen rparen semicolon
-        | {dot} dot id lparen varlisttwo rparen id_varlist_two_star semicolon
+        | {dot} dot id lparen varlisttwo rparen idvarlisttwostar semicolon
         | {inc} inc
         | {dec} dec;
-    id_varlist_two_star = dot;
+    idvarlisttwostar = dot;
     expr = dot;
-    varlist = dot;
+    varlist = {full} id colon type optintbrack commaidtypestar
+        | {empty};
+    commaidtypestar = {recursive} comma id colon type optintbrack commaidtypestar
+        | {empty};
     varlisttwo = dot;
     type = {int} int
         | {real} real
