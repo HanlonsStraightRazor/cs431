@@ -82,7 +82,7 @@ Productions
         ;
     stmt =
         {idintbrack} id intbrack? idintq semicolon
-        | {idcommaid} id commaid colon type intbrack? semicolon
+        | {idcommaid} id commaid* colon type intbrack? semicolon
         | {if} if lparen boolean rparen then lcurly stmt* rcurly elsestmt?
         | {while} while lparen boolean rparen lcurly stmt* rcurly
         | {for} for lparen type? id walrus expr [left]:semicolon boolean [right]:semicolon incdecexpr rparen lcurly stmt* rcurly
@@ -94,23 +94,6 @@ Productions
     commaid =
         comma id
         ;
-    breaksemi =
-        break semicolon
-        ;
-    endcase =
-        casebreak* default colon stmt*
-        ;
-    casebreak =
-        case lparen integer rparen colon stmt* breaksemi?
-        ;
-    incdecexpr =
-        {inc} id inc
-        | {dec} id dec
-        | {walrus} id walrus expr
-        ;
-    intbrack =
-        lbracket int rbracket
-        ;
     idintq =
         {number} walrus expr
         | {boolean} walrus boolean
@@ -121,21 +104,28 @@ Productions
         | {inc} inc
         | {dec} dec
         ;
+    intbrack =
+        lbracket int rbracket
+        ;
     elsestmt =
         else lcurly stmt* rcurly
         ;
+    incdecexpr =
+        {inc} id inc
+        | {dec} id dec
+        | {walrus} id walrus expr
+        ;
+    breaksemi =
+        break semicolon
+        ;
+    endcase =
+        casebreak* default colon stmt*
+        ;
+    casebreak =
+        case lparen integer rparen colon stmt* breaksemi?
+        ;
     idvarlisttwo =
         dot id lparen varlisttwo? rparen
-        ;
-    expr =
-        {add} expr plus term
-        | {sub} expr minus term
-        | {term} term
-        ;
-    term =
-        {mul} term times factor
-        | {div} term divide factor
-        | {factor} factor
         ;
     varlist =
         id colon type intbrack? commaidtype
@@ -148,6 +138,31 @@ Productions
         ;
     commaexpr =
         comma expr
+        ;
+    expr =
+        {add} expr plus term
+        | {sub} expr minus term
+        | {term} term
+        ;
+    term =
+        {mul} term times factor
+        | {div} term divide factor
+        | {factor} factor
+        ;
+    factor =
+        {lparen} lparen expr rparen
+        | {minus} minus factor
+        | {integer} integer
+        | {float} float
+        | {bool} bool
+        | {id} id factorid?
+        | {varlist} id lparen varlisttwo? rparen
+        ;
+    factorid =
+        intbrack? factorintbrack?
+        ;
+    factorintbrack =
+        dot id lparen varlisttwo? rparen
         ;
     boolean =
         {true} true
@@ -170,19 +185,4 @@ Productions
         | {bool} bool
         | {void} void
         | {id} id
-        ;
-    factor =
-        {lparen} lparen expr rparen
-        | {minus} minus factor
-        | {integer} integer
-        | {float} float
-        | {bool} bool
-        | {id} id factorid?
-        | {varlist} lparen varlisttwo? rparen
-        ;
-    factorid =
-        intbrack? factorintbrack?
-        ;
-    factorintbrack =
-        dot id lparen varlisttwo? rparen
         ;
