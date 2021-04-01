@@ -85,7 +85,7 @@ Productions
     stmt = {idoptintbrack} id optintbrack idintq semicolon
         | {idcommaidstar} id commaidstar colon type optintbrack
         | {if} if lparen boolean rparen then lcurly stmtseq rcurly optelsestmt;
-    optintbrack = {full} lbracket int rbracket
+    optintbrack = {full} lbracket integer rbracket
         | {empty};
     idintq = {number} walrus expr
         | {boolean} walrus boolean
@@ -98,7 +98,10 @@ Productions
     optelsestmt = {full} else lcurly stmtseq rcurly
         | {empty};
     idvarlisttwostar = dot;
-    expr = dot;
+    expr = dot /*{addop} expr addop term
+        | {term} term*/;
+    term = dot /*{multop} term multop factor
+        | {factor} factor*/;
     varlist = {full} id colon type optintbrack commaidtypestar
         | {empty};
     commaidtypestar = {recursive} comma id colon type optintbrack commaidtypestar
@@ -129,7 +132,7 @@ Productions
         | {id} id;
     factor = {lparen} lparen expr rparen
         | {id} id factorid
-        | {int} int
+        | {integer} integer
         | {real} real
         | {bool} bool
         | {minus} minus factor;
