@@ -62,7 +62,6 @@ Tokens
     anychars = [35..255]+;
     integer = digit ( digit )*;
     real_num = ( digit )+ '.' ( digit )+;
-    cond = '==' | '!=' | '>=' | '<=' | '>' | '<';
     addop = '+' | '-';
     multop = '*' | '/';
     dot = '.';
@@ -84,7 +83,10 @@ Productions
         | {statement} id comma_id_star colon type semicolon;
     stmtseq = {recursive} stmt stmtseq
         | {empty};
-    stmt = id lbracket int? rbracket idintq;
+    stmt = {id_lbracket} id lbracket int? rbracket idintq
+        |  {id_comma_int} id comma_int* colon type int?
+        |  {if} if lparen boolean rparen then lcurly stmtseq rcurly poss_else
+        ;
     idintq = {number} walrus expr semicolon
         | {string} walrus [left]:quote anychars [right]:quote semicolon
         | {get} walrus get lparen rparen semicolon
@@ -92,10 +94,25 @@ Productions
         | {dot} dot id lparen varlisttwo rparen id_varlist_two_star semicolon
         | {inc} inc
         | {dec} dec;
+    comma_int = comma int;
+    poss_else = {else} else rcurly stmtseq lcurly
+        | {empty} ;
     id_varlist_two_star = dot;
     expr = dot;
     varlist = dot;
     varlisttwo = dot;
+    boolean = {true} true
+        | {false} false
+        | {expr} [firstexpr]:expr cond [secondexpr]:expr
+        | {id} id
+        ;
+    cond = {eqv} eqv 
+        | {neqv} neqv
+        | {gte} gte 
+        | {lte} lte
+        | {gt} gt 
+        | {lt} lt
+        ;
     type = {int} int
         | {real} real
         | {string} string
