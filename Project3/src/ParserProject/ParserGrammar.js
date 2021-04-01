@@ -74,8 +74,7 @@ Productions
         | {empty};
     classmethodstmt = {classs} classs id lcurly methodstmtseqs rcurly
         | {methodstmtseq} methodstmtseq;
-    commaid = {commaid} comma id
-        | {empty};
+    commaid = {commaid} comma id;
     methodstmtseqs = {rec} methodstmtseqs methodstmtseq
         | {empty};
     methodstmtseq = {method} type id lparen varlist rparen lcurly stmtseq rcurly
@@ -83,7 +82,7 @@ Productions
     stmtseq = {rec} stmtseq stmt
         | {empty};
     stmt = {idintbrack} id intbrack? idintq semicolon
-        | {idcommaidstar} id commaid colon type intbrack? semicolon
+        | {idcommaid} id commaid colon type intbrack? semicolon
         | {if} if lparen boolean rparen then lcurly stmtseq rcurly elsestmt?
         | {while} while lparen boolean rparen lcurly stmtseq rcurly
         | {for} for lparen type? id walrus expr [left]:semicolon boolean [right]:semicolon incdecexpr rparen lcurly stmtseq rcurly
