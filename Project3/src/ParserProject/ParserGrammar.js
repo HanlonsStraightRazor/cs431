@@ -62,7 +62,6 @@ Tokens
     anychars = [35..255]+;
     integer = digit ( digit )*;
     real_num = ( digit )+ '.' ( digit )+;
-    cond = '==' | '!=' | '>=' | '<=' | '>' | '<';
     addop = '+' | '-';
     multop = '*' | '/';
     dot = '.';
@@ -71,84 +70,57 @@ Ignored Tokens
     whitespace;
 
 Productions
-    comma_id_star = {first} comma id comma_id_star
-        | ;
-    lbracket_integer_rbracket_question = {second} lbracket integer rbracket
-        | ;
-    type_question = {third} type
-        | ;
-    dot_id_lparen_varlisttwo_rparen_star = {fourth} dot id lparen varlisttwo rparen dot_id_lparen_varlisttwo_rparen_star
-        | ;
-    break_semicolon_question = {fifth} break semicolon
-        | ;
-    idinc_iddec_idwalrusexpr = {sixith} id inc
-        | {seventh} id dec
-        | {eighth} id walrus expr;
-    case_lparen_integer_rparen_colon_stmtseq =  {ninth} case lparen integer rparen colon stmtseq case_lparen_integer_rparen_colon_stmtseq
-        | ;
-    comma_expr = comma expr;
-    comma_expr_star = {tenth} comma_expr comma_expr_star
-        | ;
-    comma_id_colon_type_lbracketintegerrbracketquestion_star = {eleventh} comma id colon type lbracket_integer_rbracket_question comma_id_colon_type_lbracketintegerrbracketquestion_star
-        | ;
-    id_colon_type_lbracketintegerrbracketquestion_commaidcolontypelbracketintegerrbracketquestionstar_question = {tewelveth} id colon type lbracket_integer_rbracket_question comma_id_colon_type_lbracketintegerrbracketquestion_star
-        | ;
-    poss_else = {ninty} else lcurly stmtseq rcurly | ;
-
     prog = begin classmethodstmts end;
-    classmethodstmts = {thirteenth} classmethodstmts classmethodstmt
-        | ;
-    classmethodstmt = {fourteenth} classs id lcurly methodstmtseqs rcurly
-        | {fifthteenth} type id lparen varlist rparen lcurly stmtseq rcurly
-        | {sixteenth} id comma_id_star colon type semicolon;
-    methodstmtseqs = {seventeenth} methodstmtseqs methodstmtseq
-        | ;
-    methodstmtseq = {eighteenth} type id lparen varlist rparen lcurly stmtseq rcurly
-        | {nineteenth} id comma_id_star colon type semicolon;
-    stmtseq = {twentith} stmt stmtseq
-        | ;
-    stmt = {twentyfirst} ;/*id lbracket_integer_rbracket_question walrus expr semicolon
-        | {twentysecond} id lbracket_integer_rbracket_question walrus lquote anychars rquote semicolon
-        | {twentythird} id comma_id_star colon type lbracket_integer_rbracket_question semicolon
-        | {twentyfourth} if lparen boolean rparen then lcurly stmtseq rcurly poss_else 
-        | {twentysixth} while lparen boolean rparen lcurly stmtseq rcurly
-        | {twentyseventh} for lparen type_question id walrus expr semicolon boolean semicolon idinc_iddec_idwalrusexpr rparen lcurly stmtseq rcurly
-        | {twentyeighth} id lbracket_integer_rbracket_question walrus get lparen rparen semicolon
-        | {twentyninth} put lparen id lbracket_integer_rbracket_question rparen semicolon
-        | {thirtyth} id lbracket_integer_rbracket_question inc semicolon
-        | {thirtyfirst} id lbracket_integer_rbracket_question dec semicolon
-        | {thirtysecond} id lbracket_integer_rbracket_question walrus new id lparen rparen semicolon
-        | {thirtythird} id lparen varlisttwo rparen semicolon
-        | {thirtyfourth} id lbracket_integer_rbracket_question dot id lparen varlisttwo rparen dot_id_lparen_varlisttwo_rparen_star semicolon
-        | {thirtyfifth} return expr semicolon
-        | {thirtysixth} id lbracket_integer_rbracket_question walrus boolean semicolon
-        | {thirtyseventh} switch lparen expr rparen lcurly case lparen integer rparen colon stmtseq break_semicolon_question case_lparen_integer_rparen_colon_stmtseq default colon stmtseq rcurly;*/
-    id_colon_type = id colon type;/* added this */
-    /*varlist =  id_colon_type lbracket_int_rbracket_question comma_id_colon_type_lbracketintrbracketquestion_star
-        | ;*/
-    varlisttwo = expr comma_expr_star
-        | ;
-    expr = {thirtyeighth} expr addop term
-        | {thirtyninth} term;
-    term = {fourtith} term multop factor
-        | {fourtyfirst} factor;
-    dot_id = dot id;/* added this */
-    factor = {fourtysecond} lparen expr rparen
-        | {fourtythird} minus factor
-        | {fourtyfourth} integer
-        | {fourtyfifth} real_num
-        | {fourtysixth} boolean
-        | {fourtyseventh} id lbracket_integer_rbracket_question
-        | {fourtyeighth} id lparen varlisttwo rparen
-        | {fourtyninth} id lbracket_integer_rbracket_question dot_id lparen varlisttwo rparen;
-    expr_cond = expr cond;/* added this */
-    boolean = {fifty} true
-        | {fiftyfirst} false
-        | {fifthsecondth} expr_cond expr
-        | {fiftythird} id;
-    type = {fiftyfourth} int
-        | {fiftyfifth} real
-        | {fiftysixth} string
-        | {fiftyseventh} boolean
-        | {fiftyeighth} void
-        | {fiftyninth} id;
+    classmethodstmts = {recursive} classmethodstmts classmethodstmt
+        | {empty};
+    classmethodstmt = {classs} classs id lcurly methodstmtseqs rcurly
+        | {methodstmtseq} methodstmtseq;
+    commaidstar = {comma_id} comma id
+        | {empty};
+    methodstmtseqs = {recursive} methodstmtseqs methodstmtseq
+        | {empty};
+    methodstmtseq = {method} type id lparen varlist rparen lcurly stmtseq rcurly
+        | {statement} id commaidstar colon type semicolon;
+    stmtseq = {recursive} stmt stmtseq
+        | {empty};
+    stmt = {id} id optintbrack idintq
+        |  {id_comma_int} id commaint* colon type int?
+        |  {if} if lparen boolean rparen then lcurly stmtseq rcurly posselse
+        ;
+    optintbrack = {full} lbracket int rbracket
+        | {empty};
+    idintq = {number} walrus expr semicolon
+        | {string} walrus [left]:quote anychars [right]:quote semicolon
+        | {get} walrus get lparen rparen semicolon
+        | {new} walrus new id lparen rparen semicolon
+        | {dot} dot id lparen varlisttwo rparen idvarlisttwostar semicolon
+        | {inc} inc
+        | {dec} dec;
+    commaint = comma int;
+    posselse = {else} else rcurly stmtseq lcurly
+        | {empty} ;
+    idvarlisttwostar = dot;
+    expr = dot;
+    varlist = {full} id colon type optintbrack commaidtypestar
+        | {empty};
+    commaidtypestar = {recursive} comma id colon type optintbrack commaidtypestar
+        | {empty};
+    varlisttwo = dot;
+    boolean = {true} true
+        | {false} false
+        | {expr} [firstexpr]:expr cond [secondexpr]:expr
+        | {id} id
+        ;
+    cond = {eqv} eqv 
+        | {neqv} neqv
+        | {gte} gte 
+        | {lte} lte
+        | {gt} gt 
+        | {lt} lt
+        ;
+    type = {int} int
+        | {real} real
+        | {string} string
+        | {bool} bool
+        | {void} void
+        | {id} id;
