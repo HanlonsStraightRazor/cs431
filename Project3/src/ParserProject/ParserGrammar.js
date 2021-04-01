@@ -88,6 +88,7 @@ Productions
     optintbrack = {full} lbracket int rbracket
         | {empty};
     idintq = {number} walrus expr semicolon
+        | {bool} walrus bool semicolon
         | {string} walrus [left]:quote anychars [right]:quote semicolon
         | {get} walrus get lparen rparen semicolon
         | {new} walrus new id lparen rparen semicolon
