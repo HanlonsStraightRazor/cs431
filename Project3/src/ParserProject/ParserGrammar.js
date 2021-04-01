@@ -123,7 +123,8 @@ Productions
         | {string} string
         | {bool} bool
         | {void} void
-        | {id} id;
+        | {id} id
+        ;
     factor = {lparen} lparen expr rparen
         | {id} id factorid
         | {int} int
