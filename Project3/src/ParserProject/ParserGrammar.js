@@ -122,8 +122,10 @@ Productions
         | {thirtyfifth} return expr semicolon
         | {thirtysixth} id lbracket_integer_rbracket_question walrus boolean semicolon
         | {thirtyseventh} switch lparen expr rparen lcurly case lparen integer rparen colon stmtseq break_semicolon_question case_lparen_integer_rparen_colon_stmtseq default colon stmtseq rcurly;
-    varlist = id_colon_type_lbracketintegerrbracketquestion_commaidcolontypelbracketintegerrbracketquestionstar_question;
-    varlisttwo = expr_commaexprstar_question;
+    varlist = id colon type lbracket_int_rbracket_question comma_id_colon_type_lbracketintrbracketquestion_star
+        | ;
+    varlisttwo = expr comma_expr_star
+        | ;
     expr = {thirtyeighth} expr addop term
         | {thirtyninth} term;
     term = {fourtith} term multop factor
