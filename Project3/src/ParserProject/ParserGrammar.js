@@ -84,9 +84,18 @@ Productions
         | {statement} id comma_id_star colon type semicolon;
     stmtseq = {recursive} stmt stmtseq
         | {empty};
-    stmt = id int? walrus expr;
+    stmt = id lbracket int? rbracket idintq;
+    idintq = {number} walrus expr semicolon
+        | {string} walrus [left]:quote anychars [right]:quote semicolon
+        | {get} walrus get lparen rparen semicolon
+        | {new} walrus new id lparen rparen semicolon
+        | {dot} dot id lparen varlisttwo rparen id_varlist_two_star semicolon
+        | {inc} inc
+        | {dec} dec;
+    id_varlist_two_star = dot;
     expr = dot;
     varlist = dot;
+    varlisttwo = dot;
     type = {int} int
         | {real} real
         | {string} string
