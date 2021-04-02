@@ -6,13 +6,13 @@
     <property name="build" location="build"/>
     <property name="src" location="src/${ant.project.name}"/>
     <property name="regex" location="${src}/ParserGrammar.js"/>
-    <!-- <property name="input" location="input"/> -->
-    <!-- <property name="output" location="output"/> -->
+    <property name="input" location="input"/>
+    <property name="output" location="output"/>
 
     <target name="clean">
         <delete dir="${build}"/>
         <delete dir="${src}/${ant.project.name}"/>
-        <delete file="${output}"/>
+        <delete dir="${output}"/>
     </target>
 
     <target name="genlex">
@@ -32,11 +32,44 @@
         <copy
             file="${src}/${ant.project.name}/lexer/lexer.dat"
             todir="${build}/${ant.project.name}/lexer"/>
+        <copy
+            file="${src}/${ant.project.name}/parser/parser.dat"
+            todir="${build}/${ant.project.name}/parser"/>
     </target>
 
     <target name="run">
+        <mkdir dir="${output}"/>
         <echo message="RUNNING TEST(S)..."/>
-        <java classname="${ant.project.name}.Main" classpath="${build}"/>
+        <echo message="TEST 1..."/>
+        <java
+            classname="${ant.project.name}.Main"
+            classpath="${build}"
+            input="${input}/prog1.txt"
+            output="${output}/prog1.parse"/>
+        <echo message="TEST 2..."/>
+        <java
+            classname="${ant.project.name}.Main"
+            classpath="${build}"
+            input="${input}/prog2.txt"
+            output="${output}/prog2.parse"/>
+        <echo message="TEST 3..."/>
+        <java
+            classname="${ant.project.name}.Main"
+            classpath="${build}"
+            input="${input}/prog3.txt"
+            output="${output}/prog3.parse"/>
+        <echo message="TEST 4..."/>
+        <java
+            classname="${ant.project.name}.Main"
+            classpath="${build}"
+            input="${input}/prog4.txt"
+            output="${output}/prog4.parse"/>
+        <echo message="TEST 5..."/>
+        <java
+            classname="${ant.project.name}.Main"
+            classpath="${build}"
+            input="${input}/prog5.txt"
+            output="${output}/prog5.parse"/>
     </target>
 
     <target name="all">
