@@ -150,11 +150,11 @@ Productions
         | {factor} factor
         ;
     factor =
-        {lparen} lparen expr rparen
+        {paren} lparen expr rparen
         | {minus} minus factor
         | {integer} integer
         | {float} float
-        | {bool} bool
+        | {boolean} boolean
         | {id} id factorid?
         | {varlist} id lparen varlisttwo? rparen
         ;
