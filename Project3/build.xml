@@ -12,7 +12,7 @@
     <target name="clean">
         <delete dir="${build}"/>
         <delete dir="${src}/${ant.project.name}"/>
-        <delete file="${output}"/>
+        <delete dir="${output}"/>
     </target>
 
     <target name="genlex">
@@ -38,27 +38,33 @@
     </target>
 
     <target name="run">
+        <mkdir dir="${output}"/>
         <echo message="RUNNING TEST(S)..."/>
+        <echo message="TEST 1..."/>
         <java
             classname="${ant.project.name}.Main"
             classpath="${build}"
             input="${input}/prog1.txt"
             output="${output}/prog1.parse"/>
+        <echo message="TEST 2..."/>
         <java
             classname="${ant.project.name}.Main"
             classpath="${build}"
             input="${input}/prog2.txt"
             output="${output}/prog2.parse"/>
+        <echo message="TEST 3..."/>
         <java
             classname="${ant.project.name}.Main"
             classpath="${build}"
             input="${input}/prog3.txt"
             output="${output}/prog3.parse"/>
+        <echo message="TEST 4..."/>
         <java
             classname="${ant.project.name}.Main"
             classpath="${build}"
             input="${input}/prog4.txt"
             output="${output}/prog4.parse"/>
+        <echo message="TEST 5..."/>
         <java
             classname="${ant.project.name}.Main"
             classpath="${build}"
