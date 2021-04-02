@@ -42,28 +42,28 @@
         <java
             classname="${ant.project.name}.Main"
             classpath="${build}"
-            input="{input}/prog1.txt"
-            output="{output}/prog1.parse"/>
+            input="${input}/prog1.txt"
+            output="${output}/prog1.parse"/>
         <java
             classname="${ant.project.name}.Main"
             classpath="${build}"
-            input="{input}/prog2.txt"
-            output="{output}/prog2.parse"/>
+            input="${input}/prog2.txt"
+            output="${output}/prog2.parse"/>
         <java
             classname="${ant.project.name}.Main"
             classpath="${build}"
-            input="{input}/prog3.txt"
-            output="{output}/prog3.parse"/>
+            input="${input}/prog3.txt"
+            output="${output}/prog3.parse"/>
         <java
             classname="${ant.project.name}.Main"
             classpath="${build}"
-            input="{input}/prog4.txt"
-            output="{output}/prog4.parse"/>
+            input="${input}/prog4.txt"
+            output="${output}/prog4.parse"/>
         <java
             classname="${ant.project.name}.Main"
             classpath="${build}"
-            input="{input}/prog5.txt"
-            output="{output}/prog5.parse"/>
+            input="${input}/prog5.txt"
+            output="${output}/prog5.parse"/>
     </target>
 
     <target name="all">
