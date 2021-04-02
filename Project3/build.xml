@@ -7,6 +7,7 @@
     <property name="src" location="src/${ant.project.name}"/>
     <property name="regex" location="${src}/ParserGrammar.js"/>
     <property name="input" location="input"/>
+    <property name="output" location="output"/>
 
     <target name="clean">
         <delete dir="${build}"/>
@@ -41,23 +42,28 @@
         <java
             classname="${ant.project.name}.Main"
             classpath="${build}"
-            input="{intput}/prog1.txt"/>
+            input="{intput}/prog1.txt"
+            output="{output}/prog1.parse"/>
         <java
             classname="${ant.project.name}.Main"
             classpath="${build}"
-            input="{intput}/prog2.txt"/>
+            input="{intput}/prog2.txt"
+            output="{output}/prog2.parse"/>
         <java
             classname="${ant.project.name}.Main"
             classpath="${build}"
-            input="{intput}/prog3.txt"/>
+            input="{intput}/prog3.txt"
+            output="{output}/prog3.parse"/>
         <java
             classname="${ant.project.name}.Main"
             classpath="${build}"
-            input="{intput}/prog4.txt"/>
+            input="{intput}/prog4.txt"
+            output="{output}/prog4.parse"/>
         <java
             classname="${ant.project.name}.Main"
             classpath="${build}"
-            input="{intput}/prog5.txt"/>
+            input="{intput}/prog5.txt"
+            output="{output}/prog5.parse"/>
     </target>
 
     <target name="all">
