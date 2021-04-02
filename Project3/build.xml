@@ -6,8 +6,7 @@
     <property name="build" location="build"/>
     <property name="src" location="src/${ant.project.name}"/>
     <property name="regex" location="${src}/ParserGrammar.js"/>
-    <!-- <property name="input" location="input"/> -->
-    <!-- <property name="output" location="output"/> -->
+    <property name="input" location="input"/>
 
     <target name="clean">
         <delete dir="${build}"/>
@@ -32,11 +31,33 @@
         <copy
             file="${src}/${ant.project.name}/lexer/lexer.dat"
             todir="${build}/${ant.project.name}/lexer"/>
+        <copy
+            file="${src}/${ant.project.name}/parser/parser.dat"
+            todir="${build}/${ant.project.name}/parser"/>
     </target>
 
     <target name="run">
         <echo message="RUNNING TEST(S)..."/>
-        <java classname="${ant.project.name}.Main" classpath="${build}"/>
+        <java
+            classname="${ant.project.name}.Main"
+            classpath="${build}"
+            input="{intput}/prog1.txt"/>
+        <java
+            classname="${ant.project.name}.Main"
+            classpath="${build}"
+            input="{intput}/prog2.txt"/>
+        <java
+            classname="${ant.project.name}.Main"
+            classpath="${build}"
+            input="{intput}/prog3.txt"/>
+        <java
+            classname="${ant.project.name}.Main"
+            classpath="${build}"
+            input="{intput}/prog4.txt"/>
+        <java
+            classname="${ant.project.name}.Main"
+            classpath="${build}"
+            input="{intput}/prog5.txt"/>
     </target>
 
     <target name="all">

@@ -1,0 +1,7 @@
+BEGIN
+    class c {
+        int method() {
+            return 0;
+        }
+    }
+END
