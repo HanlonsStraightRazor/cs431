@@ -67,12 +67,10 @@ class Parser {
     }
     private void printStmt(){
         consume();
-        consume();
         sb.append("new PrintStmt(\n");
-        //fail("TLparen", "(");
+        fail("TLparen", "(");
         explist();
-        consume();
-        //fail("TRparen", ")");
+        fail("TRparen", ")");
         sb.append(")");
     }
     private String expression(){
