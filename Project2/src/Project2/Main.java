@@ -15,10 +15,13 @@ public class Main {
     public static void main(String[] args){
         if (args.length != 1) {
             System.err.println("Main takes exactly one argument!");
+            System.exit(1);
         }
         Queue<Token> q = new LinkedList<Token>();
+        String className = "ProgExpr";
         try {
             File f = new File(args[0]);
+            className = "Prog" + f.getName().split(".")[0];
             Lexer l = new Lexer(
                 new PushbackReader(
                     new FileReader(f),
@@ -32,7 +35,7 @@ public class Main {
                 }
             }
             Parser p = new Parser();
-            p.parse(q);
+            p.parse(q, className);
         }
         catch(Exception e){
             System.out.println(e.getMessage());
