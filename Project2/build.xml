@@ -7,15 +7,14 @@
     <property name="build" location="build"/>
     <property name="src" location="src/${ant.project.name}"/>
     <property name="regex" location="${src}/regex.js"/>
-    <property name="input" location="input"/>
-    <property name="output" location="src/Interpreter"/>
+    <property name="intsrc" location="src/Interpreter"/>
+    <property name="input" location="input/expr.txt"/>
+    <property name="output" location="${intsrc}/ProgExpr.java"/>
 
     <target name="clean">
         <delete dir="${build}"/>
         <delete dir="${src}/${ant.project.name}"/>
-        <delete file="${output}/ProgExpr.java"/>
-        <delete file="${output}/ProgExprTwo.java"/>
-        <delete file="${output}/ProgExprThree.java"/>
+        <delete file="${output}"/>
     </target>
 
     <target name="genlex">
@@ -38,23 +37,11 @@
         <java
             classname="${ant.project.name}.Main"
             classpath="${build}"
-            output="${output}/ProgExpr.java">
-            <arg line="${input}/Expr.txt"/>
-        </java>
-        <java
-            classname="${ant.project.name}.Main"
-            classpath="${build}"
-            output="${output}/ProgExprTwo.java">
-            <arg line="${input}/ExprTwo.txt"/>
-        </java>
-        <java
-            classname="${ant.project.name}.Main"
-            classpath="${build}"
-            output="${output}/ProgExprThree.java">
-            <arg line="${input}/ExprThree.txt"/>
+            output="${output}">
+            <arg line="${input}"/>
         </java>
         <javac
-            srcdir="${output}"
+            srcdir="${intsrc}"
             destdir="${build}"
             includeantruntime="false"
             failonerror="true"/>
@@ -62,8 +49,6 @@
 
     <target name="run">
         <java classname="Interpreter.ProgExpr" classpath="${build}"/>
-        <java classname="Interpreter.ProgExprTwo" classpath="${build}"/>
-        <java classname="Interpreter.ProgExprThree" classpath="${build}"/>
     </target>
 
     <target name="all">

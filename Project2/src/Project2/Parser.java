@@ -10,10 +10,10 @@ import Project2.node.*;
 class Parser {
     Queue<Token> q;
     StringBuilder sb;
-    void parse(Queue<Token> q, String className) {
+    void parse(Queue<Token> q) {
         this.q = q;
         sb = new StringBuilder("");
-        addStartBoilerplate(className);
+        addStartBoilerplate();
         stmts();
         addEndBoilerplate();
         System.out.print(sb);
@@ -267,9 +267,9 @@ class Parser {
         );
         System.exit(1);
     }
-    private void addStartBoilerplate(String className) {
+    private void addStartBoilerplate() {
         sb.append("package Interpreter;\n");
-        sb.append("public class " + className + " {\n");
+        sb.append("public class ProgExpr {\n");
     }
     private void addEndBoilerplate() {
         sb.append("public static void main(String[] args) {\n");
