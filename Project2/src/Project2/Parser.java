@@ -60,8 +60,7 @@ class Parser {
     private void assignStmt(){
         sb.append("new AssignStmt(\n");
         sb.append("\"" + consume().getText() + "\",\n");
-        //fail("TEquals", "<--");
-        consume();
+        fail("TEquals", "<--");
         sb.append(expression());
         sb.append(")");
     }
