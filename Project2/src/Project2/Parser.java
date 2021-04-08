@@ -36,7 +36,7 @@ class Parser {
         stmt();
         int i = 0;
         for (; getToken() != null; i++){
-            //fail("TSemi", "semicolon");
+            fail("TSemi", "semicolon");
             sb.append(",\nnew Stmts(\n");
             stmt();
         }
@@ -56,13 +56,11 @@ class Parser {
             default:
                 error("identifer or print statement");
         }
-        consume();
     }
     private void assignStmt(){
         sb.append("new AssignStmt(\n");
         sb.append("\"" + consume().getText() + "\",\n");
         //fail("TEquals", "<--");
-        // match("TNum");
         consume();
         sb.append(expression());
         sb.append(")");
