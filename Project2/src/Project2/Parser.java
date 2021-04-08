@@ -62,7 +62,6 @@ class Parser {
         sb.append("new AssignStmt(\n");
         sb.append("\"" + consume().getText() + "\",\n");
         //fail("TEquals", "<--");
-        // sb.append("new NumExp(30)");
         // match("TNum");
         consume();
         sb.append(expression());
