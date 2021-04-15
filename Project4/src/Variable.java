@@ -1,6 +1,6 @@
 package FinalProject;
 
-class enum Type {
+enum Type {
     INT, REAL, STRING, BOOLEAN, VOID
 }
 
