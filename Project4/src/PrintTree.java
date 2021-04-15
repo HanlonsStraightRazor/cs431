@@ -1,14 +1,19 @@
 package FinalProject;
-
 import FinalProject.analysis.*;
 import FinalProject.node.*;
 import java.util.*;
 
-
+/*
+* Project 4
+* Professor: Erik Krohn
+* Authors: Ben Pink, Martin Mueller, Isaiah Ley
+*/
 class PrintTree extends DepthFirstAdapter
 {
- 	public PrintTree() {
-		System.out.println("Start of the Printing Action");
+    public static HashMap<String, Variable> symbolTable = new HashMap<>();
+
+    public PrintTree() {
+    	System.out.println("Start of the Printing Action");
 	}
 
 	//this gets called if the production is prog --> id digit
