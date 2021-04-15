@@ -34,13 +34,16 @@ class Parser {
     private void stmts() {
         sb.append("private static Stmts program = new Stmts(\n");
         stmt();
-        for (int i = 0; getToken() != null; i++){
+        int i = 0;
+        for (; getToken() != null; i++){
             fail("TSemi", "semicolon");
             sb.append(",\nnew Stmts(\n");
             stmt();
-            sb.append("\n)");
         }
-        sb.append("\n);\n");
+        for(int x = 0; x < i; x++){
+            sb.append(")\n");
+        }
+        sb.append(");\n");
     }
     private void stmt(){
         switch(getName(getToken())) {
@@ -59,15 +62,15 @@ class Parser {
         sb.append("\"" + consume().getText() + "\",\n");
         fail("TEquals", "<--");
         sb.append(expression());
-        sb.append(")\n");
+        sb.append(")");
     }
     private void printStmt(){
+        consume();
         sb.append("new PrintStmt(\n");
-        fail("TEcho", "echo");
         fail("TLparen", "(");
         explist();
         fail("TRparen", ")");
-        sb.append(")\n");
+        sb.append(")");
     }
     private String expression(){
         Queue<Token> tokens = infixToPostfix();
@@ -79,14 +82,14 @@ class Parser {
                     stack.push(
                         "new IdExp(\""
                         + token.getText()
-                        + "\")\n"
+                        + "\")"
                     );
                     break;
                 case ("TNum"):
                     stack.push(
                         "new NumExp("
                         + token.getText()
-                        + ")\n"
+                        + ")"
                     );
                     break;
                 case ("TAdd"):
@@ -97,7 +100,7 @@ class Parser {
                         + augend
                         + ",\n'+',\n"
                         + addend
-                        + "\n)\n"
+                        + "\n)"
                     );
                     break;
                 case ("TSub"):
@@ -108,7 +111,7 @@ class Parser {
                         + minuend
                         + ",\n'-',\n"
                         + subtrahend
-                        + "\n)\n"
+                        + "\n)"
                     );
                     break;
                 case ("TMul"):
@@ -119,7 +122,7 @@ class Parser {
                         + multiplicand
                         + ",\n'*',\n"
                         + multiplier
-                        + "\n)\n"
+                        + "\n)"
                     );
                     break;
                 case ("TDiv"):
@@ -130,7 +133,7 @@ class Parser {
                         + dividend
                         + ",\n'/',\n"
                         + divisor
-                        + "\n)\n"
+                        + "\n)"
                     );
                     break;
                 case ("TMod"):
@@ -141,7 +144,7 @@ class Parser {
                         + mdividend
                         + ",\n'%',\n"
                         + mdivisor
-                        + "\n)\n"
+                        + "\n)"
                     );
                     break;
                 case ("TLshift"):
@@ -150,7 +153,7 @@ class Parser {
                         "new UnaryOpExp(\n"
                         + loperand
                         + ",\n\"<<\""
-                        + "\n)\n"
+                        + "\n)"
                     );
                     break;
                 case ("TRshift"):
@@ -159,7 +162,7 @@ class Parser {
                         "new UnaryOpExp(\n"
                         + roperand
                         + ",\n\">>\""
-                        + "\n)\n"
+                        + "\n)"
                     );
             }
         }
@@ -192,40 +195,35 @@ class Parser {
                     stack.push(consume());
                     break;
                 case ("TMul"):
-                    while (!stack.empty()
-                            && !(getName(stack.peek()).equals("TAdd")
+                    while (!stack.empty() && !(getName(stack.peek()).equals("TAdd")
                             || getName(stack.peek()).equals("TSub"))) {
                         tokens.add(stack.pop());
                     }
                     stack.push(consume());
                     break;
                 case ("TDiv"):
-                    while (!stack.empty()
-                            && !(getName(stack.peek()).equals("TAdd")
+                    while (!stack.empty() && !(getName(stack.peek()).equals("TAdd")
                             || getName(stack.peek()).equals("TSub"))) {
                         tokens.add(stack.pop());
                     }
                     stack.push(consume());
                     break;
                 case ("TMod"):
-                    while (!stack.empty()
-                            && !(getName(stack.peek()).equals("TAdd")
+                    while (!stack.empty() && !(getName(stack.peek()).equals("TAdd")
                             || getName(stack.peek()).equals("TSub"))) {
                         tokens.add(stack.pop());
                     }
                     stack.push(consume());
                     break;
                 case ("TLshift"):
-                    while (!stack.empty()
-                            && (stack.peek().equals("TLshift")
+                    while (!stack.empty() && (stack.peek().equals("TLshift")
                             || stack.peek().equals("TRshift"))) {
                         tokens.add(stack.pop());
                     }
                     stack.push(consume());
                     break;
                 case ("TRshift"):
-                    while (!stack.empty()
-                            && (stack.peek().equals("TLshift")
+                    while (!stack.empty() && (stack.peek().equals("TLshift")
                             || stack.peek().equals("TRshift"))) {
                         tokens.add(stack.pop());
                     }
@@ -247,7 +245,7 @@ class Parser {
             sb.append("new ExpListAndExp(\n");
             sb.append(holdingExp + ",\n");
             explist();
-            sb.append(")\n");
+            sb.append(")");
         } else {
             sb.append("new LastExpList(\n");
             sb.append(holdingExp + "\n");

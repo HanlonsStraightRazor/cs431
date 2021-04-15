@@ -8,8 +8,8 @@
     <property name="src" location="src/${ant.project.name}"/>
     <property name="regex" location="${src}/regex.js"/>
     <property name="intsrc" location="src/Interpreter"/>
-    <property name="input" location="input"/>
-    <property name="output" location="${intsrc}"/>
+    <property name="input" location="input/expr.txt"/>
+    <property name="output" location="${intsrc}/ProgExpr.java"/>
 
     <target name="clean">
         <delete dir="${build}"/>
@@ -37,20 +37,8 @@
         <java
             classname="${ant.project.name}.Main"
             classpath="${build}"
-            output="${output}/ProgExpr.java">
-            <arg line="${input}/expr.txt"/>
-        </java>
-        <java
-            classname="${ant.project.name}.Main"
-            classpath="${build}"
-            output="${output}/ProgExpr2.java">
-            <arg line="${input}/exprTwo.txt"/>
-        </java>
-        <java
-            classname="${ant.project.name}.Main"
-            classpath="${build}"
-            output="${output}/ProgExpr3.java">
-            <arg line="${input}/exprThree.txt"/>
+            output="${output}">
+            <arg line="${input}"/>
         </java>
         <javac
             srcdir="${intsrc}"
@@ -60,12 +48,7 @@
     </target>
 
     <target name="run">
-        <echo message="RUNNING TEST #1"/>
         <java classname="Interpreter.ProgExpr" classpath="${build}"/>
-        <echo message="RUNNING TEST #2"/>
-        <java classname="Interpreter.ProgExpr2" classpath="${build}"/>
-        <echo message="RUNNING TEST #3"/>
-        <java classname="Interpreter.ProgExpr3" classpath="${build}"/>
     </target>
 
     <target name="all">

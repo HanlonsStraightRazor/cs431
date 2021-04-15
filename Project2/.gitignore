@@ -1,3 +1,2 @@
 src/Project2/Project2
-src/Interpreter/ProgExpr*.java
-tags
+src/Interpreter/ProgExpr.java

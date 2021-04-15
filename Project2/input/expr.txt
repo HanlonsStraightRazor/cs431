@@ -1,1 +1,1 @@
-four<--5 + 10 ; five<--10 / 3 ; echo(four, five) ; four<--four>> ; echo(four) ; five<--four<</four>> ; echo(four,five)
+echo ( 4<< / 4>> )
