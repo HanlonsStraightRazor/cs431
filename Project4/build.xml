@@ -1,6 +1,8 @@
-<project name="ParserProject" basedir="." default="all">
+<project name="Project4" basedir="." default="all">
 
     <description>
+        Implement semantic error checking and generate MIPS aseembly for
+        Project 3's grammar.
     </description>
 
     <property name="build" location="build"/>
@@ -45,31 +47,13 @@
             classname="${ant.project.name}.Main"
             classpath="${build}"
             input="${input}/prog1.txt"
-            output="${output}/prog1.parse"/>
+            output="${output}/prog1.s"/>
         <echo message="TEST 2..."/>
         <java
             classname="${ant.project.name}.Main"
             classpath="${build}"
             input="${input}/prog2.txt"
-            output="${output}/prog2.parse"/>
-        <echo message="TEST 3..."/>
-        <java
-            classname="${ant.project.name}.Main"
-            classpath="${build}"
-            input="${input}/prog3.txt"
-            output="${output}/prog3.parse"/>
-        <echo message="TEST 4..."/>
-        <java
-            classname="${ant.project.name}.Main"
-            classpath="${build}"
-            input="${input}/prog4.txt"
-            output="${output}/prog4.parse"/>
-        <echo message="TEST 5..."/>
-        <java
-            classname="${ant.project.name}.Main"
-            classpath="${build}"
-            input="${input}/prog5.txt"
-            output="${output}/prog5.parse"/>
+            output="${output}/prog2.s"/>
     </target>
 
     <target name="all">
