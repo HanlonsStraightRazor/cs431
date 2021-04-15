@@ -5,7 +5,7 @@ Helpers
     number = ['0'..'9'];
     letter = ['a'..'z'] | ['A'..'Z'];
     alphanumeric = letter | number;
-    
+
 Tokens
     id = letter (letter | number)*;
     digit = number+;
@@ -15,8 +15,8 @@ Ignored Tokens
 
 Productions
     prog = {first} id digit |
-    	   {second} lotnumbers |
-    	   {third} [eachsymbolisuniqueinaproduction]:id [secondid]:id [digitone]:digit [digittwo]:digit ;
+           {second} lotnumbers |
+           {third} [eachsymbolisuniqueinaproduction]:id [secondid]:id [digitone]:digit [digittwo]:digit ;
     lotnumbers = digit morenumbers;
     morenumbers = {fourth} digit morenumbers |
-    		  {emptyproduction} ;
+              {emptyproduction} ;
