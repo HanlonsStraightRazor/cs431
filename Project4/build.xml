@@ -1,4 +1,4 @@
-<project name="Project4" basedir="." default="all">
+<project name="FinalProject" basedir="." default="all">
 
     <description>
         Implement semantic error checking and generate MIPS aseembly for
@@ -7,7 +7,7 @@
 
     <property name="build" location="build"/>
     <property name="src" location="src/${ant.project.name}"/>
-    <property name="regex" location="${src}/ParserGrammar.js"/>
+    <property name="regex" location="${src}/FinalProject.js"/>
     <property name="input" location="input"/>
     <property name="output" location="output"/>
 
@@ -18,7 +18,7 @@
     </target>
 
     <target name="genlex">
-        <exec executable="/bin/bash" failonerror="true">
+        <exec executable="/bin/sh" failonerror="true">
             <arg line="-c 'java -jar sablecc.jar -d ${src} ${regex}'"/>
         </exec>
     </target>
