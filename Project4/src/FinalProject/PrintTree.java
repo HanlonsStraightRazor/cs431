@@ -42,131 +42,174 @@ class PrintTree extends DepthFirstAdapter
     }
     */
 
-    public void caseAAddExpr(AAddExpr node) {}
-    public void caseAAnotherCaseCaseHelper(AAnotherCaseCaseHelper node) {}
-    public void caseAArrayArrayOption(AArrayArrayOption node) {}
-    public void caseAArrayArrayOrId(AArrayArrayOrId node) {}
-    public void caseAArrayFactor(AArrayFactor node) {}
-    public void caseAAssignBooleanMethodstmtseq(AAssignBooleanMethodstmtseq node) {}
-    public void caseAAssignBooleanStmt(AAssignBooleanStmt node) {}
-    public void caseAAssignDecMethodstmtseq(AAssignDecMethodstmtseq node) {}
-    public void caseAAssignEqualsMethodstmtseq(AAssignEqualsMethodstmtseq node) {}
-    public void caseAAssignExprStmt(AAssignExprStmt node) {}
-    public void caseAAssignIncMethodstmtseq(AAssignIncMethodstmtseq node) {}
-    public void caseAAssignmentForIncrStep(AAssignmentForIncrStep node) {}
-    public void caseAAssignReadInMethodstmtseq(AAssignReadInMethodstmtseq node) {}
-    public void caseAAssignStringMethodstmtseq(AAssignStringMethodstmtseq node) {}
-    public void caseAAssignStringStmt(AAssignStringStmt node) {}
-    public void caseABoolBoolid(ABoolBoolid node) {}
-    public void caseABoolExprOrBool(ABoolExprOrBool node) {}
-    public void caseABreakBreakHelper(ABreakBreakHelper node) {}
-    public void caseAClassDefClassmethodstmt(AClassDefClassmethodstmt node) {}
-    public void caseAClassStmtsClassmethodstmts(AClassStmtsClassmethodstmts node) {}
-    public void caseAConditionalBoolean(AConditionalBoolean node) {}
-    public void caseADeclObjectMethodstmtseq(ADeclObjectMethodstmtseq node) {}
-    public void caseADeclObjectStmt(ADeclObjectStmt node) {}
-    public void caseADecrForIncrStep(ADecrForIncrStep node) {}
-    public void caseADecrStmt(ADecrStmt node) {}
-    public void caseAEpsilonArrayOption(AEpsilonArrayOption node) {}
-    public void caseAEpsilonBreakHelper(AEpsilonBreakHelper node) {}
-    public void caseAEpsilonCaseHelper(AEpsilonCaseHelper node) {}
-    public void caseAEpsilonClassmethodstmts(AEpsilonClassmethodstmts node) {}
-    public void caseAEpsilonForOptionalType(AEpsilonForOptionalType node) {}
-    public void caseAEpsilonMethodChainingOption(AEpsilonMethodChainingOption node) {}
-    public void caseAEpsilonMethodstmtseqs(AEpsilonMethodstmtseqs node) {}
-    public void caseAEpsilonMoreIds(AEpsilonMoreIds node) {}
-    public void caseAEpsilonMoreVarlist(AEpsilonMoreVarlist node) {}
-    public void caseAEpsilonMoreVarListTwo(AEpsilonMoreVarListTwo node) {}
-    public void caseAEpsilonStmtseq(AEpsilonStmtseq node) {}
-    public void caseAEpsilonVarlist(AEpsilonVarlist node) {}
-    public void caseAEpsilonVarListTwo(AEpsilonVarListTwo node) {}
-    public void caseAExprFactor(AExprFactor node) {}
-    public void caseAExprOrBool(AExprOrBool node) {}
-    public void caseAFactorTerm(AFactorTerm node) {}
-    public void caseAFalseBoolean(AFalseBoolean node) {}
-    public void caseAFirstStmtStmtseq(AFirstStmtStmtseq node) {}
-    public void caseAForOptionalType(AForOptionalType node) {}
-    public void caseAForStmt(AForStmt node) {}
-    public void caseAGetStmt(AGetStmt node) {}
-    public void caseAIdArrayOrId(AIdArrayOrId node) {}
-    public void caseAIdBoolid(AIdBoolid node) {}
-    public void caseAIdType(AIdType node) {}
-    public void caseAIdvarlistFactor(AIdvarlistFactor node) {}
-    public void caseAIfBlockStmt(AIfBlockStmt node) {}
-    public void caseAIfElseBlockStmt(AIfElseBlockStmt node) {}
-    public void caseAIncrForIncrStep(AIncrForIncrStep node) {}
-    public void caseAIncrStmt(AIncrStmt node) {}
-    public void caseAIntFactor(AIntFactor node) {}
-    public void caseALastFactor(ALastFactor node) {}
-    public void caseAMethodCallInClassStmt(AMethodCallInClassStmt node) {}
-    public void caseAMethodCallMethodChainingOption(AMethodCallMethodChainingOption node) {}
-    public void caseAMethodCallStmt(AMethodCallStmt node) {}
-    public void caseAMethodDeclClassmethodstmt(AMethodDeclClassmethodstmt node) {}
-    public void caseAMethodDeclMethodstmtseq(AMethodDeclMethodstmtseq node) {}
-    public void caseAMethodStmtsMethodstmtseqs(AMethodStmtsMethodstmtseqs node) {}
-    public void caseAMinusAddop(AMinusAddop node) {}
-    public void caseAMoreIdsMoreIds(AMoreIdsMoreIds node) {}
-    public void caseAMoreIdsMoreVarlist(AMoreIdsMoreVarlist node) {}
-    public void caseAMoreIdsVarlist(AMoreIdsVarlist node) {}
-    public void caseAMoreVarListTwo(AMoreVarListTwo node) {}
-    public void caseAMultTerm(AMultTerm node) {}
-    public void caseANegativeFactor(ANegativeFactor node) {}
-    public void caseAPlusAddop(APlusAddop node) {}
-    public void caseAPrintStmtMethodstmtseq(APrintStmtMethodstmtseq node) {}
-    public void caseAProg(AProg node) {}
-    public void caseAPutStmt(APutStmt node) {}
-    public void caseARealFactor(ARealFactor node) {}
-    public void caseAReturnStmt(AReturnStmt node) {}
-    public void caseASwitchStmt(ASwitchStmt node) {}
-    public void caseATermExpr(ATermExpr node) {}
-    public void caseATrueBoolean(ATrueBoolean node) {}
-    public void caseATypesType(ATypesType node) {}
-    public void caseAVarDeclClassmethodstmt(AVarDeclClassmethodstmt node) {}
-    public void caseAVarDeclMethodstmtseq(AVarDeclMethodstmtseq node) {}
-    public void caseAVarDeclStmt(AVarDeclStmt node) {}
-    public void caseAVarListVarListTwo(AVarListVarListTwo node) {}
-    public void caseAWhileStmt(AWhileStmt node) {}
-    public void caseTAnychars(TAnychars node) {}
-    public void caseTBegin(TBegin node) {}
-    public void caseTBreak(TBreak node) {}
-    public void caseTCase(TCase node) {}
-    public void caseTClassLit(TClassLit node) {}
-    public void caseTColon(TColon node) {}
-    public void caseTComma(TComma node) {}
-    public void caseTCond(TCond node) {}
-    public void caseTDecr(TDecr node) {}
-    public void caseTDefault(TDefault node) {}
-    public void caseTElse(TElse node) {}
-    public void caseTEnd(TEnd node) {}
-    public void caseTEquals(TEquals node) {}
-    public void caseTFalse(TFalse node) {}
-    public void caseTFor(TFor node) {}
-    public void caseTGet(TGet node) {}
-    public void caseTId(TId node) {}
-    public void caseTIf(TIf node) {}
-    public void caseTIncr(TIncr node) {}
-    public void caseTInt(TInt node) {}
-    public void caseTLbracket(TLbracket node) {}
-    public void caseTLcurly(TLcurly node) {}
-    public void caseTLparen(TLparen node) {}
-    public void caseTMultop(TMultop node) {}
-    public void caseTNegop(TNegop node) {}
-    public void caseTNew(TNew node) {}
-    public void caseToken(Token node) {}
-    public void caseTPeriod(TPeriod node) {}
-    public void caseTPlusop(TPlusop node) {}
-    public void caseTPut(TPut node) {}
-    public void caseTRbracket(TRbracket node) {}
-    public void caseTRcurly(TRcurly node) {}
-    public void caseTReal(TReal node) {}
-    public void caseTReturn(TReturn node) {}
-    public void caseTRparen(TRparen node) {}
-    public void caseTSemicolon(TSemicolon node) {}
-    public void caseTSwitch(TSwitch node) {}
-    public void caseTThen(TThen node) {}
-    public void caseTTrue(TTrue node) {}
-    public void caseTTypeDecl(TTypeDecl node) {}
-    public void caseTWhile(TWhile node) {}
+    public void caseAAddExpr(AAddExpr node) {
+    }
+    public void caseAAnotherCaseCaseHelper(AAnotherCaseCaseHelper node) {
+    }
+    public void caseAArrayArrayOption(AArrayArrayOption node) {
+    }
+    public void caseAArrayArrayOrId(AArrayArrayOrId node) {
+    }
+    public void caseAArrayFactor(AArrayFactor node) {
+    }
+    public void caseAAssignBooleanMethodstmtseq(AAssignBooleanMethodstmtseq node) {
+    }
+    public void caseAAssignBooleanStmt(AAssignBooleanStmt node) {
+    }
+    public void caseAAssignDecMethodstmtseq(AAssignDecMethodstmtseq node) {
+    }
+    public void caseAAssignEqualsMethodstmtseq(AAssignEqualsMethodstmtseq node) {
+    }
+    public void caseAAssignExprStmt(AAssignExprStmt node) {
+    }
+    public void caseAAssignIncMethodstmtseq(AAssignIncMethodstmtseq node) {
+    }
+    public void caseAAssignmentForIncrStep(AAssignmentForIncrStep node) {
+    }
+    public void caseAAssignReadInMethodstmtseq(AAssignReadInMethodstmtseq node) {
+    }
+    public void caseAAssignStringMethodstmtseq(AAssignStringMethodstmtseq node) {
+    }
+    public void caseAAssignStringStmt(AAssignStringStmt node) {
+    }
+    public void caseABoolBoolid(ABoolBoolid node) {
+    }
+    public void caseABoolExprOrBool(ABoolExprOrBool node) {
+    }
+    public void caseABreakBreakHelper(ABreakBreakHelper node) {
+    }
+    public void caseAClassDefClassmethodstmt(AClassDefClassmethodstmt node) {
+    }
+    public void caseAClassStmtsClassmethodstmts(AClassStmtsClassmethodstmts node) {
+    }
+    public void caseAConditionalBoolean(AConditionalBoolean node) {
+    }
+    public void caseADeclObjectMethodstmtseq(ADeclObjectMethodstmtseq node) {
+    }
+    public void caseADeclObjectStmt(ADeclObjectStmt node) {
+    }
+    public void caseADecrForIncrStep(ADecrForIncrStep node) {
+    }
+    public void caseADecrStmt(ADecrStmt node) {
+    }
+    public void caseAEpsilonArrayOption(AEpsilonArrayOption node) {
+    }
+    public void caseAEpsilonBreakHelper(AEpsilonBreakHelper node) {
+    }
+    public void caseAEpsilonCaseHelper(AEpsilonCaseHelper node) {
+    }
+    public void caseAEpsilonClassmethodstmts(AEpsilonClassmethodstmts node) {
+    }
+    public void caseAEpsilonForOptionalType(AEpsilonForOptionalType node) {
+    }
+    public void caseAEpsilonMethodChainingOption(AEpsilonMethodChainingOption node) {
+    }
+    public void caseAEpsilonMethodstmtseqs(AEpsilonMethodstmtseqs node) {
+    }
+    public void caseAEpsilonMoreIds(AEpsilonMoreIds node) {
+    }
+    public void caseAEpsilonMoreVarlist(AEpsilonMoreVarlist node) {
+    }
+    public void caseAEpsilonMoreVarListTwo(AEpsilonMoreVarListTwo node) {
+    }
+    public void caseAEpsilonStmtseq(AEpsilonStmtseq node) {
+    }
+    public void caseAEpsilonVarlist(AEpsilonVarlist node) {
+    }
+    public void caseAEpsilonVarListTwo(AEpsilonVarListTwo node) {
+    }
+    public void caseAExprFactor(AExprFactor node) {
+    }
+    public void caseAExprOrBool(AExprOrBool node) {
+    }
+    public void caseAFactorTerm(AFactorTerm node) {
+    }
+    public void caseAFalseBoolean(AFalseBoolean node) {
+    }
+    public void caseAFirstStmtStmtseq(AFirstStmtStmtseq node) {
+    }
+    public void caseAForOptionalType(AForOptionalType node) {
+    }
+    public void caseAForStmt(AForStmt node) {
+    }
+    public void caseAGetStmt(AGetStmt node) {
+    }
+    public void caseAIdArrayOrId(AIdArrayOrId node) {
+    }
+    public void caseAIdBoolid(AIdBoolid node) {
+    }
+    public void caseAIdType(AIdType node) {
+    }
+    public void caseAIdvarlistFactor(AIdvarlistFactor node) {
+    }
+    public void caseAIfBlockStmt(AIfBlockStmt node) {
+    }
+    public void caseAIfElseBlockStmt(AIfElseBlockStmt node) {
+    }
+    public void caseAIncrForIncrStep(AIncrForIncrStep node) {
+    }
+    public void caseAIncrStmt(AIncrStmt node) {
+    }
+    public void caseAIntFactor(AIntFactor node) {
+    }
+    public void caseALastFactor(ALastFactor node) {
+    }
+    public void caseAMethodCallInClassStmt(AMethodCallInClassStmt node) {
+    }
+    public void caseAMethodCallMethodChainingOption(AMethodCallMethodChainingOption node) {
+    }
+    public void caseAMethodCallStmt(AMethodCallStmt node) {
+    }
+    public void caseAMethodDeclClassmethodstmt(AMethodDeclClassmethodstmt node) {
+    }
+    public void caseAMethodDeclMethodstmtseq(AMethodDeclMethodstmtseq node) {
+    }
+    public void caseAMethodStmtsMethodstmtseqs(AMethodStmtsMethodstmtseqs node) {
+    }
+    public void caseAMinusAddop(AMinusAddop node) {
+    }
+    public void caseAMoreIdsMoreIds(AMoreIdsMoreIds node) {
+    }
+    public void caseAMoreIdsMoreVarlist(AMoreIdsMoreVarlist node) {
+    }
+    public void caseAMoreIdsVarlist(AMoreIdsVarlist node) {
+    }
+    public void caseAMoreVarListTwo(AMoreVarListTwo node) {
+    }
+    public void caseAMultTerm(AMultTerm node) {
+    }
+    public void caseANegativeFactor(ANegativeFactor node) {
+    }
+    public void caseAPlusAddop(APlusAddop node) {
+    }
+    public void caseAPrintStmtMethodstmtseq(APrintStmtMethodstmtseq node) {
+    }
+    public void caseAProg(AProg node) {
+    }
+    public void caseAPutStmt(APutStmt node) {
+    }
+    public void caseARealFactor(ARealFactor node) {
+    }
+    public void caseAReturnStmt(AReturnStmt node) {
+    }
+    public void caseASwitchStmt(ASwitchStmt node) {
+    }
+    public void caseATermExpr(ATermExpr node) {
+    }
+    public void caseATrueBoolean(ATrueBoolean node) {
+    }
+    public void caseATypesType(ATypesType node) {
+    }
+    public void caseAVarDeclClassmethodstmt(AVarDeclClassmethodstmt node) {
+    }
+    public void caseAVarDeclMethodstmtseq(AVarDeclMethodstmtseq node) {
+    }
+    public void caseAVarDeclStmt(AVarDeclStmt node) {
+    }
+    public void caseAVarListVarListTwo(AVarListVarListTwo node) {
+    }
+    public void caseAWhileStmt(AWhileStmt node) {
+    }
 
     /*
     //if it reaches a digit, print it off
