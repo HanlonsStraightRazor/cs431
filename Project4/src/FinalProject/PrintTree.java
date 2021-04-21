@@ -9,8 +9,10 @@ import java.util.*;
 * Authors: Ben Pink, Martin Mueller, Isaiah Ley
 */
 class PrintTree extends DepthFirstAdapter {
-    public static ArrayList<ArrayList<Variable>> symbolTables = new ArrayList<ArrayList<Variable>>();
-    StringBuilder sb = new StringBuilder();
+    public static ArrayList<HashMap<String, Variable>> symbolTables = new ArrayList<HashMap<String, Variable>>();
+    StringBuilder textSB = new StringBuilder();
+    StringBuilder dataSB = new StringBuilder();
+    StringBuilder errorSB = new StringBuilder();
 
     public PrintTree() {
         System.out.println("Start of the Printing Action");
