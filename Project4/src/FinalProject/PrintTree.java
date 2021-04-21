@@ -15,7 +15,7 @@ class PrintTree extends DepthFirstAdapter
     public PrintTree() {
         System.out.println("Start of the Printing Action");
     }
-
+    /*
     //this gets called if the production is prog --> id digit
     public void caseAFirstProg(AFirstProg node){
         System.out.println("\tGot a first prog!");
@@ -40,14 +40,26 @@ class PrintTree extends DepthFirstAdapter
     public void caseTId(TId node){
         System.out.println("\tGot myself an id: <"+node.getText()+">");
     }
+    */
+    public void caseAIdvarlistFactor(AIdvarlistFactor node){}
+    public void caseALastFactor(ALastFactor node){}
+    public void caseAArrayArrayOrId(AArrayArrayOrId node){}
+    public void caseAIdArrayOrId(AIdArrayOrId node){}
+    public void caseATrueBoolean(ATrueBoolean node){}
+    public void caseAFalseBoolean(AFalseBoolean node){}
+    public void caseAConditionalBoolean(AConditionalBoolean node){}
+    public void caseABoolBoolid(ABoolBoolid node){}
+    public void caseAIdBoolid(AIdBoolid node){}
+    public void caseAPlusAddop(APlusAddop node){}
+    public void caseAMinusAddop(AMinusAddop node){}
+    public void caseATypesType(ATypesType node){}
+    public void caseAIdType(AIdType node){}
 
+    /*
     //if it reaches a digit, print it off
     public void caseTDigit(TDigit node){
         System.out.println("\tGot myself a digit: <"+node.getText()+">");
     }
+    */
 
-    //if it reaches a ALotnumbers, print off the digit stored inside of it
-    public void caseALotnumbers(ALotnumbers node){
-        System.out.println("\tPrinting the first number: "+node.getDigit());
-    }
 }
