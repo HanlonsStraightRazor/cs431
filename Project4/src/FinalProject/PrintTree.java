@@ -42,7 +42,6 @@ class PrintTree extends DepthFirstAdapter
     }
     */
 
-
     public void caseAAddExpr(AAddExpr node) {}
     public void caseAAnotherCaseCaseHelper(AAnotherCaseCaseHelper node) {}
     public void caseAArrayArrayOption(AArrayArrayOption node) {}
@@ -127,38 +126,6 @@ class PrintTree extends DepthFirstAdapter
     public void caseAVarDeclStmt(AVarDeclStmt node) {}
     public void caseAVarListVarListTwo(AVarListVarListTwo node) {}
     public void caseAWhileStmt(AWhileStmt node) {}
-    public void caseEOF(EOF node) {}
-    public void caseNode(Node node) {}
-    public void casePAddop(PAddop node) {}
-    public void casePArrayOption(PArrayOption node) {}
-    public void casePArrayOrId(PArrayOrId node) {}
-    public void casePBoolean(PBoolean node) {}
-    public void casePBoolid(PBoolid node) {}
-    public void casePBreakHelper(PBreakHelper node) {}
-    public void casePCaseHelper(PCaseHelper node) {}
-    public void casePClassmethodstmt(PClassmethodstmt node) {}
-    public void casePClassmethodstmts(PClassmethodstmts node) {}
-    public void casePExpr(PExpr node) {}
-    public void casePExprOrBool(PExprOrBool node) {}
-    public void casePFactor(PFactor node) {}
-    public void casePForIncrStep(PForIncrStep node) {}
-    public void casePForOptionalType(PForOptionalType node) {}
-    public void casePMethodChainingOption(PMethodChainingOption node) {}
-    public void casePMethodstmtseq(PMethodstmtseq node) {}
-    public void casePMethodstmtseqs(PMethodstmtseqs node) {}
-    public void casePMoreIds(PMoreIds node) {}
-    public void casePMoreVarlist(PMoreVarlist node) {}
-    public void casePMoreVarListTwo(PMoreVarListTwo node) {}
-    public void casePProg(PProg node) {}
-    public void casePStmt(PStmt node) {}
-    public void casePStmtseq(PStmtseq node) {}
-    public void casePTerm(PTerm node) {}
-    public void casePType(PType node) {}
-    public void casePVarlist(PVarlist node) {}
-    public void casePVarListTwo(PVarListTwo node) {}
-    public void caseStart(Start node) {}
-    public void caseSwitchable(Switchable node) {}
-    public void caseSwitch(Switch node) {}
     public void caseTAnychars(TAnychars node) {}
     public void caseTBegin(TBegin node) {}
     public void caseTBreak(TBreak node) {}
@@ -200,7 +167,6 @@ class PrintTree extends DepthFirstAdapter
     public void caseTTrue(TTrue node) {}
     public void caseTTypeDecl(TTypeDecl node) {}
     public void caseTWhile(TWhile node) {}
-    public void caseTWhitespace(TWhitespace node) {}
 
     /*
     //if it reaches a digit, print it off
