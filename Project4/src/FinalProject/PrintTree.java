@@ -9,7 +9,8 @@ import java.util.*;
 * Authors: Ben Pink, Martin Mueller, Isaiah Ley
 */
 class PrintTree extends DepthFirstAdapter {
-    public static HashMap<String, Variable> symbolTable = new HashMap<>();
+    public static ArrayList<ArrayList<Variable>> symbolTables = new ArrayList<ArrayList<Variable>>();
+    StringBuilder sb = new StringBuilder();
 
     public PrintTree() {
         System.out.println("Start of the Printing Action");
@@ -33,8 +34,6 @@ class PrintTree extends DepthFirstAdapter {
             node.getEnd().apply(this);
         }
     }
-
-
 
     @Override
     public void caseAClassStmtsClassmethodstmts(AClassStmtsClassmethodstmts node) {
