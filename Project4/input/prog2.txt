@@ -1,1 +1,8 @@
-328947 328947 234897 234897 238946 23794 6237846 32786
+BEGIN
+  VOID MAIN() {
+    idOne : INT;
+    idTwo : INT;
+    idOne = 1;
+    idTwo = 2;
+ }
+END

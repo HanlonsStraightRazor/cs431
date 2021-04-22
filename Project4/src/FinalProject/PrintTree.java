@@ -19,13 +19,9 @@ class PrintTree extends DepthFirstAdapter {
     }
 
     @Override
-    public void caseStart(Start node) {
-        node.getPProg().apply(this);
-        node.getEOF().apply(this);
-    }
-
-    @Override
     public void caseAProg(AProg node) {
+        dataSB.append(".data\n");
+        textSB.append(".text\n");
         if (node.getBegin() != null) {
             node.getBegin().apply(this);
         }

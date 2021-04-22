@@ -1,1 +1,6 @@
-mvlsdjfvnfd 445345
+BEGIN
+  VOID MAIN() {
+    string := "Hello world!";
+    PUT(string);
+  }
+END
