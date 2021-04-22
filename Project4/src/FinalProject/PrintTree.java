@@ -13,16 +13,18 @@ class PrintTree extends DepthFirstAdapter {
     private static ArrayList<HashMap<String, Variable>> symbolTables;
     private static StringBuilder text;
     private static StringBuilder data;
-    private static StringBuilder error;
     private static final String DELIMITER = "    ";
+    private static int offset = 0;
+    private static Queue<String> error;
+    private static int currentScope = 0;
     /*
      * Constructor. Initializes non final class variables.
      */
     public PrintTree() {
         symbolTables = new ArrayList<HashMap<String, Variable>>();
+        error = new LinkedList<String>();
         text  = new StringBuilder();
         data  = new StringBuilder();
-        error = new StringBuilder();
     }
     /*
      * <Prog> ::= BEGIN <ClassMethodStmts> END
@@ -38,11 +40,17 @@ class PrintTree extends DepthFirstAdapter {
             node.getClassmethodstmts().apply(this);
         }
         if (node.getEnd() != null) {
-            text.append(DELIMITER + "li $v0, 10\n");
-            text.append(DELIMITER + "syscall");
-            System.out.print(data);
-            System.out.print(text);
-            node.getEnd().apply(this);
+            if(!error.isEmpty()){
+                for(String er : error){
+                    System.out.println(er);
+                }
+            } else {
+                text.append(DELIMITER + "li $v0, 10\n");
+                text.append(DELIMITER + "syscall");
+                System.out.print(data);
+                System.out.print(text);
+                node.getEnd().apply(this);
+            }
         }
     }
 
@@ -78,27 +86,40 @@ class PrintTree extends DepthFirstAdapter {
     @Override
     public void caseAMethodDeclClassmethodstmt(AMethodDeclClassmethodstmt node) {
         if (node.getType() != null) {
+            String type = node.getType() instanceof AIdType
+                ? ((AIdType) node.getType()).toString().trim()
+                : ((ATypesType) node.getType()).toString().trim();
+            if(!type.equals("VOID")){
+                error.add("Method type must be VOID. Got " + type);
+            }
             node.getType().apply(this);
         }
         if (node.getId() != null) {
+            if(!node.getId().toString().trim().equals("MAIN")){
+                error.add("Method ID must be MAIN. Got " + node.getId().toString());
+            }
             node.getId().apply(this);
         }
         if (node.getLparen() != null) {
             node.getLparen().apply(this);
         }
         if (node.getVarlist() != null) {
+            // FIXME: BECAUSE ITS BROKEN
+            //error.add("Argument must be empty in method.");
             node.getVarlist().apply(this);
         }
         if (node.getRparen() != null) {
             node.getRparen().apply(this);
         }
         if (node.getLcurly() != null) {
+            currentScope++;
             node.getLcurly().apply(this);
         }
         if (node.getStmtseq() != null) {
             node.getStmtseq().apply(this);
         }
         if (node.getRcurly() != null) {
+            currentScope--;
             node.getRcurly().apply(this);
         }
     }
