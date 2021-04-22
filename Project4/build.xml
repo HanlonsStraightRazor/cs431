@@ -10,7 +10,7 @@
     <property name="regex" location="${src}/FinalProject.js"/>
     <property name="input" location="input"/>
     <property name="output" location="output"/>
-    <property name="error" location="error.log"/>
+    <property name="error" location="${output}/error.log"/>
 
     <target name="clean">
         <delete dir="${build}"/>
