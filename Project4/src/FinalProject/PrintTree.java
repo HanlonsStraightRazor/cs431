@@ -9,26 +9,39 @@ import java.util.*;
 * Authors: Ben Pink, Martin Mueller, Isaiah Ley
 */
 class PrintTree extends DepthFirstAdapter {
-    public static ArrayList<HashMap<String, Variable>> symbolTables = new ArrayList<HashMap<String, Variable>>();
-    StringBuilder textSB = new StringBuilder();
-    StringBuilder dataSB = new StringBuilder();
-    StringBuilder errorSB = new StringBuilder();
-
+    // Class variables
+    private static ArrayList<HashMap<String, Variable>> symbolTables;
+    private static StringBuilder text;
+    private static StringBuilder data;
+    private static StringBuilder error;
+    private static final String DELIMITER = "    ";
+    /*
+     * Constructor. Initializes non final class variables.
+     */
     public PrintTree() {
-        System.out.println("Start of the Printing Action");
+        symbolTables = new ArrayList<HashMap<String, Variable>>();
+        text  = new StringBuilder();
+        data  = new StringBuilder();
+        error = new StringBuilder();
     }
-
+    /*
+     * <Prog> ::= BEGIN <ClassMethodStmts> END
+     */
     @Override
     public void caseAProg(AProg node) {
-        dataSB.append(".data\n");
-        textSB.append(".text\n");
         if (node.getBegin() != null) {
+            data.append(DELIMITER + ".data\n\n");
+            text.append(DELIMITER + ".text\n\n");
             node.getBegin().apply(this);
         }
         if (node.getClassmethodstmts() != null) {
             node.getClassmethodstmts().apply(this);
         }
         if (node.getEnd() != null) {
+            text.append(DELIMITER + "li $v0, 10\n");
+            text.append(DELIMITER + "syscall");
+            System.out.print(data);
+            System.out.print(text);
             node.getEnd().apply(this);
         }
     }
@@ -41,10 +54,6 @@ class PrintTree extends DepthFirstAdapter {
         if (node.getClassmethodstmt() != null) {
             node.getClassmethodstmt().apply(this);
         }
-    }
-
-    @Override
-    public void caseAEpsilonClassmethodstmts(AEpsilonClassmethodstmts node) {
     }
 
     @Override
@@ -121,10 +130,6 @@ class PrintTree extends DepthFirstAdapter {
         if (node.getMethodstmtseq() != null) {
             node.getMethodstmtseq().apply(this);
         }
-    }
-
-    @Override
-    public void caseAEpsilonMethodstmtseqs(AEpsilonMethodstmtseqs node) {
     }
 
     @Override
@@ -346,10 +351,6 @@ class PrintTree extends DepthFirstAdapter {
         if (node.getStmtseq() != null) {
             node.getStmtseq().apply(this);
         }
-    }
-
-    @Override
-    public void caseAEpsilonStmtseq(AEpsilonStmtseq node) {
     }
 
     @Override
@@ -824,10 +825,6 @@ class PrintTree extends DepthFirstAdapter {
     }
 
     @Override
-    public void caseAEpsilonCaseHelper(AEpsilonCaseHelper node) {
-    }
-
-    @Override
     public void caseABreakBreakHelper(ABreakBreakHelper node) {
         if (node.getBreak() != null) {
             node.getBreak().apply(this);
@@ -835,10 +832,6 @@ class PrintTree extends DepthFirstAdapter {
         if (node.getSemicolon() != null) {
             node.getSemicolon().apply(this);
         }
-    }
-
-    @Override
-    public void caseAEpsilonBreakHelper(AEpsilonBreakHelper node) {
     }
 
     @Override
@@ -861,10 +854,6 @@ class PrintTree extends DepthFirstAdapter {
         if (node.getMethodChainingOption() != null) {
             node.getMethodChainingOption().apply(this);
         }
-    }
-
-    @Override
-    public void caseAEpsilonMethodChainingOption(AEpsilonMethodChainingOption node) {
     }
 
     @Override
@@ -908,10 +897,6 @@ class PrintTree extends DepthFirstAdapter {
     }
 
     @Override
-    public void caseAEpsilonForOptionalType(AEpsilonForOptionalType node) {
-    }
-
-    @Override
     public void caseAMoreIdsMoreIds(AMoreIdsMoreIds node) {
         if (node.getComma() != null) {
             node.getComma().apply(this);
@@ -922,10 +907,6 @@ class PrintTree extends DepthFirstAdapter {
         if (node.getMoreIds() != null) {
             node.getMoreIds().apply(this);
         }
-    }
-
-    @Override
-    public void caseAEpsilonMoreIds(AEpsilonMoreIds node) {
     }
 
     @Override
@@ -948,10 +929,6 @@ class PrintTree extends DepthFirstAdapter {
     }
 
     @Override
-    public void caseAEpsilonVarlist(AEpsilonVarlist node) {
-    }
-
-    @Override
     public void caseAArrayArrayOption(AArrayArrayOption node) {
         if (node.getLbracket() != null) {
             node.getLbracket().apply(this);
@@ -965,10 +942,6 @@ class PrintTree extends DepthFirstAdapter {
     }
 
     @Override
-    public void caseAEpsilonArrayOption(AEpsilonArrayOption node) {
-    }
-
-    @Override
     public void caseAMoreIdsMoreVarlist(AMoreIdsMoreVarlist node) {
         if (node.getComma() != null) {
             node.getComma().apply(this);
@@ -979,10 +952,6 @@ class PrintTree extends DepthFirstAdapter {
     }
 
     @Override
-    public void caseAEpsilonMoreVarlist(AEpsilonMoreVarlist node) {
-    }
-
-    @Override
     public void caseAVarListVarListTwo(AVarListVarListTwo node) {
         if (node.getExprOrBool() != null) {
             node.getExprOrBool().apply(this);
@@ -990,10 +959,6 @@ class PrintTree extends DepthFirstAdapter {
         if (node.getMoreVarListTwo() != null) {
             node.getMoreVarListTwo().apply(this);
         }
-    }
-
-    @Override
-    public void caseAEpsilonVarListTwo(AEpsilonVarListTwo node) {
     }
 
     @Override
@@ -1018,10 +983,6 @@ class PrintTree extends DepthFirstAdapter {
         if (node.getVarListTwo() != null) {
             node.getVarListTwo().apply(this);
         }
-    }
-
-    @Override
-    public void caseAEpsilonMoreVarListTwo(AEpsilonMoreVarListTwo node) {
     }
 
     @Override
