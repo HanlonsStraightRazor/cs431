@@ -22,6 +22,8 @@ class PrintTree extends DepthFirstAdapter {
      */
     public PrintTree() {
         symbolTables = new ArrayList<HashMap<String, Variable>>();
+        HashMap<String, Variable> scopeZeroHashMap = new HashMap<String, Variable>();
+        symbolTables.add(scopeZeroHashMap);
         error = new LinkedList<String>();
         text  = new StringBuilder();
         data  = new StringBuilder();
@@ -112,14 +114,14 @@ class PrintTree extends DepthFirstAdapter {
             node.getRparen().apply(this);
         }
         if (node.getLcurly() != null) {
-            currentScope++;
+            //currentScope++;
             node.getLcurly().apply(this);
         }
         if (node.getStmtseq() != null) {
             node.getStmtseq().apply(this);
         }
         if (node.getRcurly() != null) {
-            currentScope--;
+            //currentScope--;
             node.getRcurly().apply(this);
         }
     }
@@ -376,7 +378,9 @@ class PrintTree extends DepthFirstAdapter {
 
     @Override
     public void caseAAssignExprStmt(AAssignExprStmt node) {
+        String idVal = "";
         if (node.getId() != null) {
+            idVal = node.getId().toString().trim();
             node.getId().apply(this);
         }
         if (node.getArrayOption() != null) {
@@ -414,7 +418,9 @@ class PrintTree extends DepthFirstAdapter {
 
     @Override
     public void caseAVarDeclStmt(AVarDeclStmt node) {
+        String idVal = "", type = "";
         if (node.getId() != null) {
+            idVal = node.getId().toString().trim();
             node.getId().apply(this);
         }
         if (node.getMoreIds() != null) {
@@ -424,6 +430,9 @@ class PrintTree extends DepthFirstAdapter {
             node.getColon().apply(this);
         }
         if (node.getType() != null) {
+            type = node.getType() instanceof AIdType
+                ? ((AIdType) node.getType()).toString().trim()
+                : ((ATypesType) node.getType()).toString().trim();
             node.getType().apply(this);
         }
         if (node.getArrayOption() != null) {
@@ -432,6 +441,19 @@ class PrintTree extends DepthFirstAdapter {
         if (node.getSemicolon() != null) {
             node.getSemicolon().apply(this);
         }
+        if(symbolTables.size() <= currentScope){
+            HashMap<String, Variable> notinitialized = new HashMap<String, Variable>();
+            // FIXME: It's not initialized yet so it does not have a value
+            Variable newVar = new Variable(type, 0, offset);
+            notinitialized.put(idVal, newVar);
+            symbolTables.add(notinitialized);
+        } else {
+            // FIXME: It's not initialized yet so it does not have a value
+            Variable newVar = new Variable(type, 0, offset);
+            //hash map already is made for that scope
+            symbolTables.get(currentScope).put(idVal, newVar);
+        }
+        offset = offset + 4;
     }
 
     @Override

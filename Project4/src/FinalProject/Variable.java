@@ -1,20 +1,24 @@
 package FinalProject;
 
+/*
 enum Type {
     INT, REAL, STRING, BOOLEAN, VOID
 }
+*/
 
 class Variable {
-    private Type type;
+    private String type;
     private Object value;
-    public Variable(Type type, Object value) {
+    private int offset;
+    public Variable(String type, Object value, int offset) {
         this.type = type;
         this.value = value;
+        this.offset = offset;
     }
-    public Type getType() {
+    public String getType() {
         return type;
     }
-    public void setType(Type type) {
+    public void setType(String type) {
         this.type = type;
     }
     public Object getValue() {
@@ -22,5 +26,11 @@ class Variable {
     }
     public void setValue(Object value) {
         this.value = value;
+    }
+    public int getOffset() {
+        return offset;
+    }
+    public void setOffset(int offset) {
+        this.offset = offset;
     }
 }
