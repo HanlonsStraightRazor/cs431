@@ -7,7 +7,7 @@ class Array {
     private int offset;
     public Array(String type, int size, int offset) {
         this.type = type;
-        this.value = new Object[size];
+        this.values = new Object[size];
         this.size = size;
         this.offset = offset;
     }
