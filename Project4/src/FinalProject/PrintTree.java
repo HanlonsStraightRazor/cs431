@@ -1003,9 +1003,6 @@ class PrintTree extends DepthFirstAdapter {
                 data.append(idVal + ":\n");
                 if (typeVal.equals("BOOLEAN")) {
                     data.append(DELIMITER + ".byte 0:" + sizeVal + "\n");
-                } else if (typeVal.equals("STRING")) { // FIXME: Grammar is unclear about these
-                    data.append(DELIMITER
-                        + ".asciiz \"You're SOL here for now\"\n");
                 } else {
                     data.append(DELIMITER + ".word 0:" + sizeVal + "\n");
                 }
