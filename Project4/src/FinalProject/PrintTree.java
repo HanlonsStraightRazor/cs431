@@ -108,7 +108,7 @@ class PrintTree extends DepthFirstAdapter {
         }
         if (node.getVarlist() != null) {
             if (!node.getVarlist().toString().equals("")) {
-                error.add("Argument must be empty in method. Got " + node.getVarlist().outtoString());
+                error.add("Argument must be empty in method. Got " + node.getVarlist().toString());
             }
             node.getVarlist().apply(this);
         }
@@ -1100,7 +1100,14 @@ class PrintTree extends DepthFirstAdapter {
             if(node.parent().parent().parent() instanceof AAssignExprStmt){
                 Node AAssignExprStmtNode = node.parent().parent().parent();
                 idVal = ((AAssignExprStmt) AAssignExprStmtNode).getId().toString().trim();
-                text.append(idVal + " it worked!\n");
+                for(int i = currentScope; i >= 0; i--){
+                    if(symbolTables.get(i).containsKey(idVal)){
+                        Variable var = symbolTables.get(i).get(idVal);
+                        var.setValue(node.getInt());
+                        symbolTables.get(i).put(idVal, var);
+                        break;
+                    }
+                }
             }
             node.getInt().apply(this);
         }
