@@ -99,7 +99,8 @@ class PrintTree extends DepthFirstAdapter {
         }
         if (node.getId() != null) {
             if(!node.getId().toString().trim().equals("MAIN")){
-                error.add("Method ID must be MAIN. Got " + node.getId().toString());
+                error.add("Method ID must be MAIN. Got "
+                    + node.getId().toString());
             }
             node.getId().apply(this);
         }
@@ -107,8 +108,9 @@ class PrintTree extends DepthFirstAdapter {
             node.getLparen().apply(this);
         }
         if (node.getVarlist() != null) {
-            if (!node.getVarlist().toString().equals("")) {
-                error.add("Argument must be empty in method. Got " + node.getVarlist().toString());
+            if (!(node.getVarlist() instanceof AEpsilonVarlist)) {
+                error.add("Argument must be empty in method. Got "
+                    + node.getVarlist());
             }
             node.getVarlist().apply(this);
         }
