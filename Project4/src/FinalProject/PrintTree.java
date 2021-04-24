@@ -1095,7 +1095,13 @@ class PrintTree extends DepthFirstAdapter {
 
     @Override
     public void caseAIntFactor(AIntFactor node) {
+        String idVal;
         if (node.getInt() != null) {
+            if(node.parent().parent().parent() instanceof AAssignExprStmt){
+                Node AAssignExprStmtNode = node.parent().parent().parent();
+                idVal = ((AAssignExprStmt) AAssignExprStmtNode).getId().toString().trim();
+                text.append(idVal + " it worked!\n");
+            }
             node.getInt().apply(this);
         }
     }
