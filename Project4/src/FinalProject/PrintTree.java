@@ -10,7 +10,7 @@ import java.util.*;
 */
 class PrintTree extends DepthFirstAdapter {
     // Class variables
-    private static ArrayList<HashMap<String, Variable>> symbolTables;
+    private static ArrayList<HashMap<String, Symbol>> symbolTables;
     private static StringBuilder text;
     private static StringBuilder data;
     private static final String DELIMITER = "    ";
@@ -21,8 +21,8 @@ class PrintTree extends DepthFirstAdapter {
      * Constructor. Initializes non final class variables.
      */
     public PrintTree() {
-        symbolTables = new ArrayList<HashMap<String, Variable>>();
-        HashMap<String, Variable> scopeZeroHashMap = new HashMap<String, Variable>();
+        symbolTables = new ArrayList<HashMap<String, Symbol>>();
+        HashMap<String, Symbol> scopeZeroHashMap = new HashMap<String, Symbol>();
         symbolTables.add(scopeZeroHashMap);
         error = new LinkedList<String>();
         text  = new StringBuilder();
@@ -423,6 +423,7 @@ class PrintTree extends DepthFirstAdapter {
     @Override
     public void caseAVarDeclStmt(AVarDeclStmt node) {
         String idVal = "", type = "";
+        boolean isArray = false;
         if (node.getId() != null) {
             idVal = node.getId().toString().trim();
             node.getId().apply(this);
@@ -440,22 +441,27 @@ class PrintTree extends DepthFirstAdapter {
             node.getType().apply(this);
         }
         if (node.getArrayOption() != null) {
+            if(node.getArrayOption() instanceof AArrayArrayOption){
+                isArray = true;
+            }
             node.getArrayOption().apply(this);
         }
         if (node.getSemicolon() != null) {
             node.getSemicolon().apply(this);
         }
-        if(symbolTables.size() <= currentScope){
-            HashMap<String, Variable> notinitialized = new HashMap<String, Variable>();
-            Variable newVar = new Variable(type, offset);
-            notinitialized.put(idVal, newVar);
-            symbolTables.add(notinitialized);
-        } else {
-            Variable newVar = new Variable(type, offset);
-            //hash map already is made for that scope
-            symbolTables.get(currentScope).put(idVal, newVar);
+        if(!isArray){
+            if(symbolTables.size() <= currentScope){
+                HashMap<String, Symbol> notinitialized = new HashMap<String, Symbol>();
+                Variable newVar = new Variable(type, offset);
+                notinitialized.put(idVal, newVar);
+                symbolTables.add(notinitialized);
+            } else {
+                Variable newVar = new Variable(type, offset);
+                //hash map already is made for that scope
+                symbolTables.get(currentScope).put(idVal, newVar);
+            }
+            offset = offset + 4;
         }
-        offset = offset + 4;
     }
 
     @Override
@@ -979,6 +985,20 @@ class PrintTree extends DepthFirstAdapter {
             node.getLbracket().apply(this);
         }
         if (node.getInt() != null) {
+            if(node.parent() instanceof AVarDeclStmt){
+                String idVal = "", typeVal = "";
+                Node AVarDeclStmtNode = node.parent();
+                idVal = ((AVarDeclStmt) AVarDeclStmtNode).getId().toString().trim();
+                typeVal = ((AVarDeclStmt) AVarDeclStmtNode).getType().toString().trim();
+                Array arr = new Array(typeVal, Integer.parseInt(node.getInt().toString().trim()));
+                if(symbolTables.size() <= currentScope){
+                    HashMap<String, Symbol> notinitialized = new HashMap<String, Symbol>();
+                    notinitialized.put(idVal, arr);
+                    symbolTables.add(notinitialized);
+                } else {
+                    symbolTables.get(currentScope).put(idVal, arr);
+                }
+            }
             node.getInt().apply(this);
         }
         if (node.getRbracket() != null) {
@@ -1103,13 +1123,15 @@ class PrintTree extends DepthFirstAdapter {
                 idVal = ((AAssignExprStmt) AAssignExprStmtNode).getId().toString().trim();
                 for(int i = currentScope; i >= 0; i--){
                     if(symbolTables.get(i).containsKey(idVal)){
-                        found = true;
-                        Variable var = symbolTables.get(i).get(idVal);
-                        var.setValue(node.getInt());
-                        symbolTables.get(i).put(idVal, var);
-                        text.append(DELIMITER + "li $t0, " + var.getValue() + "\n");
-                        text.append(DELIMITER + "sw $t0, " + var.getOffset() + "($sp)\n");
-                        break;
+                        Symbol var = symbolTables.get(i).get(idVal);
+                        if(var instanceof Variable){
+                            found = true;
+                            ((Variable)var).setValue(node.getInt());
+                            symbolTables.get(i).put(idVal, ((Variable)var));
+                            text.append(DELIMITER + "li $t0, " + ((Variable)var).getValue() + "\n");
+                            text.append(DELIMITER + "sw $t0, " + ((Variable)var).getOffset() + "($sp)\n");
+                            break;
+                        }
                     }
                 }
                 if (found == false){
@@ -1130,13 +1152,15 @@ class PrintTree extends DepthFirstAdapter {
                 idVal = ((AAssignExprStmt) AAssignExprStmtNode).getId().toString().trim();
                 for(int i = currentScope; i >= 0; i--){
                     if(symbolTables.get(i).containsKey(idVal)){
-                        found = true;
-                        Variable var = symbolTables.get(i).get(idVal);
-                        var.setValue(node.getReal());
-                        symbolTables.get(i).put(idVal, var);
-                        text.append(DELIMITER + "li $t0, " + var.getValue() + "\n");
-                        text.append(DELIMITER + "sw $t0, " + var.getOffset() + "($sp)\n");
-                        break;
+                        Symbol var = symbolTables.get(i).get(idVal);
+                        if(var instanceof Variable){
+                            found = true;
+                            ((Variable)var).setValue(node.getReal());
+                            symbolTables.get(i).put(idVal, ((Variable)var));
+                            text.append(DELIMITER + "li $t0, " + ((Variable)var).getValue() + "\n");
+                            text.append(DELIMITER + "sw $t0, " + ((Variable)var).getOffset() + "($sp)\n");
+                            break;
+                        }
                     }
                 }
                 if (found == false){
