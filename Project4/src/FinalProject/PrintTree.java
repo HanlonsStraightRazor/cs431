@@ -1096,12 +1096,14 @@ class PrintTree extends DepthFirstAdapter {
     @Override
     public void caseAIntFactor(AIntFactor node) {
         String idVal;
+        boolean found = false;
         if (node.getInt() != null) {
             if(node.parent().parent().parent() instanceof AAssignExprStmt){
                 Node AAssignExprStmtNode = node.parent().parent().parent();
                 idVal = ((AAssignExprStmt) AAssignExprStmtNode).getId().toString().trim();
                 for(int i = currentScope; i >= 0; i--){
                     if(symbolTables.get(i).containsKey(idVal)){
+                        found = true;
                         Variable var = symbolTables.get(i).get(idVal);
                         var.setValue(node.getInt());
                         symbolTables.get(i).put(idVal, var);
@@ -1109,6 +1111,9 @@ class PrintTree extends DepthFirstAdapter {
                         text.append(DELIMITER + "sw $t0, " + var.getOffset() + "($sp)\n");
                         break;
                     }
+                }
+                if (found == false){
+                    error.add("Variable " + idVal + " has not been declared.");
                 }
             }
             node.getInt().apply(this);
@@ -1118,12 +1123,14 @@ class PrintTree extends DepthFirstAdapter {
     @Override
     public void caseARealFactor(ARealFactor node) {
         String idVal;
+        boolean found = false;
         if (node.getReal() != null) {
             if(node.parent().parent().parent() instanceof AAssignExprStmt){
                 Node AAssignExprStmtNode = node.parent().parent().parent();
                 idVal = ((AAssignExprStmt) AAssignExprStmtNode).getId().toString().trim();
                 for(int i = currentScope; i >= 0; i--){
                     if(symbolTables.get(i).containsKey(idVal)){
+                        found = true;
                         Variable var = symbolTables.get(i).get(idVal);
                         var.setValue(node.getReal());
                         symbolTables.get(i).put(idVal, var);
@@ -1131,6 +1138,9 @@ class PrintTree extends DepthFirstAdapter {
                         text.append(DELIMITER + "sw $t0, " + var.getOffset() + "($sp)\n");
                         break;
                     }
+                }
+                if (found == false){
+                    error.add("Variable " + idVal + " has not been declared.");
                 }
             }
             node.getReal().apply(this);
