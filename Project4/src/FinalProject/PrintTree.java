@@ -476,6 +476,33 @@ class PrintTree extends DepthFirstAdapter {
             node.getLparen().apply(this);
         }
         if (node.getBoolid() != null) {
+            boolean boolVal = false;
+            if(node.getBoolid() instanceof ABoolBoolid){
+                boolean found = false;
+                String idVal = ((AIdBoolid) node.getBoolid()).getId().toString().trim();
+                for(int i = currentScope; i >= 0; i--){
+                    if(symbolTables.get(i).containsKey(idVal)){
+                        Symbol var = symbolTables.get(i).get(idVal);
+                        if(var instanceof Variable){
+                            if(!((Variable) var).getType().toString().equals("BOOLEAN")){
+                                error.add("Variable " + idVal + " has type " + ((Variable) var).getType() + " which cannot be converted to BOOLEAN.");
+                                return;
+                            }
+                            found = true;
+                            if((boolean)((Variable)var).getValue()){
+                                boolVal = true;
+                            }
+                            break;
+                        }
+                    }
+                }
+                if (found == false){
+                    error.add("Variable " + idVal + " has not been declared.");
+                }
+            } else {
+                //ATrueBoolean, AFalseBoolean, or AConditionalBoolean
+                //add stuff
+            }
             node.getBoolid().apply(this);
         }
         if (node.getRparen() != null) {
