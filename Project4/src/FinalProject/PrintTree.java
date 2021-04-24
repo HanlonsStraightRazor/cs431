@@ -1096,7 +1096,7 @@ class PrintTree extends DepthFirstAdapter {
     @Override
     public void caseAIntFactor(AIntFactor node) {
         String idVal;
-        Bool found = false;
+        boolean found = false;
         if (node.getInt() != null) {
             if(node.parent().parent().parent() instanceof AAssignExprStmt){
                 Node AAssignExprStmtNode = node.parent().parent().parent();
@@ -1113,7 +1113,7 @@ class PrintTree extends DepthFirstAdapter {
                     }
                 }
                 if (found == false){
-                    error.add("Variable " + idVal + " has not been declared.")
+                    error.add("Variable " + idVal + " has not been declared.");
                 }
             }
             node.getInt().apply(this);
@@ -1123,7 +1123,7 @@ class PrintTree extends DepthFirstAdapter {
     @Override
     public void caseARealFactor(ARealFactor node) {
         String idVal;
-        Bool found = false;
+        boolean found = false;
         if (node.getReal() != null) {
             if(node.parent().parent().parent() instanceof AAssignExprStmt){
                 Node AAssignExprStmtNode = node.parent().parent().parent();
@@ -1140,7 +1140,7 @@ class PrintTree extends DepthFirstAdapter {
                     }
                 }
                 if (found == false){
-                    error.add("Variable " + idVal + " has not been declared.")
+                    error.add("Variable " + idVal + " has not been declared.");
                 }
             }
             node.getReal().apply(this);
