@@ -8,7 +8,6 @@ class Array {
         this.type = type;
         this.values = new Object[size];
         this.size = size;
-        this.offset = offset;
     }
     public String getType() {
         return type;
@@ -21,5 +20,8 @@ class Array {
     }
     public void setValueAt(int index, Object value) {
         values[index] = value;
+    }
+    public int getSize() {
+        return size;
     }
 }
