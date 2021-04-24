@@ -1105,6 +1105,8 @@ class PrintTree extends DepthFirstAdapter {
                         Variable var = symbolTables.get(i).get(idVal);
                         var.setValue(node.getInt());
                         symbolTables.get(i).put(idVal, var);
+                        text.append(DELIMITER + "li $t0, " + var.getValue() + "\n");
+                        text.append(DELIMITER + "sw $t0, " + var.getOffset() + "($sp)\n");
                         break;
                     }
                 }
@@ -1115,7 +1117,22 @@ class PrintTree extends DepthFirstAdapter {
 
     @Override
     public void caseARealFactor(ARealFactor node) {
+        String idVal;
         if (node.getReal() != null) {
+            if(node.parent().parent().parent() instanceof AAssignExprStmt){
+                Node AAssignExprStmtNode = node.parent().parent().parent();
+                idVal = ((AAssignExprStmt) AAssignExprStmtNode).getId().toString().trim();
+                for(int i = currentScope; i >= 0; i--){
+                    if(symbolTables.get(i).containsKey(idVal)){
+                        Variable var = symbolTables.get(i).get(idVal);
+                        var.setValue(node.getReal());
+                        symbolTables.get(i).put(idVal, var);
+                        text.append(DELIMITER + "li $t0, " + var.getValue() + "\n");
+                        text.append(DELIMITER + "sw $t0, " + var.getOffset() + "($sp)\n");
+                        break;
+                    }
+                }
+            }
             node.getReal().apply(this);
         }
     }
