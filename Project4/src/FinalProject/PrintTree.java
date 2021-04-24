@@ -14,6 +14,8 @@ class PrintTree extends DepthFirstAdapter {
     private static StringBuilder text;
     private static StringBuilder data;
     private static final String DELIMITER = "    ";
+    private static final String LABELPREFIX = "label";
+    private static int labelnum;
     private static int offset = 0;
     private static Queue<String> error;
     private static int currentScope = 0;
@@ -27,6 +29,7 @@ class PrintTree extends DepthFirstAdapter {
         error = new LinkedList<String>();
         text  = new StringBuilder();
         data  = new StringBuilder();
+        labelnum = 0;
     }
     /*
      * <Prog> ::= BEGIN <ClassMethodStmts> END
