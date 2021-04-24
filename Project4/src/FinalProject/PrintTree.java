@@ -44,7 +44,7 @@ class PrintTree extends DepthFirstAdapter {
         if (node.getEnd() != null) {
             if(!error.isEmpty()){
                 for(String er : error){
-                    System.out.println(er);
+                    System.err.println(er);
                 }
             } else {
                 text.append(DELIMITER + "li $v0, 10\n");

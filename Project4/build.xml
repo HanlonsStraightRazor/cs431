@@ -10,13 +10,11 @@
     <property name="regex" location="${src}/FinalProject.js"/>
     <property name="input" location="input"/>
     <property name="output" location="output"/>
-    <property name="error" location="${output}/error.log"/>
 
     <target name="clean">
         <delete dir="${build}"/>
         <delete dir="${src}/${ant.project.name}"/>
         <delete dir="${output}"/>
-        <delete file="${error}"/>
     </target>
 
     <target name="genlex">
@@ -49,22 +47,19 @@
             classname="${ant.project.name}.Main"
             classpath="${build}"
             input="${input}/prog1.txt"
-            output="${output}/prog1.s"
-            error="${error}"/>
+            output="${output}/prog1.s"/>
         <echo message="TEST 2..."/>
         <java
             classname="${ant.project.name}.Main"
             classpath="${build}"
             input="${input}/prog2.txt"
-            output="${output}/prog2.s"
-            error="${error}"/>
+            output="${output}/prog2.s"/>
         <echo message="TEST 3..."/>
         <java
             classname="${ant.project.name}.Main"
             classpath="${build}"
             input="${input}/prog3.txt"
-            output="${output}/prog3.s"
-            error="${error}"/>
+            output="${output}/prog3.s"/>
     </target>
 
     <target name="all">
