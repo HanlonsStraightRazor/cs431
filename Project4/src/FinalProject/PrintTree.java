@@ -1154,6 +1154,10 @@ class PrintTree extends DepthFirstAdapter {
                     if(symbolTables.get(i).containsKey(idVal)){
                         Symbol var = symbolTables.get(i).get(idVal);
                         if(var instanceof Variable){
+                            if(((Variable) var).getType().equals("INT")){
+                                error.add("Type " + node.getType().toString().trim() + " cannot be converted to INT.");
+                                return;
+                            }
                             found = true;
                             ((Variable)var).setValue(node.getReal());
                             symbolTables.get(i).put(idVal, ((Variable)var));
