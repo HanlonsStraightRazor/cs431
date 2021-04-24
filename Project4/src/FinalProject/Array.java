@@ -1,6 +1,6 @@
 package FinalProject;
 
-class Array {
+class Array extends Symbol {
     private String type;
     private Object[] values;
     private int size;
