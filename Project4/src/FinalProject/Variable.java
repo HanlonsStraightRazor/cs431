@@ -1,6 +1,6 @@
 package FinalProject;
 
-class Variable {
+class Variable extends Symbol {
     private String type;
     private Object value;
     private int offset;
