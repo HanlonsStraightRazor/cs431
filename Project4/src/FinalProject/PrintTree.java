@@ -445,13 +445,11 @@ class PrintTree extends DepthFirstAdapter {
         }
         if(symbolTables.size() <= currentScope){
             HashMap<String, Variable> notinitialized = new HashMap<String, Variable>();
-            // FIXME: It's not initialized yet so it does not have a value
-            Variable newVar = new Variable(type, 0, offset);
+            Variable newVar = new Variable(type, offset);
             notinitialized.put(idVal, newVar);
             symbolTables.add(notinitialized);
         } else {
-            // FIXME: It's not initialized yet so it does not have a value
-            Variable newVar = new Variable(type, 0, offset);
+            Variable newVar = new Variable(type, offset);
             //hash map already is made for that scope
             symbolTables.get(currentScope).put(idVal, newVar);
         }
