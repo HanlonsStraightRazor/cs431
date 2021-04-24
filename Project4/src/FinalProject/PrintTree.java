@@ -1166,7 +1166,7 @@ class PrintTree extends DepthFirstAdapter {
                         if(var instanceof Variable){
                             if(!(((Variable) var).getType().equals("INT")  || ((Variable) var).getType().equals("REAL"))){
                                 error.add("Variable " + idVal + " has type " + ((Variable) var).getType() + " which cannot be converted to INT.");
-                                return;
+                                break;
                             }
                             found = true;
                             ((Variable)var).setValue(node.getInt());
@@ -1199,7 +1199,7 @@ class PrintTree extends DepthFirstAdapter {
                         if(var instanceof Variable){
                             if(!((Variable) var).getType().equals("REAL")){
                                 error.add("Variable " + idVal + " has type " + ((Variable) var).getType() + " which cannot be converted to REAL.");
-                                return;
+                                break;
                             }
                             found = true;
                             ((Variable)var).setValue(node.getReal());
