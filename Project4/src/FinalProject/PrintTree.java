@@ -69,6 +69,7 @@ class PrintTree extends DepthFirstAdapter {
     @Override
     public void caseAClassDefClassmethodstmt(AClassDefClassmethodstmt node) {
         if (node.getClassLit() != null) {
+            error.add("Erroneous class definition.");
             node.getClassLit().apply(this);
         }
         if (node.getId() != null) {
@@ -106,8 +107,9 @@ class PrintTree extends DepthFirstAdapter {
             node.getLparen().apply(this);
         }
         if (node.getVarlist() != null) {
-            // FIXME: BECAUSE ITS BROKEN
-            //error.add("Argument must be empty in method.");
+            if (!node.getVarlist().toString().equals("")) {
+                error.add("Argument must be empty in method. Got " + node.getVarlist().outtoString());
+            }
             node.getVarlist().apply(this);
         }
         if (node.getRparen() != null) {
