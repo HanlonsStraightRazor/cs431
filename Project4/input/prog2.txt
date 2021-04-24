@@ -1,5 +1,10 @@
 BEGIN
   VOID MAIN() {
+    bool : BOOLEAN [5];
+    str : STRING [6];
+    integer : INT [7];
+    realnum : REAL [8];
+    voidt : VOID [9];
     idOne : INT;
     idTwo : INT;
     idPie : REAL;

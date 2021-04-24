@@ -987,10 +987,12 @@ class PrintTree extends DepthFirstAdapter {
         if (node.getInt() != null) {
             if(node.parent() instanceof AVarDeclStmt){
                 String idVal = "", typeVal = "";
+                int sizeVal = 0;
                 Node AVarDeclStmtNode = node.parent();
                 idVal = ((AVarDeclStmt) AVarDeclStmtNode).getId().toString().trim();
                 typeVal = ((AVarDeclStmt) AVarDeclStmtNode).getType().toString().trim();
-                Array arr = new Array(typeVal, Integer.parseInt(node.getInt().toString().trim()));
+                sizeVal = Integer.parseInt(node.getInt().toString().trim());
+                Array arr = new Array(typeVal, sizeVal);
                 if(symbolTables.size() <= currentScope){
                     HashMap<String, Symbol> notinitialized = new HashMap<String, Symbol>();
                     notinitialized.put(idVal, arr);
@@ -998,6 +1000,16 @@ class PrintTree extends DepthFirstAdapter {
                 } else {
                     symbolTables.get(currentScope).put(idVal, arr);
                 }
+                data.append(idVal + ":\n");
+                if (typeVal.equals("BOOLEAN")) {
+                    data.append(DELIMITER + ".byte 0:" + sizeVal + "\n");
+                } else if (typeVal.equals("STRING")) { // FIXME: Grammar is unclear about these
+                    data.append(DELIMITER
+                        + ".asciiz \"You're SOL here for now\"\n");
+                } else {
+                    data.append(DELIMITER + ".word 0:" + sizeVal + "\n");
+                }
+                data.append("\n");
             }
             node.getInt().apply(this);
         }
