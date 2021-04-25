@@ -1,6 +1,23 @@
 BEGIN
   VOID MAIN() {
-    boolOne     : BOOLEAN [5] ;
-    boolOne [0] := TRUE;
+    var        :  BOOLEAN;
+    var        := TRUE;
+    num        :  INT;
+    num        := 1;
+    boolOne    :  BOOLEAN [5] ;
+    boolOne[0] := TRUE;
+    IF (var) THEN {
+        var := FALSE;
+    } ELSE {
+        var := TRUE;
+        IF (TRUE) THEN {
+            num := 2;
+        }
+        IF (FALSE) THEN {
+            num := 4;
+        } ELSE {
+            num := 3;
+        }
+    }
  }
 END

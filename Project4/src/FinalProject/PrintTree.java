@@ -553,6 +553,12 @@ class PrintTree extends DepthFirstAdapter {
 
     @Override
     public void caseAIfElseBlockStmt(AIfElseBlockStmt node) {
+        String falselabel = LABELPREFIX
+            + labelnum;
+        String endlabel = LABELPREFIX
+            + (labelnum + 1);
+        boolean isConstant = false;
+        boolean constant = false;
         if (node.getIf() != null) {
             node.getIf().apply(this);
         }
@@ -560,6 +566,50 @@ class PrintTree extends DepthFirstAdapter {
             node.getLparen().apply(this);
         }
         if (node.getBoolid() != null) {
+            if(node.getBoolid() instanceof AIdBoolid){
+                boolean found = false;
+                String idVal = ((AIdBoolid) node.getBoolid()).getId().toString().trim();
+                for(int i = currentScope; i >= 0; i--){
+                    if(symbolTables.get(i).containsKey(idVal)){
+                        Symbol var = symbolTables.get(i).get(idVal);
+                        if(var instanceof Variable){
+                            if(!((Variable) var).getType().toString().equals("BOOLEAN")){
+                                error.add("Variable "
+                                    + idVal
+                                    + " has type "
+                                    + ((Variable) var).getType()
+                                    + " which cannot be converted to BOOLEAN.");
+                                break;
+                            }
+                            found = true;
+                            labelnum += 2;
+                        }
+                        text.append(DELIMITER
+                            + "lw $t0, "
+                            + ((Variable) var).getOffset()
+                            + "($sp)\n");
+                        text.append(DELIMITER
+                            + "beq $zero, $t0, "
+                            + falselabel
+                            + "\n");
+                    }
+                }
+                if (found == false){
+                    error.add("Variable "
+                        + idVal
+                        + " has not been declared.");
+                }
+            } else {
+                ABoolBoolid ABoolBoolidNode = (ABoolBoolid)node.getBoolid();
+                if((ABoolBoolidNode.getBoolean()) instanceof ATrueBoolean){
+                    isConstant = true;
+                    constant = true;
+                } else if((ABoolBoolidNode.getBoolean()) instanceof AFalseBoolean){
+                    isConstant = true;
+                } else if((ABoolBoolidNode.getBoolean()) instanceof AConditionalBoolean){
+
+                }
+            }
             node.getBoolid().apply(this);
         }
         if (node.getRparen() != null) {
@@ -572,9 +622,13 @@ class PrintTree extends DepthFirstAdapter {
             node.getIflcurly().apply(this);
         }
         if (node.getIfBlockStmts() != null) {
-            node.getIfBlockStmts().apply(this);
+            if (constant) {
+                node.getIfBlockStmts().apply(this);
+            }
         }
         if (node.getIfrcurly() != null) {
+            text.append(DELIMITER + "j "
+                + endlabel + "\n");
             node.getIfrcurly().apply(this);
         }
         if (node.getElse() != null) {
@@ -584,9 +638,19 @@ class PrintTree extends DepthFirstAdapter {
             node.getElselcurly().apply(this);
         }
         if (node.getElseBlockStmts() != null) {
-            node.getElseBlockStmts().apply(this);
+            if (!isConstant) {
+                text.append(falselabel
+                    + ":\n");
+            }
+            if (!isConstant || !constant) {
+                node.getElseBlockStmts().apply(this);
+            }
         }
         if (node.getElsercurly() != null) {
+            if (!isConstant) {
+                text.append(endlabel
+                    + ":\n");
+            }
             node.getElsercurly().apply(this);
         }
     }
