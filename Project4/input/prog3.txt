@@ -1,12 +1,6 @@
 BEGIN
   VOID MAIN() {
-    boolOne : BOOLEAN;
-    boolOne := TRUE;
-    IF (boolOne) THEN {
-        idOne : INT;
-    }
-    IF (FALSE) THEN {
-        idTwo : INT;
-    }
+    boolOne     : BOOLEAN [5] ;
+    boolOne [0] := TRUE;
  }
 END

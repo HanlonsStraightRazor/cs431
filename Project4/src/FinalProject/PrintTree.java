@@ -907,65 +907,69 @@ class PrintTree extends DepthFirstAdapter {
     @Override
     public void caseAAssignBooleanStmt(AAssignBooleanStmt node) {
         String idVal = "";
-        boolean arrayOption = false;
+        boolean isArray = false;
         if (node.getId() != null) {
             idVal = node.getId().toString().trim();
             node.getId().apply(this);
         }
         if (node.getArrayOption() != null) {
-            arrayOption = true;
+            if(node.getArrayOption() instanceof AArrayArrayOption){
+                isArray = true;
+            }
             node.getArrayOption().apply(this);
         }
         if (node.getEquals() != null) {
             node.getEquals().apply(this);
         }
         if (node.getBoolean() != null) {
-            if(node.getBoolean() instanceof ATrueBoolean){
-                boolean found = false;
-                for(int i = currentScope; i >= 0; i--){
-                    if(symbolTables.get(i).containsKey(idVal)){
-                        Symbol var = symbolTables.get(i).get(idVal);
-                        if(var instanceof Variable){
-                            if(!((Variable) var).getType().equals("BOOLEAN")){
-                                error.add("Variable " + idVal + " has type " + ((Variable) var).getType() + " which cannot be converted to BOOLEAN.");
+            if(!isArray){
+                if(node.getBoolean() instanceof ATrueBoolean){
+                    boolean found = false;
+                    for(int i = currentScope; i >= 0; i--){
+                        if(symbolTables.get(i).containsKey(idVal)){
+                            Symbol var = symbolTables.get(i).get(idVal);
+                            if(var instanceof Variable){
+                                if(!((Variable) var).getType().equals("BOOLEAN")){
+                                    error.add("Variable " + idVal + " has type " + ((Variable) var).getType() + " which cannot be converted to BOOLEAN.");
+                                    break;
+                                }
+                                found = true;
+                                ((Variable)var).setValue(true);
+                                symbolTables.get(i).put(idVal, ((Variable)var));
+                                text.append(DELIMITER + "li $t0, " + 1 + "\n");
+                                text.append(DELIMITER + "sw $t0, " + ((Variable)var).getOffset() + "($sp)\n");
                                 break;
                             }
-                            found = true;
-                            ((Variable)var).setValue(true);
-                            symbolTables.get(i).put(idVal, ((Variable)var));
-                            text.append(DELIMITER + "li $t0, " + 1 + "\n");
-                            text.append(DELIMITER + "sw $t0, " + ((Variable)var).getOffset() + "($sp)\n");
-                            break;
                         }
                     }
-                }
-                if (found == false){
-                    error.add("Variable " + idVal + " has not been declared.");
-                }
-            } else if(node.getBoolean() instanceof AFalseBoolean){
-                boolean found = false;
-                for(int i = currentScope; i >= 0; i--){
-                    if(symbolTables.get(i).containsKey(idVal)){
-                        Symbol var = symbolTables.get(i).get(idVal);
-                        if(var instanceof Variable){
-                            if(!((Variable) var).getType().equals("BOOLEAN")){
-                                error.add("Variable " + idVal + " has type " + ((Variable) var).getType() + " which cannot be converted to BOOLEAN.");
+                    if (found == false){
+                        error.add("Variable " + idVal + " has not been declared.");
+                    }
+                } else if(node.getBoolean() instanceof AFalseBoolean){
+                    boolean found = false;
+                    for(int i = currentScope; i >= 0; i--){
+                        if(symbolTables.get(i).containsKey(idVal)){
+                            Symbol var = symbolTables.get(i).get(idVal);
+                            if(var instanceof Variable){
+                                if(!((Variable) var).getType().equals("BOOLEAN")){
+                                    error.add("Variable " + idVal + " has type " + ((Variable) var).getType() + " which cannot be converted to BOOLEAN.");
+                                    break;
+                                }
+                                found = true;
+                                ((Variable)var).setValue(false);
+                                symbolTables.get(i).put(idVal, ((Variable)var));
+                                text.append(DELIMITER + "li $t0, " + 0 + "\n");
+                                text.append(DELIMITER + "sw $t0, " + ((Variable)var).getOffset() + "($sp)\n");
                                 break;
                             }
-                            found = true;
-                            ((Variable)var).setValue(false);
-                            symbolTables.get(i).put(idVal, ((Variable)var));
-                            text.append(DELIMITER + "li $t0, " + 0 + "\n");
-                            text.append(DELIMITER + "sw $t0, " + ((Variable)var).getOffset() + "($sp)\n");
-                            break;
                         }
                     }
+                    if (found == false){
+                        error.add("Variable " + idVal + " has not been declared.");
+                    }
+                } else if(node.getBoolean() instanceof AConditionalBoolean){
+                    //FIXME : AConditionalBoolean has not been implemented yet
                 }
-                if (found == false){
-                    error.add("Variable " + idVal + " has not been declared.");
-                }
-            } else if(node.getBoolean() instanceof AConditionalBoolean){
-                //FIXME : AConditionalBoolean has not been implemented yet
             }
             node.getBoolean().apply(this);
         }
@@ -1203,7 +1207,44 @@ class PrintTree extends DepthFirstAdapter {
             } else if(node.parent() instanceof ADecrStmt){
                 //FIXME
             } else if(node.parent() instanceof AAssignBooleanStmt){
-                //FIXME
+                String idVal = "";
+                int index = 0;
+                boolean found = false;
+                AAssignBooleanStmt AAssignBooleanStmtNode = (AAssignBooleanStmt)node.parent();
+                idVal = AAssignBooleanStmtNode.getId().toString().trim();
+                index = Integer.parseInt(node.getInt().toString().trim());
+                for(int i = currentScope; i >= 0; i--){
+                    if(symbolTables.get(i).containsKey(idVal)){
+                        Symbol var = symbolTables.get(i).get(idVal);
+                        if(var instanceof Array){
+                            if(!((Array) var).getType().equals("BOOLEAN")){
+                                error.add("Array " + idVal + " has type " + ((Variable) var).getType() + " which cannot be converted to BOOLEAN.");
+                                break;
+                            }
+                            found = true;
+                            Node boolNode = AAssignBooleanStmtNode.getBoolean();
+                            if(boolNode instanceof ATrueBoolean){
+                                ((Array)var).setValueAt(index, true);
+                                symbolTables.get(i).put(idVal, ((Array)var));
+                                text.append(DELIMITER + "li $t0, " + 1 + "\n");
+                                text.append(DELIMITER + "la $t1, " + idVal + "\n");
+                                text.append(DELIMITER + "sw $t0, " + Integer.toString(index).trim() + "($t1)\n");
+                            } else if(boolNode instanceof AFalseBoolean){
+                                ((Array)var).setValueAt(index, false);
+                                symbolTables.get(i).put(idVal, ((Array)var));
+                                text.append(DELIMITER + "li $t0, " + 0 + "\n");
+                                text.append(DELIMITER + "la $t1, " + idVal + "\n");
+                                text.append(DELIMITER + "sw $t0, " + Integer.toString(index).trim() + "($t1)\n");
+                            } else if(boolNode instanceof AConditionalBoolean){
+                                //FIXME : AConditionalBoolean
+                            }
+                            break;
+                        }
+                    }
+                }
+                if (found == false){
+                    error.add("Array " + idVal + " has not been declared.");
+                }
             }
             node.getInt().apply(this);
         }
