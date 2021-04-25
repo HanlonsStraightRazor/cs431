@@ -1426,6 +1426,9 @@ class PrintTree extends DepthFirstAdapter {
         }
         if (node.getFactor() != null) {
             node.getFactor().apply(this);
+            text.append(DELIMITER + "li $t0, -1\n");
+            text.append(DELIMITER + "mul $t0, $s0\n");
+            text.append(DELIMITER + "mflo $s0\n");
         }
     }
 
