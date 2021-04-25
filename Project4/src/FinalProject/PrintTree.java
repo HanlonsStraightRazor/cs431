@@ -514,15 +514,38 @@ class PrintTree extends DepthFirstAdapter {
         }
         if (node.getBoolid() != null) {
             if(node.getBoolid() instanceof AIdBoolid){
-                labelnum++;
-                text.append(DELIMITER
-                    + "lw $t0, "
-                    + ((Variable) var).getOffset()
-                    + "($sp)\n");
-                text.append(DELIMITER
-                    + "beq $zero, $t0, "
-                    + falselabel
-                    + "\n");
+                boolean found = false;
+                String idVal = ((AIdBoolid) node.getBoolid()).getId().toString().trim();
+                for(int i = currentScope; i >= 0; i--){
+                    if(symbolTables.get(i).containsKey(idVal)){
+                        Symbol var = symbolTables.get(i).get(idVal);
+                        if(var instanceof Variable){
+                            if(!((Variable) var).getType().toString().equals("BOOLEAN")){
+                                error.add("Variable "
+                                    + idVal
+                                    + " has type "
+                                    + ((Variable) var).getType()
+                                    + " which cannot be converted to BOOLEAN.");
+                                break;
+                            }
+                            found = true;
+                            labelnum++;
+                        }
+                        text.append(DELIMITER
+                            + "lw $t0, "
+                            + ((Variable) var).getOffset()
+                            + "($sp)\n");
+                        text.append(DELIMITER
+                            + "beq $zero, $t0, "
+                            + falselabel
+                            + "\n");
+                    }
+                }
+                if (found == false){
+                    error.add("Variable "
+                        + idVal
+                        + " has not been declared.");
+                }
             } else {
                 ABoolBoolid ABoolBoolidNode = (ABoolBoolid)node.getBoolid();
                 if((ABoolBoolidNode.getBoolean()) instanceof ATrueBoolean){
@@ -576,15 +599,38 @@ class PrintTree extends DepthFirstAdapter {
         }
         if (node.getBoolid() != null) {
             if(node.getBoolid() instanceof AIdBoolid){
-                labelnum += 2;
-                text.append(DELIMITER
-                    + "lw $t0, "
-                    + ((Variable) var).getOffset()
-                    + "($sp)\n");
-                text.append(DELIMITER
-                    + "beq $zero, $t0, "
-                    + falselabel
-                    + "\n");
+                boolean found = false;
+                String idVal = ((AIdBoolid) node.getBoolid()).getId().toString().trim();
+                for(int i = currentScope; i >= 0; i--){
+                    if(symbolTables.get(i).containsKey(idVal)){
+                        Symbol var = symbolTables.get(i).get(idVal);
+                        if(var instanceof Variable){
+                            if(!((Variable) var).getType().toString().equals("BOOLEAN")){
+                                error.add("Variable "
+                                    + idVal
+                                    + " has type "
+                                    + ((Variable) var).getType()
+                                    + " which cannot be converted to BOOLEAN.");
+                                break;
+                            }
+                            found = true;
+                            labelnum += 2;
+                        }
+                        text.append(DELIMITER
+                            + "lw $t0, "
+                            + ((Variable) var).getOffset()
+                            + "($sp)\n");
+                        text.append(DELIMITER
+                            + "beq $zero, $t0, "
+                            + falselabel
+                            + "\n");
+                    }
+                }
+                if (found == false){
+                    error.add("Variable "
+                        + idVal
+                        + " has not been declared.");
+                }
             } else {
                 ABoolBoolid ABoolBoolidNode = (ABoolBoolid)node.getBoolid();
                 if((ABoolBoolidNode.getBoolean()) instanceof ATrueBoolean){
@@ -1537,27 +1583,6 @@ class PrintTree extends DepthFirstAdapter {
     @Override
     public void caseAIdBoolid(AIdBoolid node) {
         if (node.getId() != null) {
-            boolean found = false;
-            String idVal = node.getId().toString().trim();
-                for(int i = currentScope; i >= 0; i--){
-                    if(symbolTables.get(i).containsKey(idVal)){
-                        found = true;
-                        Symbol var = symbolTables.get(i).get(idVal);
-                        if(var instanceof Variable){
-                            if(!((Variable) var).getType().toString().equals("BOOLEAN")){
-                                error.add("Variable "
-                                    + idVal
-                                    + " has type "
-                                    + ((Variable) var).getType()
-                                    + " which cannot be converted to BOOLEAN.");
-                                break;
-                            }
-                        }
-                    }
-                }
-            if (found == false){
-                error.add("Varible " + idVal + " has not been declared.");
-            }
             node.getId().apply(this);
         }
     }
