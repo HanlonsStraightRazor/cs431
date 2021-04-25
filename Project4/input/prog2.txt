@@ -12,5 +12,7 @@ BEGIN
     idTwo := 2;
     idPie := 3.14;
     idPie := 5;
+    idOne++;
+    idOne--;
  }
 END

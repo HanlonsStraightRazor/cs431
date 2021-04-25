@@ -438,6 +438,7 @@ class PrintTree extends DepthFirstAdapter {
             node.getColon().apply(this);
         }
         if (node.getType() != null) {
+            //TODO: Need to check that varible has not be declared in scope already ._.
             type = node.getType() instanceof AIdType
                 ? ((AIdType) node.getType()).toString().trim()
                 : ((ATypesType) node.getType()).toString().trim();
@@ -682,10 +683,18 @@ class PrintTree extends DepthFirstAdapter {
 
     @Override
     public void caseAIncrStmt(AIncrStmt node) {
+        String idVal = "";
+        boolean found = false;
+        boolean array = false;
+        Object val;
         if (node.getId() != null) {
+            idVal = node.getId().toString().trim();
             node.getId().apply(this);
         }
         if (node.getArrayOption() != null) {
+            if(node.getArrayOption() instanceof AArrayArrayOption){
+                array = true;
+            }
             node.getArrayOption().apply(this);
         }
         if (node.getIncr() != null) {
@@ -694,14 +703,50 @@ class PrintTree extends DepthFirstAdapter {
         if (node.getSemicolon() != null) {
             node.getSemicolon().apply(this);
         }
+        if (!array){
+            for(int i = currentScope; i >= 0; i--){
+                if(symbolTables.get(i).containsKey(idVal)){
+                    Symbol var = symbolTables.get(i).get(idVal);
+                    if(var instanceof Variable){
+                        if(!(((Variable) var).getType().equals("INT")  || ((Variable) var).getType().equals("REAL"))){
+                            error.add("Variable " + idVal + " has type " + ((Variable) var).getType() + " which cannot be incremented.");
+                            break;
+                        }
+                        found = true;
+                        if (((Variable) var).getType().equals("INT")){
+                            val = Integer.parseInt(((Variable)var).getValue().toString().trim()) + 1;
+                        }
+                        else {
+                            val = Double.parseDouble(((Variable)var).getValue().toString().trim()) + 1;
+                        }
+                        ((Variable)var).setValue(val);
+                        symbolTables.get(i).put(idVal, ((Variable)var));
+                        text.append(DELIMITER + "li $t0, " + ((Variable)var).getValue() + "\n");
+                        text.append(DELIMITER + "sw $t0, " + ((Variable)var).getOffset() + "($sp)\n");
+                        break;
+                    }
+                }
+            }
+            if (found == false){
+                error.add("Variable " + idVal + " has not been declared.");
+            }
+        }
     }
 
     @Override
     public void caseADecrStmt(ADecrStmt node) {
+        String idVal = "";
+        boolean found = false;
+        boolean array = false;
+        Object val;
         if (node.getId() != null) {
+            idVal = node.getId().toString().trim();
             node.getId().apply(this);
         }
         if (node.getArrayOption() != null) {
+            if(node.getArrayOption() instanceof AArrayArrayOption){
+                array = true;
+            }
             node.getArrayOption().apply(this);
         }
         if (node.getDecr() != null) {
@@ -709,6 +754,34 @@ class PrintTree extends DepthFirstAdapter {
         }
         if (node.getSemicolon() != null) {
             node.getSemicolon().apply(this);
+        }
+        if (!array){
+            for(int i = currentScope; i >= 0; i--){
+                if(symbolTables.get(i).containsKey(idVal)){
+                    Symbol var = symbolTables.get(i).get(idVal);
+                    if(var instanceof Variable){
+                        if(!(((Variable) var).getType().equals("INT")  || ((Variable) var).getType().equals("REAL"))){
+                            error.add("Variable " + idVal + " has type " + ((Variable) var).getType() + " which cannot be decremented.");
+                            break;
+                        }
+                        found = true;
+                        if (((Variable) var).getType().equals("INT")){
+                            val = Integer.parseInt(((Variable)var).getValue().toString().trim()) - 1;
+                        }
+                        else {
+                            val = Double.parseDouble(((Variable)var).getValue().toString().trim()) - 1.0;
+                        }
+                        ((Variable)var).setValue(val);
+                        symbolTables.get(i).put(idVal, ((Variable)var));
+                        text.append(DELIMITER + "li $t0, " + ((Variable)var).getValue() + "\n");
+                        text.append(DELIMITER + "sw $t0, " + ((Variable)var).getOffset() + "($sp)\n");
+                        break;
+                    }
+                }
+            }
+            if (found == false){
+                error.add("Variable " + idVal + " has not been declared.");
+            }
         }
     }
 
