@@ -1,6 +1,8 @@
 BEGIN
   VOID MAIN() {
-    IF (TRUE) THEN {
+    boolOne : BOOLEAN;
+    boolOne := TRUE;
+    IF (boolOne) THEN {
         idOne : INT;
     }
     IF (FALSE) THEN {
