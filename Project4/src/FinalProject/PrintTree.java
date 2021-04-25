@@ -473,6 +473,8 @@ class PrintTree extends DepthFirstAdapter {
     public void caseAIfBlockStmt(AIfBlockStmt node) {
         String falselabel = LABELPREFIX
             + labelnum++;
+        boolean isConstant = false;
+        boolean constant = false;
         if (node.getIf() != null) {
             node.getIf().apply(this);
         }
@@ -515,9 +517,10 @@ class PrintTree extends DepthFirstAdapter {
             } else {
                 ABoolBoolid ABoolBoolidNode = (ABoolBoolid)node.getBoolid();
                 if((ABoolBoolidNode.getBoolean()) instanceof ATrueBoolean){
-                    //add her for if(true)
+                    isConstant = true;
+                    constant = true;
                 } else if((ABoolBoolidNode.getBoolean()) instanceof AFalseBoolean){
-                    //add here for if(false)
+                    isConstant = true;
                 } else if((ABoolBoolidNode.getBoolean()) instanceof AConditionalBoolean){
 
                 }
@@ -533,12 +536,15 @@ class PrintTree extends DepthFirstAdapter {
         if (node.getLcurly() != null) {
             node.getLcurly().apply(this);
         }
-        if (node.getStmtseq() != null) {
+        if ((node.getStmtseq() != null)
+            && (!isConstant || constant)) {
             node.getStmtseq().apply(this);
         }
         if (node.getRcurly() != null) {
-            text.append(falselabel
-                + ":\n");
+            if (!isConstant) {
+                text.append(falselabel
+                    + ":\n");
+            }
             node.getRcurly().apply(this);
         }
     }
