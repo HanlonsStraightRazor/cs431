@@ -121,14 +121,14 @@ class PrintTree extends DepthFirstAdapter {
             node.getRparen().apply(this);
         }
         if (node.getLcurly() != null) {
-            //currentScope++;
+            currentScope++;
             node.getLcurly().apply(this);
         }
         if (node.getStmtseq() != null) {
             node.getStmtseq().apply(this);
         }
         if (node.getRcurly() != null) {
-            //currentScope--;
+            currentScope--;
             node.getRcurly().apply(this);
         }
     }
@@ -385,9 +385,7 @@ class PrintTree extends DepthFirstAdapter {
 
     @Override
     public void caseAAssignExprStmt(AAssignExprStmt node) {
-        String idVal = "";
         if (node.getId() != null) {
-            idVal = node.getId().toString().trim();
             node.getId().apply(this);
         }
         if (node.getArrayOption() != null) {
