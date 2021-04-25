@@ -37,8 +37,10 @@ class PrintTree extends DepthFirstAdapter {
     @Override
     public void caseAProg(AProg node) {
         if (node.getBegin() != null) {
-            data.append(DELIMITER + ".data\n\n");
-            text.append(DELIMITER + ".text\n\n");
+            data.append(DELIMITER
+                + ".data\n\n");
+            text.append(DELIMITER
+                + ".text\n\n");
             node.getBegin().apply(this);
         }
         if (node.getClassmethodstmts() != null) {
@@ -50,8 +52,10 @@ class PrintTree extends DepthFirstAdapter {
                     System.err.println(er);
                 }
             } else {
-                text.append(DELIMITER + "li $v0, 10\n");
-                text.append(DELIMITER + "syscall");
+                text.append(DELIMITER
+                    + "li $v0, 10\n");
+                text.append(DELIMITER
+                    + "syscall");
                 System.out.print(data);
                 System.out.print(text);
                 node.getEnd().apply(this);
@@ -467,7 +471,8 @@ class PrintTree extends DepthFirstAdapter {
 
     @Override
     public void caseAIfBlockStmt(AIfBlockStmt node) {
-        String falselabel = LABELPREFIX + labelnum++ + ":\n";
+        String falselabel = LABELPREFIX
+            + labelnum++;
         if (node.getIf() != null) {
             node.getIf().apply(this);
         }
@@ -492,12 +497,20 @@ class PrintTree extends DepthFirstAdapter {
                             }
                             found = true;
                         }
-                        text.append("lw $t0, " + ((Variable) var).getOffset() + "($sp)\n");
-                        text.append("beq $zero, $t0," + falselabel + "\n");
+                        text.append(DELIMITER
+                            + "lw $t0, "
+                            + ((Variable) var).getOffset()
+                            + "($sp)\n");
+                        text.append(DELIMITER
+                            + "beq $zero, $t0, "
+                            + falselabel
+                            + "\n");
                     }
                 }
                 if (found == false){
-                    error.add("Variable " + idVal + " has not been declared.");
+                    error.add("Variable "
+                        + idVal
+                        + " has not been declared.");
                 }
             } else {
                 ABoolBoolid ABoolBoolidNode = (ABoolBoolid)node.getBoolid();
@@ -524,7 +537,8 @@ class PrintTree extends DepthFirstAdapter {
             node.getStmtseq().apply(this);
         }
         if (node.getRcurly() != null) {
-            text.append(falselabel);
+            text.append(falselabel
+                + ":\n");
             node.getRcurly().apply(this);
         }
     }
@@ -1039,9 +1053,14 @@ class PrintTree extends DepthFirstAdapter {
                 }
                 data.append(idVal + ":\n");
                 if (typeVal.equals("BOOLEAN")) {
-                    data.append(DELIMITER + ".byte 0:" + sizeVal + "\n");
+                    data.append(DELIMITER
+                        + ".byte 0:"
+                        + sizeVal + "\n");
                 } else {
-                    data.append(DELIMITER + ".word 0:" + sizeVal + "\n");
+                    data.append(DELIMITER
+                        + ".word 0:"
+                        + sizeVal
+                        + "\n");
                 }
                 data.append("\n");
             }
@@ -1171,15 +1190,26 @@ class PrintTree extends DepthFirstAdapter {
                     if(symbolTables.get(i).containsKey(idVal)){
                         Symbol var = symbolTables.get(i).get(idVal);
                         if(var instanceof Variable){
-                            if(!(((Variable) var).getType().equals("INT")  || ((Variable) var).getType().equals("REAL"))){
-                                error.add("Variable " + idVal + " has type " + ((Variable) var).getType() + " which cannot be converted to INT.");
+                            if(!(((Variable) var).getType().equals("INT")
+                                || ((Variable) var).getType().equals("REAL"))){
+                                error.add("Variable "
+                                        + idVal
+                                        + " has type "
+                                        + ((Variable) var).getType()
+                                        + " which cannot be converted to INT.");
                                 break;
-                            }
-                            found = true;
-                            ((Variable)var).setValue(node.getInt());
-                            symbolTables.get(i).put(idVal, ((Variable)var));
-                            text.append(DELIMITER + "li $t0, " + ((Variable)var).getValue() + "\n");
-                            text.append(DELIMITER + "sw $t0, " + ((Variable)var).getOffset() + "($sp)\n");
+                        }
+                        found = true;
+                        ((Variable)var).setValue(node.getInt());
+                        symbolTables.get(i).put(idVal, ((Variable)var));
+                        text.append(DELIMITER
+                            + "li $t0, "
+                            + ((Variable)var).getValue().toString().trim()
+                            + "\n");
+                        text.append(DELIMITER
+                            + "sw $t0, "
+                            + Integer.toString(((Variable)var).getOffset()).trim()
+                            + "($sp)\n");
                             break;
                         }
                     }
@@ -1205,14 +1235,24 @@ class PrintTree extends DepthFirstAdapter {
                         Symbol var = symbolTables.get(i).get(idVal);
                         if(var instanceof Variable){
                             if(!((Variable) var).getType().equals("REAL")){
-                                error.add("Variable " + idVal + " has type " + ((Variable) var).getType() + " which cannot be converted to REAL.");
+                                error.add("Variable "
+                                    + idVal
+                                    + " has type "
+                                    + ((Variable) var).getType()
+                                    + " which cannot be converted to REAL.");
                                 break;
                             }
                             found = true;
                             ((Variable)var).setValue(node.getReal());
                             symbolTables.get(i).put(idVal, ((Variable)var));
-                            text.append(DELIMITER + "li $t0, " + ((Variable)var).getValue() + "\n");
-                            text.append(DELIMITER + "sw $t0, " + ((Variable)var).getOffset() + "($sp)\n");
+                            text.append(DELIMITER
+                                + "li $t0, "
+                                + ((Variable)var).getValue()
+                                + "\n");
+                            text.append(DELIMITER
+                                + "sw $t0, "
+                                + ((Variable)var).getOffset()
+                                + "($sp)\n");
                             break;
                         }
                     }
