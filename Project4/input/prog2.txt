@@ -1,18 +1,29 @@
 BEGIN
   VOID MAIN() {
-    bool : BOOLEAN [5];
-    str : STRING [6];
+    bool    : BOOLEAN [5];
+    str     : STRING [6];
     integer : INT [7];
     realnum : REAL [8];
-    voidt : VOID [9];
-    idOne : INT;
-    idTwo : INT;
-    idPie : REAL;
-    idOne := 1;
-    idTwo := 2;
-    idPie := 3.14;
-    idPie := 5;
+    voidt   : VOID [9];
+    idOne   : INT;
+    idPie   : REAL;
+    cond    : BOOLEAN;
+    idOne   := 1;
     idOne++;
     idOne--;
+    idPie   := 3.14;
+    cond    := TRUE;
+    IF (cond) THEN {
+        idPie := 3;
+        IF (FALSE) THEN {
+            idPie := 5;
+        }
+        IF (TRUE) THEN {
+            idPie := 4;
+        }
+        IF (cond) THEN {
+            idPie := 10;
+        }
+    }
  }
 END

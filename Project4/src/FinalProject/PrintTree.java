@@ -37,8 +37,10 @@ class PrintTree extends DepthFirstAdapter {
     @Override
     public void caseAProg(AProg node) {
         if (node.getBegin() != null) {
-            data.append(DELIMITER + ".data\n\n");
-            text.append(DELIMITER + ".text\n\n");
+            data.append(DELIMITER
+                + ".data\n\n");
+            text.append(DELIMITER
+                + ".text\n\n");
             node.getBegin().apply(this);
         }
         if (node.getClassmethodstmts() != null) {
@@ -50,8 +52,10 @@ class PrintTree extends DepthFirstAdapter {
                     System.err.println(er);
                 }
             } else {
-                text.append(DELIMITER + "li $v0, 10\n");
-                text.append(DELIMITER + "syscall");
+                text.append(DELIMITER
+                    + "li $v0, 10\n");
+                text.append(DELIMITER
+                    + "syscall");
                 System.out.print(data);
                 System.out.print(text);
                 node.getEnd().apply(this);
@@ -121,14 +125,14 @@ class PrintTree extends DepthFirstAdapter {
             node.getRparen().apply(this);
         }
         if (node.getLcurly() != null) {
-            //currentScope++;
+            currentScope++;
             node.getLcurly().apply(this);
         }
         if (node.getStmtseq() != null) {
             node.getStmtseq().apply(this);
         }
         if (node.getRcurly() != null) {
-            //currentScope--;
+            currentScope--;
             node.getRcurly().apply(this);
         }
     }
@@ -385,9 +389,7 @@ class PrintTree extends DepthFirstAdapter {
 
     @Override
     public void caseAAssignExprStmt(AAssignExprStmt node) {
-        String idVal = "";
         if (node.getId() != null) {
-            idVal = node.getId().toString().trim();
             node.getId().apply(this);
         }
         if (node.getArrayOption() != null) {
@@ -470,6 +472,10 @@ class PrintTree extends DepthFirstAdapter {
 
     @Override
     public void caseAIfBlockStmt(AIfBlockStmt node) {
+        String falselabel = LABELPREFIX
+            + labelnum;
+        boolean isConstant = false;
+        boolean constant = false;
         if (node.getIf() != null) {
             node.getIf().apply(this);
         }
@@ -477,8 +483,7 @@ class PrintTree extends DepthFirstAdapter {
             node.getLparen().apply(this);
         }
         if (node.getBoolid() != null) {
-            boolean boolVal = false;
-            if(node.getBoolid() instanceof ABoolBoolid){
+            if(node.getBoolid() instanceof AIdBoolid){
                 boolean found = false;
                 String idVal = ((AIdBoolid) node.getBoolid()).getId().toString().trim();
                 for(int i = currentScope; i >= 0; i--){
@@ -486,23 +491,41 @@ class PrintTree extends DepthFirstAdapter {
                         Symbol var = symbolTables.get(i).get(idVal);
                         if(var instanceof Variable){
                             if(!((Variable) var).getType().toString().equals("BOOLEAN")){
-                                error.add("Variable " + idVal + " has type " + ((Variable) var).getType() + " which cannot be converted to BOOLEAN.");
-                                return;
+                                error.add("Variable "
+                                    + idVal
+                                    + " has type "
+                                    + ((Variable) var).getType()
+                                    + " which cannot be converted to BOOLEAN.");
+                                break;
                             }
                             found = true;
-                            if((boolean)((Variable)var).getValue()){
-                                boolVal = true;
-                            }
-                            break;
+                            labelnum++;
                         }
+                        text.append(DELIMITER
+                            + "lw $t0, "
+                            + ((Variable) var).getOffset()
+                            + "($sp)\n");
+                        text.append(DELIMITER
+                            + "beq $zero, $t0, "
+                            + falselabel
+                            + "\n");
                     }
                 }
                 if (found == false){
-                    error.add("Variable " + idVal + " has not been declared.");
+                    error.add("Variable "
+                        + idVal
+                        + " has not been declared.");
                 }
             } else {
-                //ATrueBoolean, AFalseBoolean, or AConditionalBoolean
-                //add stuff
+                ABoolBoolid ABoolBoolidNode = (ABoolBoolid)node.getBoolid();
+                if((ABoolBoolidNode.getBoolean()) instanceof ATrueBoolean){
+                    isConstant = true;
+                    constant = true;
+                } else if((ABoolBoolidNode.getBoolean()) instanceof AFalseBoolean){
+                    isConstant = true;
+                } else if((ABoolBoolidNode.getBoolean()) instanceof AConditionalBoolean){
+
+                }
             }
             node.getBoolid().apply(this);
         }
@@ -515,10 +538,15 @@ class PrintTree extends DepthFirstAdapter {
         if (node.getLcurly() != null) {
             node.getLcurly().apply(this);
         }
-        if (node.getStmtseq() != null) {
+        if ((node.getStmtseq() != null)
+            && (!isConstant || constant)) {
             node.getStmtseq().apply(this);
         }
         if (node.getRcurly() != null) {
+            if (!isConstant) {
+                text.append(falselabel
+                    + ":\n");
+            }
             node.getRcurly().apply(this);
         }
     }
@@ -878,16 +906,67 @@ class PrintTree extends DepthFirstAdapter {
 
     @Override
     public void caseAAssignBooleanStmt(AAssignBooleanStmt node) {
+        String idVal = "";
+        boolean arrayOption = false;
         if (node.getId() != null) {
+            idVal = node.getId().toString().trim();
             node.getId().apply(this);
         }
         if (node.getArrayOption() != null) {
+            arrayOption = true;
             node.getArrayOption().apply(this);
         }
         if (node.getEquals() != null) {
             node.getEquals().apply(this);
         }
         if (node.getBoolean() != null) {
+            if(node.getBoolean() instanceof ATrueBoolean){
+                boolean found = false;
+                for(int i = currentScope; i >= 0; i--){
+                    if(symbolTables.get(i).containsKey(idVal)){
+                        Symbol var = symbolTables.get(i).get(idVal);
+                        if(var instanceof Variable){
+                            if(!((Variable) var).getType().equals("BOOLEAN")){
+                                error.add("Variable " + idVal + " has type " + ((Variable) var).getType() + " which cannot be converted to BOOLEAN.");
+                                break;
+                            }
+                            found = true;
+                            ((Variable)var).setValue(true);
+                            symbolTables.get(i).put(idVal, ((Variable)var));
+                            text.append(DELIMITER + "li $t0, " + 1 + "\n");
+                            text.append(DELIMITER + "sw $t0, " + ((Variable)var).getOffset() + "($sp)\n");
+                            break;
+                        }
+                    }
+                }
+                if (found == false){
+                    error.add("Variable " + idVal + " has not been declared.");
+                }
+            } else if(node.getBoolean() instanceof AFalseBoolean){
+                boolean found = false;
+                for(int i = currentScope; i >= 0; i--){
+                    if(symbolTables.get(i).containsKey(idVal)){
+                        Symbol var = symbolTables.get(i).get(idVal);
+                        if(var instanceof Variable){
+                            if(!((Variable) var).getType().equals("BOOLEAN")){
+                                error.add("Variable " + idVal + " has type " + ((Variable) var).getType() + " which cannot be converted to BOOLEAN.");
+                                break;
+                            }
+                            found = true;
+                            ((Variable)var).setValue(false);
+                            symbolTables.get(i).put(idVal, ((Variable)var));
+                            text.append(DELIMITER + "li $t0, " + 0 + "\n");
+                            text.append(DELIMITER + "sw $t0, " + ((Variable)var).getOffset() + "($sp)\n");
+                            break;
+                        }
+                    }
+                }
+                if (found == false){
+                    error.add("Variable " + idVal + " has not been declared.");
+                }
+            } else if(node.getBoolean() instanceof AConditionalBoolean){
+                //FIXME : AConditionalBoolean has not been implemented yet
+            }
             node.getBoolean().apply(this);
         }
         if (node.getSemicolon() != null) {
@@ -1105,11 +1184,26 @@ class PrintTree extends DepthFirstAdapter {
                 }
                 data.append(idVal + ":\n");
                 if (typeVal.equals("BOOLEAN")) {
-                    data.append(DELIMITER + ".byte 0:" + sizeVal + "\n");
+                    data.append(DELIMITER
+                        + ".byte 0:"
+                        + sizeVal + "\n");
                 } else {
-                    data.append(DELIMITER + ".word 0:" + sizeVal + "\n");
+                    data.append(DELIMITER
+                        + ".word 0:"
+                        + sizeVal
+                        + "\n");
                 }
                 data.append("\n");
+            } else if(node.parent() instanceof AAssignExprStmt){
+                //FIXME
+            } else if(node.parent() instanceof AAssignStringStmt){
+                //FIXME
+            } else if(node.parent() instanceof AIncrStmt){
+                //FIXME
+            } else if(node.parent() instanceof ADecrStmt){
+                //FIXME
+            } else if(node.parent() instanceof AAssignBooleanStmt){
+                //FIXME
             }
             node.getInt().apply(this);
         }
@@ -1237,15 +1331,26 @@ class PrintTree extends DepthFirstAdapter {
                     if(symbolTables.get(i).containsKey(idVal)){
                         Symbol var = symbolTables.get(i).get(idVal);
                         if(var instanceof Variable){
-                            if(!(((Variable) var).getType().equals("INT")  || ((Variable) var).getType().equals("REAL"))){
-                                error.add("Variable " + idVal + " has type " + ((Variable) var).getType() + " which cannot be converted to INT.");
+                            if(!(((Variable) var).getType().equals("INT")
+                                || ((Variable) var).getType().equals("REAL"))){
+                                error.add("Variable "
+                                        + idVal
+                                        + " has type "
+                                        + ((Variable) var).getType()
+                                        + " which cannot be converted to INT.");
                                 break;
-                            }
-                            found = true;
-                            ((Variable)var).setValue(node.getInt());
-                            symbolTables.get(i).put(idVal, ((Variable)var));
-                            text.append(DELIMITER + "li $t0, " + ((Variable)var).getValue() + "\n");
-                            text.append(DELIMITER + "sw $t0, " + ((Variable)var).getOffset() + "($sp)\n");
+                        }
+                        found = true;
+                        ((Variable)var).setValue(node.getInt());
+                        symbolTables.get(i).put(idVal, ((Variable)var));
+                        text.append(DELIMITER
+                            + "li $t0, "
+                            + ((Variable)var).getValue().toString().trim()
+                            + "\n");
+                        text.append(DELIMITER
+                            + "sw $t0, "
+                            + Integer.toString(((Variable)var).getOffset()).trim()
+                            + "($sp)\n");
                             break;
                         }
                     }
@@ -1271,14 +1376,24 @@ class PrintTree extends DepthFirstAdapter {
                         Symbol var = symbolTables.get(i).get(idVal);
                         if(var instanceof Variable){
                             if(!((Variable) var).getType().equals("REAL")){
-                                error.add("Variable " + idVal + " has type " + ((Variable) var).getType() + " which cannot be converted to REAL.");
+                                error.add("Variable "
+                                    + idVal
+                                    + " has type "
+                                    + ((Variable) var).getType()
+                                    + " which cannot be converted to REAL.");
                                 break;
                             }
                             found = true;
                             ((Variable)var).setValue(node.getReal());
                             symbolTables.get(i).put(idVal, ((Variable)var));
-                            text.append(DELIMITER + "li $t0, " + ((Variable)var).getValue() + "\n");
-                            text.append(DELIMITER + "sw $t0, " + ((Variable)var).getOffset() + "($sp)\n");
+                            text.append(DELIMITER
+                                + "li $t0, "
+                                + ((Variable)var).getValue()
+                                + "\n");
+                            text.append(DELIMITER
+                                + "sw $t0, "
+                                + ((Variable)var).getOffset()
+                                + "($sp)\n");
                             break;
                         }
                     }
