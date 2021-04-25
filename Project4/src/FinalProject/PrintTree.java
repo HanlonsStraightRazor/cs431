@@ -469,6 +469,7 @@ class PrintTree extends DepthFirstAdapter {
 
     @Override
     public void caseAIfBlockStmt(AIfBlockStmt node) {
+        String falselabel = LABELPREFIX + labelnum++ + ":\n";
         if (node.getIf() != null) {
             node.getIf().apply(this);
         }
@@ -484,15 +485,17 @@ class PrintTree extends DepthFirstAdapter {
                         Symbol var = symbolTables.get(i).get(idVal);
                         if(var instanceof Variable){
                             if(!((Variable) var).getType().toString().equals("BOOLEAN")){
-                                error.add("Variable " + idVal + " has type " + ((Variable) var).getType() + " which cannot be converted to BOOLEAN.");
-                                return;
+                                error.add("Variable "
+                                    + idVal
+                                    + " has type "
+                                    + ((Variable) var).getType()
+                                    + " which cannot be converted to BOOLEAN.");
+                                break;
                             }
                             found = true;
-                            if((boolean)((Variable)var).getValue()){
-                                text.append("bool value is true for id\n");
-                            }
-                            break;
                         }
+                        text.append("lw $t0, " + ((Variable) var).getOffset() + "($sp)\n");
+                        text.append("beq $zero, $t0," + falselabel + "\n");
                     }
                 }
                 if (found == false){
@@ -523,6 +526,7 @@ class PrintTree extends DepthFirstAdapter {
             node.getStmtseq().apply(this);
         }
         if (node.getRcurly() != null) {
+            text.append(falselabel);
             node.getRcurly().apply(this);
         }
     }
