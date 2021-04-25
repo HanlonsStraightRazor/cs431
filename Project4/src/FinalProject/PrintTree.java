@@ -630,8 +630,10 @@ class PrintTree extends DepthFirstAdapter {
             }
         }
         if (node.getIfrcurly() != null) {
-            text.append(DELIMITER + "j "
-                + endlabel + "\n");
+            if (!isConstant) {
+                text.append(DELIMITER + "j "
+                   + endlabel + "\n");
+            }
             node.getIfrcurly().apply(this);
         }
         if (node.getElse() != null) {
