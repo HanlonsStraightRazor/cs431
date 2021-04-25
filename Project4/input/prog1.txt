@@ -1,6 +1,12 @@
 BEGIN
   VOID MAIN() {
-    string := "Hello world!";
-    PUT(string);
+    idOne   : INT;
+    idPie   : REAL;
+    cond    : BOOLEAN;
+    idOne   := 1;
+    idPie   := 3.14;
+    cond    := TRUE;
+    idOne++;
+    idOne--;
   }
 END
