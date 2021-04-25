@@ -1,5 +1,10 @@
 BEGIN
-VOID MAIN() {
-
-}
+  VOID MAIN() {
+    IF (TRUE) THEN {
+        idOne : INT;
+    }
+    IF (FALSE) THEN {
+        idTwo : INT;
+    }
+ }
 END

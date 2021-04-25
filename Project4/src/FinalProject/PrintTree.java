@@ -476,8 +476,7 @@ class PrintTree extends DepthFirstAdapter {
             node.getLparen().apply(this);
         }
         if (node.getBoolid() != null) {
-            boolean boolVal = false;
-            if(node.getBoolid() instanceof ABoolBoolid){
+            if(node.getBoolid() instanceof AIdBoolid){
                 boolean found = false;
                 String idVal = ((AIdBoolid) node.getBoolid()).getId().toString().trim();
                 for(int i = currentScope; i >= 0; i--){
@@ -490,7 +489,7 @@ class PrintTree extends DepthFirstAdapter {
                             }
                             found = true;
                             if((boolean)((Variable)var).getValue()){
-                                boolVal = true;
+                                text.append("bool value is true for id\n");
                             }
                             break;
                         }
@@ -500,8 +499,14 @@ class PrintTree extends DepthFirstAdapter {
                     error.add("Variable " + idVal + " has not been declared.");
                 }
             } else {
-                //ATrueBoolean, AFalseBoolean, or AConditionalBoolean
-                //add stuff
+                ABoolBoolid ABoolBoolidNode = (ABoolBoolid)node.getBoolid();
+                if((ABoolBoolidNode.getBoolean()) instanceof ATrueBoolean){
+                    //add her for if(true)
+                } else if((ABoolBoolidNode.getBoolean()) instanceof AFalseBoolean){
+                    //add here for if(false)
+                } else if((ABoolBoolidNode.getBoolean()) instanceof AConditionalBoolean){
+
+                }
             }
             node.getBoolid().apply(this);
         }
