@@ -834,11 +834,13 @@ class PrintTree extends DepthFirstAdapter {
     @Override
     public void caseAAssignBooleanStmt(AAssignBooleanStmt node) {
         String idVal = "";
+        boolean arrayOption = false;
         if (node.getId() != null) {
             idVal = node.getId().toString().trim();
             node.getId().apply(this);
         }
         if (node.getArrayOption() != null) {
+            arrayOption = true;
             node.getArrayOption().apply(this);
         }
         if (node.getEquals() != null) {
@@ -1119,6 +1121,16 @@ class PrintTree extends DepthFirstAdapter {
                         + "\n");
                 }
                 data.append("\n");
+            } else if(node.parent() instanceof AAssignExprStmt){
+                //FIXME
+            } else if(node.parent() instanceof AAssignStringStmt){
+                //FIXME
+            } else if(node.parent() instanceof AIncrStmt){
+                //FIXME
+            } else if(node.parent() instanceof ADecrStmt){
+                //FIXME
+            } else if(node.parent() instanceof AAssignBooleanStmt){
+                //FIXME
             }
             node.getInt().apply(this);
         }
