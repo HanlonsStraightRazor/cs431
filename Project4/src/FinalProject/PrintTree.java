@@ -442,7 +442,8 @@ class PrintTree extends DepthFirstAdapter {
         if (node.getType() != null) {
             //TODO: Need to check that varible has not be declared in scope already ._.
             type = node.getType() instanceof AIdType
-                ? ((AIdType) node.getType()).toString().trim()
+                //((AIdType) node.getType()).toString().trim()
+                ? error.add("Can not have type " + ((AIdType) node.getType()).toString().trim() + ".");
                 : ((ATypesType) node.getType()).toString().trim();
             node.getType().apply(this);
         }
