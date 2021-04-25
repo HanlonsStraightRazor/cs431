@@ -13,6 +13,15 @@ BEGIN
     cond    := TRUE;
     IF (cond) THEN {
         idPie := 3;
+        IF (FALSE) THEN {
+            idPie := 5;
+        }
+        IF (TRUE) THEN {
+            idPie := 4;
+        }
+        IF (cond) THEN {
+            idPie := 10;
+        }
     }
  }
 END

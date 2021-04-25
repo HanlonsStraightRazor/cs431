@@ -472,7 +472,7 @@ class PrintTree extends DepthFirstAdapter {
     @Override
     public void caseAIfBlockStmt(AIfBlockStmt node) {
         String falselabel = LABELPREFIX
-            + labelnum++;
+            + labelnum;
         boolean isConstant = false;
         boolean constant = false;
         if (node.getIf() != null) {
@@ -498,6 +498,7 @@ class PrintTree extends DepthFirstAdapter {
                                 break;
                             }
                             found = true;
+                            labelnum++;
                         }
                         text.append(DELIMITER
                             + "lw $t0, "
