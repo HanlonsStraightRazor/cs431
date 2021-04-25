@@ -1437,6 +1437,10 @@ class PrintTree extends DepthFirstAdapter {
         String idVal;
         boolean found = false;
         if (node.getInt() != null) {
+            text.append(DELIMITER
+                + "li $s0, "
+                + node.getInt().getText().trim()
+                + "\n");
             if(node.parent().parent().parent() instanceof AAssignExprStmt){
                 Node AAssignExprStmtNode = node.parent().parent().parent();
                 idVal = ((AAssignExprStmt) AAssignExprStmtNode).getId().toString().trim();
