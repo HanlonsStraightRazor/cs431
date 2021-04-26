@@ -1616,4 +1616,23 @@ class PrintTree extends DepthFirstAdapter {
             node.getId().apply(this);
         }
     }
+
+    public int getScope(String id) {
+        int scope = -1;
+        for(int i = currentScope; i >= 0; i--){
+            if(symbolTables.get(i).containsKey(id)){
+                scope = i;
+                break;
+            }
+        }
+        return scope;
+    }
+
+    public Symbol getSymbol(int scope, String id) {
+        return symbolTables.get(scope).get(id);
+    }
+
+    public boolean isArray(Symbol symbol) {
+        return symbol instanceof Array;
+    }
 }
