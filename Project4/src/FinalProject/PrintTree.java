@@ -45,12 +45,15 @@ class PrintTree extends DepthFirstAdapter {
                 + ".data\n\n"
                 + "TRUE:\n"
                 + DELIMITER
+                + ".asciiz \""
                 + TRUE
-                + "\nFALSE:\n"
+                + "\"\nFALSE:\n"
                 + DELIMITER
+                + ".asciiz \""
                 + FALSE
-                +"\n");
-            text.append(DELIMITER
+                +"\"\n");
+            text.append("\n"
+                + DELIMITER
                 + ".text\n\n");
             node.getBegin().apply(this);
         }
@@ -825,7 +828,7 @@ class PrintTree extends DepthFirstAdapter {
             if (array) {
                 index =
                      Integer.parseInt(((AArrayArrayOption) node.getArrayOption()).getInt().getText());
-                if (((Array) symbol).isInitializedAt(index)) {
+                if (!((Array) symbol).isInitializedAt(index)) {
                     error.add("Variable "
                         + id
                         + " has not been initialized at index "
@@ -834,7 +837,7 @@ class PrintTree extends DepthFirstAdapter {
                     return;
                 }
             } else {
-                if (((Variable) symbol).isInitialized()) {
+                if (!((Variable) symbol).isInitialized()) {
                     error.add("Variable "
                         + id
                         + " has not been initialized.");
@@ -846,7 +849,7 @@ class PrintTree extends DepthFirstAdapter {
             node.getRparen().apply(this);
         }
         if (node.getSemicolon() != null) {
-            text.append(DELIMITER + "lw $v0, ");
+            text.append(DELIMITER + "li $v0, ");
             switch (symbol.getType().trim()) {
                 case "INTEGER":
                     text.append("1\n");
@@ -856,12 +859,12 @@ class PrintTree extends DepthFirstAdapter {
                             + id
                             + "\n");
                         text.append(DELIMITER
-                            + "lw $a0, \n"
+                            + "lw $a0, "
                             + index
                             + "($a0)\n");
                     } else {
                         text.append(DELIMITER
-                            + "lw $a0, \n"
+                            + "lw $a0, "
                             + ((Variable) symbol).getOffset()
                             + "($sp)\n");
                     }
@@ -874,12 +877,12 @@ class PrintTree extends DepthFirstAdapter {
                             + id
                             + "\n");
                         text.append(DELIMITER
-                            + "lw $f12, \n"
+                            + "lw $f12, "
                             + index
                             + "($t0)\n");
                     } else {
                         text.append(DELIMITER
-                            + "lw $f12, \n"
+                            + "lw $f12, "
                             + ((Variable) symbol).getOffset()
                             + "($sp)\n");
                     }
@@ -892,12 +895,12 @@ class PrintTree extends DepthFirstAdapter {
                             + id
                             + "\n");
                         text.append(DELIMITER
-                            + "lw $a0, \n"
+                            + "lw $a0, "
                             + index
                             + "($a0)\n");
                     } else {
                         text.append(DELIMITER
-                            + "lw $a0, \n"
+                            + "lw $a0, "
                             + ((Variable) symbol).getOffset()
                             + "($sp)\n");
                     }
@@ -910,12 +913,12 @@ class PrintTree extends DepthFirstAdapter {
                             + id
                             + "\n");
                         text.append(DELIMITER
-                            + "lw $t0, \n"
+                            + "lw $t0, "
                             + index
                             + "($t0)\n");
                     } else {
                         text.append(DELIMITER
-                            + "lw $t0, \n"
+                            + "lw $t0, "
                             + ((Variable) symbol).getOffset()
                             + "($sp)\n");
                     }
@@ -925,7 +928,8 @@ class PrintTree extends DepthFirstAdapter {
                         + "beq $zero, $t0, "
                         + falseLabel
                         + "\n");
-                    text.append("la $a0, TRUE\n");
+                    text.append(DELIMITER
+                        + "la $a0, TRUE\n");
                     text.append(DELIMITER
                         + "j "
                         + endLabel
@@ -933,7 +937,8 @@ class PrintTree extends DepthFirstAdapter {
                     text.append("\n"
                         + falseLabel
                         + ":\n");
-                    text.append("la $a0, FALSE\n");
+                    text.append(DELIMITER
+                        + "la $a0, FALSE\n");
                     text.append("\n"
                         + endLabel
                         + ":\n");
@@ -946,19 +951,24 @@ class PrintTree extends DepthFirstAdapter {
                             + id
                             + "\n");
                         text.append(DELIMITER
-                            + "lw $a0, \n"
+                            + "lw $a0, "
                             + index
                             + "($a0)\n");
                     } else {
                         text.append(DELIMITER
-                            + "lw $a0, \n"
+                            + "lw $a0, "
                             + ((Variable) symbol).getOffset()
                             + "($sp)\n");
                     }
             }
             text.append(DELIMITER
                 + "syscall\n");
-            text.append("li $a0, 0xA\nli $v0, 11,\nsyscall\n"); // Print newline
+            text.append(DELIMITER
+                + "li $v0, 11\n"
+                + DELIMITER
+                + "li $a0, 0xA\n"
+                + DELIMITER
+                + "syscall\n"); // Print newline
             node.getSemicolon().apply(this);
         }
     }
