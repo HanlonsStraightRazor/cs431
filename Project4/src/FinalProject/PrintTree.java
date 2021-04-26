@@ -993,17 +993,18 @@ class PrintTree extends DepthFirstAdapter {
             if(!(var.getType().equals("INT")
                 || var.getType().equals("REAL"))){
                 error.add("Variable " + id + " has type " + var.getType() + " which cannot be decremented.");
-            }
-            if (var.getType().equals("INT")){
-                text.append(DELIMITER + "lw $t0, " + var.getOffset() + "($sp)\n");
-                text.append(DELIMITER + "li $t1, " + "1" + "\n");
-                text.append(DELIMITER + "add $t0, " + "$t0, " + "$t1\n");
-                text.append(DELIMITER + "sw $t0, " + var.getOffset() + "($sp)\n");
             } else {
-                text.append(DELIMITER + "lw $f0, " + var.getOffset() + "($sp)\n");
-                text.append(DELIMITER + "li $f1, " + "1.0" + "\n");
-                text.append(DELIMITER + "add $f0, " + "f0, " + "f1\n");
-                text.append(DELIMITER + "sw $f0, " + var.getOffset() + "($sp)\n");
+                if (var.getType().equals("INT")){
+                    text.append(DELIMITER + "lw $t0, " + var.getOffset() + "($sp)\n");
+                    text.append(DELIMITER + "li $t1, " + "1" + "\n");
+                    text.append(DELIMITER + "add $t0, " + "$t0, " + "$t1\n");
+                    text.append(DELIMITER + "sw $t0, " + var.getOffset() + "($sp)\n");
+                } else {
+                    text.append(DELIMITER + "lw $f0, " + var.getOffset() + "($sp)\n");
+                    text.append(DELIMITER + "li $f1, " + "1.0" + "\n");
+                    text.append(DELIMITER + "add $f0, " + "f0, " + "f1\n");
+                    text.append(DELIMITER + "sw $f0, " + var.getOffset() + "($sp)\n");
+                }
             }
         }
     }
@@ -1428,9 +1429,68 @@ class PrintTree extends DepthFirstAdapter {
                     }
                 }              
             } else if(node.parent() instanceof AIncrStmt){
-                //FIXME
+                AIncrStmt AIncrStmtNode = (AIncrStmt)node.parent();
+                String idVal = AIncrStmtNode.getId().toString().trim();
+                int scope = getScope(idVal);
+                int index = Integer.parseInt(node.getInt().toString().trim());
+                
+                if (scope == -1) {
+                    error.add("Array " + idVal + " has not been declared.");
+                }
+                Array var = (Array) getSymbol(scope, idVal);
+                if(!(var.getType().equals("INT")
+                    || var.getType().equals("REAL"))){
+                    error.add("Array " + idVal + " has type " + var.getType() + " which cannot be incremented.");
+                } else {
+                    if(var.isInitializedAt(index)){
+                        if (var.getType().equals("INT")){
+                            text.append(DELIMITER + "la $t2, " + idVal + "\n");
+                            text.append(DELIMITER + "lw $t0, " + Integer.toString(index).trim() + "($t2)\n");
+                            text.append(DELIMITER + "li $t1, " + "1" + "\n");
+                            text.append(DELIMITER + "add $t0, " + "$t0, " + "$t1\n");
+                            text.append(DELIMITER + "sw $t0, " + Integer.toString(index).trim() + "($t2)\n");
+                        } else {
+                            text.append(DELIMITER + "la $f2, " + idVal + "\n");
+                            text.append(DELIMITER + "lw $f0, " + Integer.toString(index).trim() + "($f2)\n");
+                            text.append(DELIMITER + "li $f1, " + "1" + "\n");
+                            text.append(DELIMITER + "add $f0, " + "$f0, " + "$f1\n");
+                            text.append(DELIMITER + "sw $f0, " + Integer.toString(index).trim() + "($f2)\n");
+                        }
+                    } else {
+                        error.add("Array " + idVal + " at index: " + index + " has not been initialized yet.");
+                    }
+                }
             } else if(node.parent() instanceof ADecrStmt){
-                //FIXME
+                AIncrStmt AIncrStmtNode = (AIncrStmt)node.parent();
+                String idVal = AIncrStmtNode.getId().toString().trim();
+                int scope = getScope(idVal);
+                int index = Integer.parseInt(node.getInt().toString().trim());
+                if (scope == -1) {
+                    error.add("Array " + idVal + " has not been declared.");
+                }
+                Array var = (Array) getSymbol(scope, idVal);
+                if(!(var.getType().equals("INT")
+                    || var.getType().equals("REAL"))){
+                    error.add("Array " + idVal + " has type " + var.getType() + " which cannot be decremented.");
+                } else {
+                    if(var.isInitializedAt(index)){
+                        if (var.getType().equals("INT")){
+                            text.append(DELIMITER + "la $t2, " + idVal + "\n");
+                            text.append(DELIMITER + "lw $t0, " + Integer.toString(index).trim() + "($t2)\n");
+                            text.append(DELIMITER + "li $t1, " + "1" + "\n");
+                            text.append(DELIMITER + "sub $t0, " + "$t0, " + "$t1\n");
+                            text.append(DELIMITER + "sw $t0, " + Integer.toString(index).trim() + "($t2)\n");
+                        } else {
+                            text.append(DELIMITER + "la $f2, " + idVal + "\n");
+                            text.append(DELIMITER + "lw $f0, " + Integer.toString(index).trim() + "($f2)\n");
+                            text.append(DELIMITER + "li $f1, " + "1" + "\n");
+                            text.append(DELIMITER + "sub $f0, " + "$f0, " + "$f1\n");
+                            text.append(DELIMITER + "sw $f0, " + Integer.toString(index).trim() + "($f2)\n");
+                        }
+                    } else {
+                        error.add("Array " + idVal + " at index: " + index + " has not been initialized yet.");
+                    }
+                }
             } else if(node.parent() instanceof AAssignBooleanStmt){
                 AAssignBooleanStmt node2 = (AAssignBooleanStmt) node.parent();
                 String id = node2.getId().toString().trim();
