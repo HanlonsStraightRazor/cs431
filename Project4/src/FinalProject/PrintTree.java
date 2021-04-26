@@ -45,12 +45,15 @@ class PrintTree extends DepthFirstAdapter {
                 + ".data\n\n"
                 + "TRUE:\n"
                 + DELIMITER
+                + ".asciiz \""
                 + TRUE
-                + "\nFALSE:\n"
+                + "\"\nFALSE:\n"
                 + DELIMITER
+                + ".asciiz \""
                 + FALSE
-                +"\n");
-            text.append(DELIMITER
+                +"\"\n");
+            text.append("\n"
+                + DELIMITER
                 + ".text\n\n");
             node.getBegin().apply(this);
         }
@@ -904,7 +907,7 @@ class PrintTree extends DepthFirstAdapter {
             if (array) {
                 index =
                      Integer.parseInt(((AArrayArrayOption) node.getArrayOption()).getInt().getText());
-                if (((Array) symbol).isInitializedAt(index)) {
+                if (!((Array) symbol).isInitializedAt(index)) {
                     error.add("Variable "
                         + id
                         + " has not been initialized at index "
@@ -913,7 +916,7 @@ class PrintTree extends DepthFirstAdapter {
                     return;
                 }
             } else {
-                if (((Variable) symbol).isInitialized()) {
+                if (!((Variable) symbol).isInitialized()) {
                     error.add("Variable "
                         + id
                         + " has not been initialized.");
@@ -925,7 +928,7 @@ class PrintTree extends DepthFirstAdapter {
             node.getRparen().apply(this);
         }
         if (node.getSemicolon() != null) {
-            text.append(DELIMITER + "lw $v0, ");
+            text.append(DELIMITER + "li $v0, ");
             switch (symbol.getType().trim()) {
                 case "INTEGER":
                     text.append("1\n");
@@ -935,12 +938,12 @@ class PrintTree extends DepthFirstAdapter {
                             + id
                             + "\n");
                         text.append(DELIMITER
-                            + "lw $a0, \n"
+                            + "lw $a0, "
                             + index
                             + "($a0)\n");
                     } else {
                         text.append(DELIMITER
-                            + "lw $a0, \n"
+                            + "lw $a0, "
                             + ((Variable) symbol).getOffset()
                             + "($sp)\n");
                     }
@@ -953,12 +956,12 @@ class PrintTree extends DepthFirstAdapter {
                             + id
                             + "\n");
                         text.append(DELIMITER
-                            + "lw $f12, \n"
+                            + "lw $f12, "
                             + index
                             + "($t0)\n");
                     } else {
                         text.append(DELIMITER
-                            + "lw $f12, \n"
+                            + "lw $f12, "
                             + ((Variable) symbol).getOffset()
                             + "($sp)\n");
                     }
@@ -971,12 +974,12 @@ class PrintTree extends DepthFirstAdapter {
                             + id
                             + "\n");
                         text.append(DELIMITER
-                            + "lw $a0, \n"
+                            + "lw $a0, "
                             + index
                             + "($a0)\n");
                     } else {
                         text.append(DELIMITER
-                            + "lw $a0, \n"
+                            + "lw $a0, "
                             + ((Variable) symbol).getOffset()
                             + "($sp)\n");
                     }
@@ -989,12 +992,12 @@ class PrintTree extends DepthFirstAdapter {
                             + id
                             + "\n");
                         text.append(DELIMITER
-                            + "lw $t0, \n"
+                            + "lw $t0, "
                             + index
                             + "($t0)\n");
                     } else {
                         text.append(DELIMITER
-                            + "lw $t0, \n"
+                            + "lw $t0, "
                             + ((Variable) symbol).getOffset()
                             + "($sp)\n");
                     }
@@ -1004,7 +1007,8 @@ class PrintTree extends DepthFirstAdapter {
                         + "beq $zero, $t0, "
                         + falseLabel
                         + "\n");
-                    text.append("la $a0, TRUE\n");
+                    text.append(DELIMITER
+                        + "la $a0, TRUE\n");
                     text.append(DELIMITER
                         + "j "
                         + endLabel
@@ -1012,7 +1016,8 @@ class PrintTree extends DepthFirstAdapter {
                     text.append("\n"
                         + falseLabel
                         + ":\n");
-                    text.append("la $a0, FALSE\n");
+                    text.append(DELIMITER
+                        + "la $a0, FALSE\n");
                     text.append("\n"
                         + endLabel
                         + ":\n");
@@ -1025,19 +1030,24 @@ class PrintTree extends DepthFirstAdapter {
                             + id
                             + "\n");
                         text.append(DELIMITER
-                            + "lw $a0, \n"
+                            + "lw $a0, "
                             + index
                             + "($a0)\n");
                     } else {
                         text.append(DELIMITER
-                            + "lw $a0, \n"
+                            + "lw $a0, "
                             + ((Variable) symbol).getOffset()
                             + "($sp)\n");
                     }
             }
             text.append(DELIMITER
                 + "syscall\n");
-            text.append("li $a0, 0xA\nli $v0, 11,\nsyscall\n"); // Print newline
+            text.append(DELIMITER
+                + "li $v0, 11\n"
+                + DELIMITER
+                + "li $a0, 0xA\n"
+                + DELIMITER
+                + "syscall\n"); // Print newline
             node.getSemicolon().apply(this);
         }
     }
@@ -1072,17 +1082,18 @@ class PrintTree extends DepthFirstAdapter {
             if(!(var.getType().equals("INT")
                 || var.getType().equals("REAL"))){
                 error.add("Variable " + id + " has type " + var.getType() + " which cannot be decremented.");
-            }
-            if (var.getType().equals("INT")){
-                text.append(DELIMITER + "lw $t0, " + var.getOffset() + "($sp)\n");
-                text.append(DELIMITER + "li $t1, " + "1" + "\n");
-                text.append(DELIMITER + "add $t0, " + "$t0, " + "$t1\n");
-                text.append(DELIMITER + "sw $t0, " + var.getOffset() + "($sp)\n");
             } else {
-                text.append(DELIMITER + "lw $f0, " + var.getOffset() + "($sp)\n");
-                text.append(DELIMITER + "li $f1, " + "1.0" + "\n");
-                text.append(DELIMITER + "add $f0, " + "f0, " + "f1\n");
-                text.append(DELIMITER + "sw $f0, " + var.getOffset() + "($sp)\n");
+                if (var.getType().equals("INT")){
+                    text.append(DELIMITER + "lw $t0, " + var.getOffset() + "($sp)\n");
+                    text.append(DELIMITER + "li $t1, " + "1" + "\n");
+                    text.append(DELIMITER + "add $t0, " + "$t0, " + "$t1\n");
+                    text.append(DELIMITER + "sw $t0, " + var.getOffset() + "($sp)\n");
+                } else {
+                    text.append(DELIMITER + "lw $f0, " + var.getOffset() + "($sp)\n");
+                    text.append(DELIMITER + "li $f1, " + "1.0" + "\n");
+                    text.append(DELIMITER + "add $f0, " + "f0, " + "f1\n");
+                    text.append(DELIMITER + "sw $f0, " + var.getOffset() + "($sp)\n");
+                }
             }
         }
     }
@@ -1523,9 +1534,68 @@ class PrintTree extends DepthFirstAdapter {
                     }
                 }              
             } else if(node.parent() instanceof AIncrStmt){
-                //FIXME
+                AIncrStmt AIncrStmtNode = (AIncrStmt)node.parent();
+                String idVal = AIncrStmtNode.getId().toString().trim();
+                int scope = getScope(idVal);
+                int index = Integer.parseInt(node.getInt().toString().trim());
+                
+                if (scope == -1) {
+                    error.add("Array " + idVal + " has not been declared.");
+                }
+                Array var = (Array) getSymbol(scope, idVal);
+                if(!(var.getType().equals("INT")
+                    || var.getType().equals("REAL"))){
+                    error.add("Array " + idVal + " has type " + var.getType() + " which cannot be incremented.");
+                } else {
+                    if(var.isInitializedAt(index)){
+                        if (var.getType().equals("INT")){
+                            text.append(DELIMITER + "la $t2, " + idVal + "\n");
+                            text.append(DELIMITER + "lw $t0, " + Integer.toString(index).trim() + "($t2)\n");
+                            text.append(DELIMITER + "li $t1, " + "1" + "\n");
+                            text.append(DELIMITER + "add $t0, " + "$t0, " + "$t1\n");
+                            text.append(DELIMITER + "sw $t0, " + Integer.toString(index).trim() + "($t2)\n");
+                        } else {
+                            text.append(DELIMITER + "la $f2, " + idVal + "\n");
+                            text.append(DELIMITER + "lw $f0, " + Integer.toString(index).trim() + "($f2)\n");
+                            text.append(DELIMITER + "li $f1, " + "1" + "\n");
+                            text.append(DELIMITER + "add $f0, " + "$f0, " + "$f1\n");
+                            text.append(DELIMITER + "sw $f0, " + Integer.toString(index).trim() + "($f2)\n");
+                        }
+                    } else {
+                        error.add("Array " + idVal + " at index: " + index + " has not been initialized yet.");
+                    }
+                }
             } else if(node.parent() instanceof ADecrStmt){
-                //FIXME
+                AIncrStmt AIncrStmtNode = (AIncrStmt)node.parent();
+                String idVal = AIncrStmtNode.getId().toString().trim();
+                int scope = getScope(idVal);
+                int index = Integer.parseInt(node.getInt().toString().trim());
+                if (scope == -1) {
+                    error.add("Array " + idVal + " has not been declared.");
+                }
+                Array var = (Array) getSymbol(scope, idVal);
+                if(!(var.getType().equals("INT")
+                    || var.getType().equals("REAL"))){
+                    error.add("Array " + idVal + " has type " + var.getType() + " which cannot be decremented.");
+                } else {
+                    if(var.isInitializedAt(index)){
+                        if (var.getType().equals("INT")){
+                            text.append(DELIMITER + "la $t2, " + idVal + "\n");
+                            text.append(DELIMITER + "lw $t0, " + Integer.toString(index).trim() + "($t2)\n");
+                            text.append(DELIMITER + "li $t1, " + "1" + "\n");
+                            text.append(DELIMITER + "sub $t0, " + "$t0, " + "$t1\n");
+                            text.append(DELIMITER + "sw $t0, " + Integer.toString(index).trim() + "($t2)\n");
+                        } else {
+                            text.append(DELIMITER + "la $f2, " + idVal + "\n");
+                            text.append(DELIMITER + "lw $f0, " + Integer.toString(index).trim() + "($f2)\n");
+                            text.append(DELIMITER + "li $f1, " + "1" + "\n");
+                            text.append(DELIMITER + "sub $f0, " + "$f0, " + "$f1\n");
+                            text.append(DELIMITER + "sw $f0, " + Integer.toString(index).trim() + "($f2)\n");
+                        }
+                    } else {
+                        error.add("Array " + idVal + " at index: " + index + " has not been initialized yet.");
+                    }
+                }
             } else if(node.parent() instanceof AAssignBooleanStmt){
                 AAssignBooleanStmt node2 = (AAssignBooleanStmt) node.parent();
                 String id = node2.getId().toString().trim();
