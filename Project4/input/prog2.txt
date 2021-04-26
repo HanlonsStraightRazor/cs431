@@ -25,5 +25,10 @@ BEGIN
             idPie := 10;
         }
     }
+    WHILE (cond) {
+        idPie := 13;
+        cond := FALSE;
+        idPie := 14;
+    }
  }
 END
