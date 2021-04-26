@@ -1232,11 +1232,11 @@ class PrintTree extends DepthFirstAdapter {
             else if (node.getExprOrBool() instanceof ABoolExprOrBool) {
                 if(((ABoolExprOrBool)node.getExprOrBool()).getBoolean() instanceof AFalseBoolean) {
                     text.append(DELIMITER 
-                        + "li $s0, 0");
+                        + "li $s0, 0\n");
                 }
                 else{
                     text.append(DELIMITER 
-                        + "li $s0, 1");
+                        + "li $s0, 1\n");
                 }
             }
             else {

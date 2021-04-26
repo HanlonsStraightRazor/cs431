@@ -30,5 +30,6 @@ BEGIN
         cond := FALSE;
         idPie := 14;
     }
+    RETURN TRUE;
  }
 END
