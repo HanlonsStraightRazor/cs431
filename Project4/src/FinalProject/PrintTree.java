@@ -436,12 +436,19 @@ class PrintTree extends DepthFirstAdapter {
         }
     }
 
+    //FIXME
     @Override
     public void caseAAssignStringStmt(AAssignStringStmt node) {
+        String idVal = "", type = "";
+        boolean isArray = false;
         if (node.getId() != null) {
+            idVal = node.getId().toString().trim();
             node.getId().apply(this);
         }
         if (node.getArrayOption() != null) {
+            if(node.getArrayOption() instanceof AArrayArrayOption){
+                isArray = true;
+            }
             node.getArrayOption().apply(this);
         }
         if (node.getEquals() != null) {
@@ -452,6 +459,9 @@ class PrintTree extends DepthFirstAdapter {
         }
         if (node.getSemicolon() != null) {
             node.getSemicolon().apply(this);
+        }
+        if(!isArray){
+            data.append(idVal + ": .asciiz \"" + node.getAnychars().toString() + "\"");
         }
     }
 
@@ -554,7 +564,7 @@ class PrintTree extends DepthFirstAdapter {
                 } else if((ABoolBoolidNode.getBoolean()) instanceof AFalseBoolean){
                     isConstant = true;
                 } else if((ABoolBoolidNode.getBoolean()) instanceof AConditionalBoolean){
-
+                    //FIXME : AConditionalBoolean
                 }
             }
             node.getBoolid().apply(this);

@@ -1,12 +1,6 @@
 BEGIN
   VOID MAIN() {
-    idOne   : INT;
-    idPie   : REAL;
-    cond    : BOOLEAN;
-    idOne   := 1;
-    idPie   := 3.14;
-    cond    := TRUE;
-    idOne++;
-    idOne--;
+    cond    : STRING;
+    cond    := "VaLuE";
   }
 END
