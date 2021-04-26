@@ -15,10 +15,12 @@ class PrintTree extends DepthFirstAdapter {
     private static StringBuilder data;
     private static final String DELIMITER = "    ";
     private static final String LABELPREFIX = "label";
+    private static final String TRUE = "TRUE";
+    private static final String FALSE = "FALSE";
     private static int labelnum;
-    private static int offset = 0;
+    private static int offset;
     private static Queue<String> error;
-    private static int currentScope = 0;
+    private static int currentScope;
     /*
      * Constructor. Initializes non final class variables.
      */
@@ -30,6 +32,8 @@ class PrintTree extends DepthFirstAdapter {
         text  = new StringBuilder();
         data  = new StringBuilder();
         labelnum = 0;
+        offset = 0;
+        currentScope = 0;
     }
     /*
      * <Prog> ::= BEGIN <ClassMethodStmts> END
@@ -38,7 +42,14 @@ class PrintTree extends DepthFirstAdapter {
     public void caseAProg(AProg node) {
         if (node.getBegin() != null) {
             data.append(DELIMITER
-                + ".data\n\n");
+                + ".data\n\n"
+                + "TRUE:\n"
+                + DELIMITER
+                + TRUE
+                + "\nFALSE:\n"
+                + DELIMITER
+                + FALSE
+                +"\n");
             text.append(DELIMITER
                 + ".text\n\n");
             node.getBegin().apply(this);
@@ -567,7 +578,7 @@ class PrintTree extends DepthFirstAdapter {
         }
         if (node.getRcurly() != null) {
             if (!isConstant) {
-                text.append(falselabel
+                text.append("\n" + falselabel
                     + ":\n");
             }
             decScope();
@@ -662,7 +673,7 @@ class PrintTree extends DepthFirstAdapter {
         }
         if (node.getElseBlockStmts() != null) {
             if (!isConstant) {
-                text.append(falselabel
+                text.append("\n" + falselabel
                     + ":\n");
             }
             if (!isConstant || !constant) {
@@ -671,7 +682,7 @@ class PrintTree extends DepthFirstAdapter {
         }
         if (node.getElsercurly() != null) {
             if (!isConstant) {
-                text.append(endlabel
+                text.append("\n" + endlabel
                     + ":\n");
             }
             decScope();
@@ -777,6 +788,11 @@ class PrintTree extends DepthFirstAdapter {
 
     @Override
     public void caseAPutStmt(APutStmt node) {
+        Symbol symbol = null;
+        String id = "<INVALID>";
+        int scope = -1;
+        boolean array = false;
+        int index = 0;
         if (node.getPut() != null) {
             node.getPut().apply(this);
         }
@@ -784,15 +800,154 @@ class PrintTree extends DepthFirstAdapter {
             node.getLparen().apply(this);
         }
         if (node.getId() != null) {
+            id = node.getId().toString().trim();
+            scope = getScope(id);
+            if (scope == -1) {
+                error.add("Variable " + id + " has not been declared.");
+                return;
+            }
+            symbol = getSymbol(scope, id);
+            array = isArray(symbol);
             node.getId().apply(this);
         }
         if (node.getArrayOption() != null) {
+            if (array) {
+                index =
+                     Integer.parseInt(((AArrayArrayOption) node.getArrayOption()).getInt().getText());
+                if (((Array) symbol).isInitializedAt(index)) {
+                    error.add("Variable "
+                        + id
+                        + " has not been initialized at index "
+                        + index
+                        + ".");
+                    return;
+                }
+            } else {
+                if (((Variable) symbol).isInitialized()) {
+                    error.add("Variable "
+                        + id
+                        + " has not been initialized.");
+                }
+            }
             node.getArrayOption().apply(this);
         }
         if (node.getRparen() != null) {
             node.getRparen().apply(this);
         }
         if (node.getSemicolon() != null) {
+            text.append(DELIMITER + "lw $v0, ");
+            switch (symbol.getType().trim()) {
+                case "INTEGER":
+                    text.append("1\n");
+                    if (array) {
+                        text.append(DELIMITER
+                            + "la $a0, "
+                            + id
+                            + "\n");
+                        text.append(DELIMITER
+                            + "lw $a0, \n"
+                            + index
+                            + "($a0)\n");
+                    } else {
+                        text.append(DELIMITER
+                            + "lw $a0, \n"
+                            + ((Variable) symbol).getOffset()
+                            + "($sp)\n");
+                    }
+                    break;
+                case "REAL":
+                    text.append("2\n");
+                    if (array) {
+                        text.append(DELIMITER
+                            + "la $t0, "
+                            + id
+                            + "\n");
+                        text.append(DELIMITER
+                            + "lw $f12, \n"
+                            + index
+                            + "($t0)\n");
+                    } else {
+                        text.append(DELIMITER
+                            + "lw $f12, \n"
+                            + ((Variable) symbol).getOffset()
+                            + "($sp)\n");
+                    }
+                    break;
+                case "STRING":
+                    text.append("4\n");
+                    if (array) {
+                        text.append(DELIMITER
+                            + "la $a0, "
+                            + id
+                            + "\n");
+                        text.append(DELIMITER
+                            + "lw $a0, \n"
+                            + index
+                            + "($a0)\n");
+                    } else {
+                        text.append(DELIMITER
+                            + "lw $a0, \n"
+                            + ((Variable) symbol).getOffset()
+                            + "($sp)\n");
+                    }
+                    break;
+                case "BOOLEAN":
+                    text.append("4\n");
+                    if (array) {
+                        text.append(DELIMITER
+                            + "la $t0, "
+                            + id
+                            + "\n");
+                        text.append(DELIMITER
+                            + "lw $t0, \n"
+                            + index
+                            + "($t0)\n");
+                    } else {
+                        text.append(DELIMITER
+                            + "lw $t0, \n"
+                            + ((Variable) symbol).getOffset()
+                            + "($sp)\n");
+                    }
+                    String falseLabel = LABELPREFIX + labelnum++;
+                    String endLabel   = LABELPREFIX + labelnum++;
+                    text.append(DELIMITER
+                        + "beq $zero, $t0, "
+                        + falseLabel
+                        + "\n");
+                    text.append("la $a0, TRUE\n");
+                    text.append(DELIMITER
+                        + "j "
+                        + endLabel
+                        + "\n");
+                    text.append("\n"
+                        + falseLabel
+                        + ":\n");
+                    text.append("la $a0, FALSE\n");
+                    text.append("\n"
+                        + endLabel
+                        + ":\n");
+                    break;
+                default:
+                    text.append("1\n");
+                    if (array) {
+                        text.append(DELIMITER
+                            + "la $a0, "
+                            + id
+                            + "\n");
+                        text.append(DELIMITER
+                            + "lw $a0, \n"
+                            + index
+                            + "($a0)\n");
+                    } else {
+                        text.append(DELIMITER
+                            + "lw $a0, \n"
+                            + ((Variable) symbol).getOffset()
+                            + "($sp)\n");
+                    }
+            }
+            text.append(DELIMITER
+                + "syscall\n");
+            text.append("li $a0, 0xA\nli $v0, 11,\nsyscall\n"); // Print newline
             node.getSemicolon().apply(this);
         }
     }
