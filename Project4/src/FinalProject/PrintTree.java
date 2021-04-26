@@ -705,6 +705,13 @@ class PrintTree extends DepthFirstAdapter {
 
     @Override
     public void caseAWhileStmt(AWhileStmt node) {
+        String trueLabel = LABELPREFIX
+            + labelnum;
+        String falseLabel = LABELPREFIX
+            + (labelnum + 1);
+        Symbol var;
+        boolean isConstant = false;
+        boolean constant = false;
         if (node.getWhile() != null) {
             node.getWhile().apply(this);
         }
@@ -712,6 +719,53 @@ class PrintTree extends DepthFirstAdapter {
             node.getLparen().apply(this);
         }
         if (node.getBoolid() != null) {
+            if(node.getBoolid() instanceof AIdBoolid) {
+                boolean found = false;
+                idVal = ((AIdBoolid) node.getBoolid()).getId().toString().trim();
+                for(int i = currentScope; i >= 0; i--){
+                    if(symbolTables.get(i).containsKey(idVal)){
+                        Symbol var = symbolTables.get(i).get(idVal);
+                        if(var instanceof Variable){
+                            if(!((Variable) var).getType().toString().equals("BOOLEAN")){
+                                error.add("Variable "
+                                    + idVal
+                                    + " has type "
+                                    + ((Variable) var).getType()
+                                    + " which cannot be converted to BOOLEAN.");
+                                break;
+                            }
+                            found = true;
+                            labelnum += 2;
+                        }
+                        text.append(DELIMITER
+                            + "lw $t0, "
+                            + ((Variable) var).getOffset()
+                            + "($sp)\n");
+                        text.append(DELIMITER
+                            + "beq $zero, $t0, "
+                            + falselabel
+                            + "\n");
+                        text.append(trueLabel
+                            + ":\n");
+                    }
+                }
+                if (found == false){
+                    error.add("Variable "
+                        + idVal
+                        + " has not been declared.");
+                }
+            } 
+            else {
+                ABoolBoolid ABoolBoolidNode = (ABoolBoolid)node.getBoolid();
+                if((ABoolBoolidNode.getBoolean()) instanceof ATrueBoolean){
+                    isConstant = true;
+                    constant = true;
+                } else if((ABoolBoolidNode.getBoolean()) instanceof AFalseBoolean){
+                    isConstant = true;
+                } else if((ABoolBoolidNode.getBoolean()) instanceof AConditionalBoolean){
+                    //FIXME : AConditionalBoolean
+                }
+            }
             node.getBoolid().apply(this);
         }
         if (node.getRparen() != null) {
@@ -719,11 +773,37 @@ class PrintTree extends DepthFirstAdapter {
         }
         if (node.getLcurly() != null) {
             node.getLcurly().apply(this);
+            incScope();
         }
-        if (node.getStmtseq() != null) {
-            node.getStmtseq().apply(this);
-        }
+        if ((node.getStmtseq() != null)
+            if(isConstant && constant){
+                node.getStmtseq().apply(this);
+                text.append(DELIMITER
+                    + "beq $zero, $zero, "
+                    + trueLabel
+                    + "\n");
+            }
+            else if(!isConstant){
+                node.getStmtseq().apply(this);
+                text.append(DELIMITER
+                    + "lw $t0, "
+                    + ((Variable) var).getOffset()
+                    + "($sp)\n");
+                text.append(DELIMITER
+                    + "beq $zero, $t0, "
+                    + falseLabel
+                    + "\n");
+                text.append(DELIMITER
+                    + "bne $zero, $t0, "
+                    + trueLabel
+                    + "\n");  
+            }
         if (node.getRcurly() != null) {
+            if (!isConstant) {
+                text.append(falseLabel
+                    + ":\n");
+            }
+            decScope();
             node.getRcurly().apply(this);
         }
     }
