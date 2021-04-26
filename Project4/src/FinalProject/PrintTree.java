@@ -696,9 +696,9 @@ class PrintTree extends DepthFirstAdapter {
             + labelnum;
         String falseLabel = LABELPREFIX
             + (labelnum + 1);
-        Symbol var;
         boolean isConstant = false;
         boolean constant = false;
+        Variable var = null;
         if (node.getWhile() != null) {
             node.getWhile().apply(this);
         }
@@ -708,48 +708,46 @@ class PrintTree extends DepthFirstAdapter {
         if (node.getBoolid() != null) {
             if(node.getBoolid() instanceof AIdBoolid) {
                 boolean found = false;
-                idVal = ((AIdBoolid) node.getBoolid()).getId().toString().trim();
-                for(int i = currentScope; i >= 0; i--){
-                    if(symbolTables.get(i).containsKey(idVal)){
-                        Symbol var = symbolTables.get(i).get(idVal);
-                        if(var instanceof Variable){
-                            if(!((Variable) var).getType().toString().equals("BOOLEAN")){
-                                error.add("Variable "
-                                    + idVal
-                                    + " has type "
-                                    + ((Variable) var).getType()
-                                    + " which cannot be converted to BOOLEAN.");
-                                break;
-                            }
-                            found = true;
-                            labelnum += 2;
-                        }
-                        text.append(DELIMITER
-                            + "lw $t0, "
-                            + ((Variable) var).getOffset()
-                            + "($sp)\n");
-                        text.append(DELIMITER
-                            + "beq $zero, $t0, "
-                            + falselabel
-                            + "\n");
-                        text.append(trueLabel
-                            + ":\n");
-                    }
-                }
-                if (found == false){
+                String id = ((AIdBoolid) node.getBoolid()).getId().toString().trim();
+                int scope = getScope(id);
+                if (scope == -1) {
                     error.add("Variable "
-                        + idVal
+                        + id
                         + " has not been declared.");
+                } else {
+                    labelnum += 2;
                 }
-            } 
+                var = (Variable) getSymbol(scope, id);
+                if(!var.getType().toString().equals("BOOLEAN")) {
+                    error.add("Variable "
+                        + id
+                        + " has type "
+                        + var.getType()
+                        + " which cannot be converted to BOOLEAN.");
+                }
+                text.append(DELIMITER
+                    + "lw $t0, "
+                    + var.getOffset()
+                    + "($sp)\n");
+                text.append(DELIMITER
+                    + "beq $zero, $t0, "
+                    + falseLabel
+                    + "\n");
+                text.append(trueLabel
+                    + ":\n");
+                }
             else {
                 ABoolBoolid ABoolBoolidNode = (ABoolBoolid)node.getBoolid();
-                if((ABoolBoolidNode.getBoolean()) instanceof ATrueBoolean){
+                if((ABoolBoolidNode.getBoolean()) instanceof ATrueBoolean) {
                     isConstant = true;
                     constant = true;
-                } else if((ABoolBoolidNode.getBoolean()) instanceof AFalseBoolean){
+                    text.append(trueLabel
+                    + ":\n");
+                    }
+                else if((ABoolBoolidNode.getBoolean()) instanceof AFalseBoolean) {
                     isConstant = true;
-                } else if((ABoolBoolidNode.getBoolean()) instanceof AConditionalBoolean){
+                } 
+                else if((ABoolBoolidNode.getBoolean()) instanceof AConditionalBoolean) {
                     //FIXME : AConditionalBoolean
                 }
             }
@@ -762,29 +760,30 @@ class PrintTree extends DepthFirstAdapter {
             node.getLcurly().apply(this);
             incScope();
         }
-        if ((node.getStmtseq() != null)
-            if(isConstant && constant){
+        if (node.getStmtseq() != null) {
+            if(isConstant && constant) {
                 node.getStmtseq().apply(this);
                 text.append(DELIMITER
-                    + "beq $zero, $zero, "
+                    + "j "
                     + trueLabel
                     + "\n");
             }
-            else if(!isConstant){
+            else if(!isConstant) {
                 node.getStmtseq().apply(this);
                 text.append(DELIMITER
                     + "lw $t0, "
-                    + ((Variable) var).getOffset()
+                    + var.getOffset()
                     + "($sp)\n");
-                text.append(DELIMITER
-                    + "beq $zero, $t0, "
-                    + falseLabel
-                    + "\n");
                 text.append(DELIMITER
                     + "bne $zero, $t0, "
                     + trueLabel
-                    + "\n");  
+                    + "\n");
+                text.append(DELIMITER
+                    + "j "
+                    + falseLabel
+                    + "\n");
             }
+        }
         if (node.getRcurly() != null) {
             if (!isConstant) {
                 text.append(falseLabel
