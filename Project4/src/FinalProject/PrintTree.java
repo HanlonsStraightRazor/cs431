@@ -125,14 +125,14 @@ class PrintTree extends DepthFirstAdapter {
             node.getRparen().apply(this);
         }
         if (node.getLcurly() != null) {
-            currentScope++;
+            incScope();
             node.getLcurly().apply(this);
         }
         if (node.getStmtseq() != null) {
             node.getStmtseq().apply(this);
         }
         if (node.getRcurly() != null) {
-            currentScope--;
+            decScope();
             node.getRcurly().apply(this);
         }
     }
@@ -418,7 +418,7 @@ class PrintTree extends DepthFirstAdapter {
                     }
                     found = true;
                     ((Variable)var).initialize();
-                    symbolTables.get(i).put(idVal, ((Variable)var));
+                    addToSymbolTable(idVal, ((Variable)var), i);
                     text.append(DELIMITER
                         + "sw $s0, "
                         + Integer.toString(((Variable)var).getOffset()).trim()
@@ -458,7 +458,7 @@ class PrintTree extends DepthFirstAdapter {
     @Override
     public void caseAVarDeclStmt(AVarDeclStmt node) {
         String idVal = "", type = "";
-        boolean isArray = false;
+        boolean isArray = false, alreadyDeclared = false;
         if (node.getId() != null) {
             idVal = node.getId().toString().trim();
             node.getId().apply(this);
@@ -470,7 +470,6 @@ class PrintTree extends DepthFirstAdapter {
             node.getColon().apply(this);
         }
         if (node.getType() != null) {
-            //TODO: Need to check that varible has not be declared in scope already ._.
             if(node.getType() instanceof AIdType){
                 //type = ((AIdType) node.getType()).toString().trim();
                 error.add("Can not have type " + ((AIdType) node.getType()).toString().trim() + ".");
@@ -479,6 +478,12 @@ class PrintTree extends DepthFirstAdapter {
             }
             node.getType().apply(this);
         }
+        try{
+            if(symbolTables.get(currentScope).containsKey(idVal)){
+                alreadyDeclared = true;
+                error.add(idVal + " has already been declared in this scope.");
+            }
+        } catch (Exception ex){};
         if (node.getArrayOption() != null) {
             if(node.getArrayOption() instanceof AArrayArrayOption){
                 isArray = true;
@@ -488,17 +493,9 @@ class PrintTree extends DepthFirstAdapter {
         if (node.getSemicolon() != null) {
             node.getSemicolon().apply(this);
         }
-        if(!isArray){
-            if(symbolTables.size() <= currentScope){
-                HashMap<String, Symbol> notinitialized = new HashMap<String, Symbol>();
-                Variable newVar = new Variable(type, offset);
-                notinitialized.put(idVal, newVar);
-                symbolTables.add(notinitialized);
-            } else {
-                Variable newVar = new Variable(type, offset);
-                //hash map already is made for that scope
-                symbolTables.get(currentScope).put(idVal, newVar);
-            }
+        if((!isArray) && (!alreadyDeclared)){
+            Variable newVar = new Variable(type, offset);
+            addToSymbolTable(idVal, newVar);
             offset = offset + 4;
         }
     }
@@ -547,6 +544,7 @@ class PrintTree extends DepthFirstAdapter {
         }
         if (node.getLcurly() != null) {
             node.getLcurly().apply(this);
+            incScope();
         }
         if ((node.getStmtseq() != null)
             && (!isConstant || constant)) {
@@ -557,6 +555,7 @@ class PrintTree extends DepthFirstAdapter {
                 text.append(falselabel
                     + ":\n");
             }
+            decScope();
             node.getRcurly().apply(this);
         }
     }
@@ -606,6 +605,7 @@ class PrintTree extends DepthFirstAdapter {
             node.getThen().apply(this);
         }
         if (node.getIflcurly() != null) {
+            incScope();
             node.getIflcurly().apply(this);
         }
         if (node.getIfBlockStmts() != null) {
@@ -618,12 +618,14 @@ class PrintTree extends DepthFirstAdapter {
                 text.append(DELIMITER + "j "
                    + endlabel + "\n");
             }
+            decScope();
             node.getIfrcurly().apply(this);
         }
         if (node.getElse() != null) {
             node.getElse().apply(this);
         }
         if (node.getElselcurly() != null) {
+            incScope();
             node.getElselcurly().apply(this);
         }
         if (node.getElseBlockStmts() != null) {
@@ -640,6 +642,7 @@ class PrintTree extends DepthFirstAdapter {
                 text.append(endlabel
                     + ":\n");
             }
+            decScope();
             node.getElsercurly().apply(this);
         }
     }
@@ -992,7 +995,7 @@ class PrintTree extends DepthFirstAdapter {
                                 }
                                 found = true;
                                 ((Variable)var).initialize();
-                                symbolTables.get(i).put(idVal, ((Variable)var));
+                                addToSymbolTable(idVal, ((Variable)var), i);
                                 text.append(DELIMITER + "li $t0, " + 1 + "\n");
                                 text.append(DELIMITER + "sw $t0, " + ((Variable)var).getOffset() + "($sp)\n");
                                 break;
@@ -1014,7 +1017,7 @@ class PrintTree extends DepthFirstAdapter {
                                 }
                                 found = true;
                                 ((Variable)var).initialize();
-                                symbolTables.get(i).put(idVal, ((Variable)var));
+                                addToSymbolTable(idVal, ((Variable)var), i);
                                 text.append(DELIMITER + "li $t0, " + 0 + "\n");
                                 text.append(DELIMITER + "sw $t0, " + ((Variable)var).getOffset() + "($sp)\n");
                                 break;
@@ -1236,13 +1239,7 @@ class PrintTree extends DepthFirstAdapter {
                 typeVal = ((AVarDeclStmt) AVarDeclStmtNode).getType().toString().trim();
                 sizeVal = Integer.parseInt(node.getInt().toString().trim());
                 Array arr = new Array(typeVal, sizeVal);
-                if(symbolTables.size() <= currentScope){
-                    HashMap<String, Symbol> notinitialized = new HashMap<String, Symbol>();
-                    notinitialized.put(idVal, arr);
-                    symbolTables.add(notinitialized);
-                } else {
-                    symbolTables.get(currentScope).put(idVal, arr);
-                }
+                addToSymbolTable(idVal, arr);
                 data.append(idVal + ":\n");
                 if (typeVal.equals("BOOLEAN")) {
                     data.append(DELIMITER
@@ -1282,13 +1279,14 @@ class PrintTree extends DepthFirstAdapter {
                             Node boolNode = AAssignBooleanStmtNode.getBoolean();
                             if(boolNode instanceof ATrueBoolean){
                                 ((Array)var).initializeAt(index);
-                                symbolTables.get(i).put(idVal, ((Array)var));
+                                addToSymbolTable(idVal, ((Array)var), i);
                                 text.append(DELIMITER + "li $t0, " + 1 + "\n");
                                 text.append(DELIMITER + "la $t1, " + idVal + "\n");
                                 text.append(DELIMITER + "sw $t0, " + Integer.toString(index).trim() + "($t1)\n");
                             } else if(boolNode instanceof AFalseBoolean){
                                 ((Array)var).initializeAt(index);
                                 symbolTables.get(i).put(idVal, ((Array)var));
+                                addToSymbolTable(idVal, ((Array)var), i);
                                 text.append(DELIMITER + "li $t0, " + 0 + "\n");
                                 text.append(DELIMITER + "la $t1, " + idVal + "\n");
                                 text.append(DELIMITER + "sw $t0, " + Integer.toString(index).trim() + "($t1)\n");
@@ -1590,5 +1588,26 @@ class PrintTree extends DepthFirstAdapter {
         if (node.getId() != null) {
             node.getId().apply(this);
         }
+    }
+
+    public void incScope(){
+        HashMap<String, Symbol> notinitialized = new HashMap<String, Symbol>();
+        symbolTables.add(notinitialized);
+        currentScope++;
+    }
+
+    public void decScope(){
+        try{
+            symbolTables.remove(currentScope);
+        } catch(Exception ex){};
+        currentScope--;
+    }
+
+    public void addToSymbolTable(String idVal, Symbol val){
+        symbolTables.get(currentScope).put(idVal, val);
+    }
+
+    public void addToSymbolTable(String idVal, Symbol val, int scope){
+        symbolTables.get(scope).put(idVal, val);
     }
 }
