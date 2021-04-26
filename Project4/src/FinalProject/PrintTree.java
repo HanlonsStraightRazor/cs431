@@ -15,10 +15,12 @@ class PrintTree extends DepthFirstAdapter {
     private static StringBuilder data;
     private static final String DELIMITER = "    ";
     private static final String LABELPREFIX = "label";
+    private static final String TRUE = "TRUE";
+    private static final String FALSE = "FALSE";
     private static int labelnum;
-    private static int offset = 0;
+    private static int offset;
     private static Queue<String> error;
-    private static int currentScope = 0;
+    private static int currentScope;
     /*
      * Constructor. Initializes non final class variables.
      */
@@ -30,6 +32,8 @@ class PrintTree extends DepthFirstAdapter {
         text  = new StringBuilder();
         data  = new StringBuilder();
         labelnum = 0;
+        offset = 0;
+        currentScope = 0;
     }
     /*
      * <Prog> ::= BEGIN <ClassMethodStmts> END
@@ -38,7 +42,14 @@ class PrintTree extends DepthFirstAdapter {
     public void caseAProg(AProg node) {
         if (node.getBegin() != null) {
             data.append(DELIMITER
-                + ".data\n\n");
+                + ".data\n\n"
+                + "TRUE:\n"
+                + DELIMITER
+                + TRUE
+                + "\nFALSE:\n"
+                + DELIMITER
+                + FALSE
+                +"\n");
             text.append(DELIMITER
                 + ".text\n\n");
             node.getBegin().apply(this);
@@ -389,10 +400,7 @@ class PrintTree extends DepthFirstAdapter {
 
     @Override
     public void caseAAssignExprStmt(AAssignExprStmt node) {
-        String idVal = "";
-        boolean found = false;
         if (node.getId() != null) {
-            idVal = node.getId().toString().trim();
             node.getId().apply(this);
         }
         if (node.getArrayOption() != null) {
@@ -402,34 +410,27 @@ class PrintTree extends DepthFirstAdapter {
             node.getEquals().apply(this);
         }
         if (node.getExpr() != null) {
+            String id = node.getId().toString().trim();
+            int scope = getScope(id);
+            if (scope == -1) {
+                error.add("Variable " + id + " has not been declared.");
+            }
+            Variable var = (Variable) getSymbol(scope, id);
+            if(!(var.getType().equals("INT")
+                || var.getType().equals("REAL"))) {
+                error.add("Variable "
+                        + id
+                        + " has type "
+                        + var.getType()
+                        + " which cannot be converted to INT.");
+            }
+            text.append(DELIMITER
+                + "sw $s0, "
+                + Integer.toString(var.getOffset())
+                + "($sp)\n");
+            var.initialize();
+            addToSymbolTable(id, var, scope);
             node.getExpr().apply(this);
-            for(int i = currentScope; i >= 0; i--){
-                if(symbolTables.get(i).containsKey(idVal)){
-                    Symbol var = symbolTables.get(i).get(idVal);
-                    if(var instanceof Variable){
-                        if(!(((Variable) var).getType().equals("INT")
-                            || ((Variable) var).getType().equals("REAL"))){
-                            error.add("Variable "
-                                    + idVal
-                                    + " has type "
-                                    + ((Variable) var).getType()
-                                    + " which cannot be converted to INT.");
-                            break;
-                    }
-                    found = true;
-                    ((Variable)var).initialize();
-                    addToSymbolTable(idVal, ((Variable)var), i);
-                    text.append(DELIMITER
-                        + "sw $s0, "
-                        + Integer.toString(((Variable)var).getOffset()).trim()
-                        + "($sp)\n");
-                        break;
-                    }
-                }
-            }
-            if (found == false){
-                error.add("Variable " + idVal + " has not been declared.");
-            }
         }
         if (node.getSemicolon() != null) {
             node.getSemicolon().apply(this);
@@ -488,12 +489,10 @@ class PrintTree extends DepthFirstAdapter {
             }
             node.getType().apply(this);
         }
-        try{
-            if(symbolTables.get(currentScope).containsKey(idVal)){
-                alreadyDeclared = true;
-                error.add(idVal + " has already been declared in this scope.");
-            }
-        } catch (Exception ex){};
+        if(symbolTables.get(currentScope).containsKey(idVal)){
+            alreadyDeclared = true;
+            error.add(idVal + " has already been declared in this scope.");
+        }
         if (node.getArrayOption() != null) {
             if(node.getArrayOption() instanceof AArrayArrayOption){
                 isArray = true;
@@ -524,46 +523,40 @@ class PrintTree extends DepthFirstAdapter {
         }
         if (node.getBoolid() != null) {
             if(node.getBoolid() instanceof AIdBoolid){
-                boolean found = false;
-                String idVal = ((AIdBoolid) node.getBoolid()).getId().toString().trim();
-                for(int i = currentScope; i >= 0; i--){
-                    if(symbolTables.get(i).containsKey(idVal)){
-                        Symbol var = symbolTables.get(i).get(idVal);
-                        if(var instanceof Variable){
-                            if(!((Variable) var).getType().toString().equals("BOOLEAN")){
-                                error.add("Variable "
-                                    + idVal
-                                    + " has type "
-                                    + ((Variable) var).getType()
-                                    + " which cannot be converted to BOOLEAN.");
-                                break;
-                            }
-                            found = true;
-                            labelnum++;
-                        }
-                        text.append(DELIMITER
-                            + "lw $t0, "
-                            + ((Variable) var).getOffset()
-                            + "($sp)\n");
-                        text.append(DELIMITER
-                            + "beq $zero, $t0, "
-                            + falselabel
-                            + "\n");
-                    }
-                }
-                if (found == false){
+                String id = ((AIdBoolid) node.getBoolid()).getId().getText().trim();
+                int scope = getScope(id);
+                if (scope == -1) {
                     error.add("Variable "
-                        + idVal
+                        + id
                         + " has not been declared.");
+                } else {
+                    labelnum++;
                 }
+                Variable var = (Variable) getSymbol(scope, id);
+                if(!((Variable) var).getType().toString().equals("BOOLEAN")){
+                    error.add("Variable "
+                        + id
+                        + " has type "
+                        + var.getType()
+                        + " which cannot be converted to BOOLEAN.");
+                }
+                text.append(DELIMITER
+                    + "lw $t0, "
+                    + var.getOffset()
+                    + "($sp)\n");
+                text.append(DELIMITER
+                    + "beq $zero, $t0, "
+                    + falselabel
+                    + "\n");
             } else {
-                ABoolBoolid ABoolBoolidNode = (ABoolBoolid)node.getBoolid();
-                if((ABoolBoolidNode.getBoolean()) instanceof ATrueBoolean){
+                ABoolBoolid node2 = (ABoolBoolid) node.getBoolid();
+                if (node2.getBoolean() instanceof ATrueBoolean){
                     isConstant = true;
                     constant = true;
-                } else if((ABoolBoolidNode.getBoolean()) instanceof AFalseBoolean){
+                } else if (node2.getBoolean() instanceof AFalseBoolean) {
                     isConstant = true;
-                } else if((ABoolBoolidNode.getBoolean()) instanceof AConditionalBoolean){
+                } else if (node2.getBoolean() instanceof AConditionalBoolean) {
+                    isConstant = true;
                     //FIXME : AConditionalBoolean
                 }
             }
@@ -585,7 +578,7 @@ class PrintTree extends DepthFirstAdapter {
         }
         if (node.getRcurly() != null) {
             if (!isConstant) {
-                text.append(falselabel
+                text.append("\n" + falselabel
                     + ":\n");
             }
             decScope();
@@ -609,47 +602,41 @@ class PrintTree extends DepthFirstAdapter {
         }
         if (node.getBoolid() != null) {
             if(node.getBoolid() instanceof AIdBoolid){
-                boolean found = false;
-                String idVal = ((AIdBoolid) node.getBoolid()).getId().toString().trim();
-                for(int i = currentScope; i >= 0; i--){
-                    if(symbolTables.get(i).containsKey(idVal)){
-                        Symbol var = symbolTables.get(i).get(idVal);
-                        if(var instanceof Variable){
-                            if(!((Variable) var).getType().toString().equals("BOOLEAN")){
-                                error.add("Variable "
-                                    + idVal
-                                    + " has type "
-                                    + ((Variable) var).getType()
-                                    + " which cannot be converted to BOOLEAN.");
-                                break;
-                            }
-                            found = true;
-                            labelnum += 2;
-                        }
-                        text.append(DELIMITER
-                            + "lw $t0, "
-                            + ((Variable) var).getOffset()
-                            + "($sp)\n");
-                        text.append(DELIMITER
-                            + "beq $zero, $t0, "
-                            + falselabel
-                            + "\n");
-                    }
-                }
-                if (found == false){
+                String id = ((AIdBoolid) node.getBoolid()).getId().toString().trim();
+                int scope = getScope(id);
+                if (scope == -1) {
                     error.add("Variable "
-                        + idVal
+                        + id
                         + " has not been declared.");
+                } else {
+                    labelnum += 2;
                 }
+                Variable var = (Variable) getSymbol(scope, id);
+                if(!var.getType().toString().equals("BOOLEAN")){
+                    error.add("Variable "
+                        + id
+                        + " has type "
+                        + var.getType()
+                        + " which cannot be converted to BOOLEAN.");
+                }
+                text.append(DELIMITER
+                    + "lw $t0, "
+                    + var.getOffset()
+                    + "($sp)\n");
+                text.append(DELIMITER
+                    + "beq $zero, $t0, "
+                    + falselabel
+                    + "\n");
             } else {
-                ABoolBoolid ABoolBoolidNode = (ABoolBoolid)node.getBoolid();
-                if((ABoolBoolidNode.getBoolean()) instanceof ATrueBoolean){
+                ABoolBoolid node2 = (ABoolBoolid) node.getBoolid();
+                if (node2.getBoolean() instanceof ATrueBoolean) {
                     isConstant = true;
                     constant = true;
-                } else if((ABoolBoolidNode.getBoolean()) instanceof AFalseBoolean){
+                } else if (node2.getBoolean() instanceof AFalseBoolean) {
                     isConstant = true;
-                } else if((ABoolBoolidNode.getBoolean()) instanceof AConditionalBoolean){
-
+                } else if (node2.getBoolean() instanceof AConditionalBoolean) {
+                    isConstant = true;
+                    // FIXME: Add conditional support
                 }
             }
             node.getBoolid().apply(this);
@@ -686,7 +673,7 @@ class PrintTree extends DepthFirstAdapter {
         }
         if (node.getElseBlockStmts() != null) {
             if (!isConstant) {
-                text.append(falselabel
+                text.append("\n" + falselabel
                     + ":\n");
             }
             if (!isConstant || !constant) {
@@ -695,7 +682,7 @@ class PrintTree extends DepthFirstAdapter {
         }
         if (node.getElsercurly() != null) {
             if (!isConstant) {
-                text.append(endlabel
+                text.append("\n" + endlabel
                     + ":\n");
             }
             decScope();
@@ -881,6 +868,11 @@ class PrintTree extends DepthFirstAdapter {
 
     @Override
     public void caseAPutStmt(APutStmt node) {
+        Symbol symbol = null;
+        String id = "<INVALID>";
+        int scope = -1;
+        boolean array = false;
+        int index = 0;
         if (node.getPut() != null) {
             node.getPut().apply(this);
         }
@@ -888,27 +880,165 @@ class PrintTree extends DepthFirstAdapter {
             node.getLparen().apply(this);
         }
         if (node.getId() != null) {
+            id = node.getId().toString().trim();
+            scope = getScope(id);
+            if (scope == -1) {
+                error.add("Variable " + id + " has not been declared.");
+                return;
+            }
+            symbol = getSymbol(scope, id);
+            array = isArray(symbol);
             node.getId().apply(this);
         }
         if (node.getArrayOption() != null) {
+            if (array) {
+                index =
+                     Integer.parseInt(((AArrayArrayOption) node.getArrayOption()).getInt().getText());
+                if (((Array) symbol).isInitializedAt(index)) {
+                    error.add("Variable "
+                        + id
+                        + " has not been initialized at index "
+                        + index
+                        + ".");
+                    return;
+                }
+            } else {
+                if (((Variable) symbol).isInitialized()) {
+                    error.add("Variable "
+                        + id
+                        + " has not been initialized.");
+                }
+            }
             node.getArrayOption().apply(this);
         }
         if (node.getRparen() != null) {
             node.getRparen().apply(this);
         }
         if (node.getSemicolon() != null) {
+            text.append(DELIMITER + "lw $v0, ");
+            switch (symbol.getType().trim()) {
+                case "INTEGER":
+                    text.append("1\n");
+                    if (array) {
+                        text.append(DELIMITER
+                            + "la $a0, "
+                            + id
+                            + "\n");
+                        text.append(DELIMITER
+                            + "lw $a0, \n"
+                            + index
+                            + "($a0)\n");
+                    } else {
+                        text.append(DELIMITER
+                            + "lw $a0, \n"
+                            + ((Variable) symbol).getOffset()
+                            + "($sp)\n");
+                    }
+                    break;
+                case "REAL":
+                    text.append("2\n");
+                    if (array) {
+                        text.append(DELIMITER
+                            + "la $t0, "
+                            + id
+                            + "\n");
+                        text.append(DELIMITER
+                            + "lw $f12, \n"
+                            + index
+                            + "($t0)\n");
+                    } else {
+                        text.append(DELIMITER
+                            + "lw $f12, \n"
+                            + ((Variable) symbol).getOffset()
+                            + "($sp)\n");
+                    }
+                    break;
+                case "STRING":
+                    text.append("4\n");
+                    if (array) {
+                        text.append(DELIMITER
+                            + "la $a0, "
+                            + id
+                            + "\n");
+                        text.append(DELIMITER
+                            + "lw $a0, \n"
+                            + index
+                            + "($a0)\n");
+                    } else {
+                        text.append(DELIMITER
+                            + "lw $a0, \n"
+                            + ((Variable) symbol).getOffset()
+                            + "($sp)\n");
+                    }
+                    break;
+                case "BOOLEAN":
+                    text.append("4\n");
+                    if (array) {
+                        text.append(DELIMITER
+                            + "la $t0, "
+                            + id
+                            + "\n");
+                        text.append(DELIMITER
+                            + "lw $t0, \n"
+                            + index
+                            + "($t0)\n");
+                    } else {
+                        text.append(DELIMITER
+                            + "lw $t0, \n"
+                            + ((Variable) symbol).getOffset()
+                            + "($sp)\n");
+                    }
+                    String falseLabel = LABELPREFIX + labelnum++;
+                    String endLabel   = LABELPREFIX + labelnum++;
+                    text.append(DELIMITER
+                        + "beq $zero, $t0, "
+                        + falseLabel
+                        + "\n");
+                    text.append("la $a0, TRUE\n");
+                    text.append(DELIMITER
+                        + "j "
+                        + endLabel
+                        + "\n");
+                    text.append("\n"
+                        + falseLabel
+                        + ":\n");
+                    text.append("la $a0, FALSE\n");
+                    text.append("\n"
+                        + endLabel
+                        + ":\n");
+                    break;
+                default:
+                    text.append("1\n");
+                    if (array) {
+                        text.append(DELIMITER
+                            + "la $a0, "
+                            + id
+                            + "\n");
+                        text.append(DELIMITER
+                            + "lw $a0, \n"
+                            + index
+                            + "($a0)\n");
+                    } else {
+                        text.append(DELIMITER
+                            + "lw $a0, \n"
+                            + ((Variable) symbol).getOffset()
+                            + "($sp)\n");
+                    }
+            }
+            text.append(DELIMITER
+                + "syscall\n");
+            text.append("li $a0, 0xA\nli $v0, 11,\nsyscall\n"); // Print newline
             node.getSemicolon().apply(this);
         }
     }
 
     @Override
     public void caseAIncrStmt(AIncrStmt node) {
-        String idVal = "";
-        boolean found = false;
+        String id = "";
         boolean array = false;
         Object val;
         if (node.getId() != null) {
-            idVal = node.getId().toString().trim();
+            id = node.getId().toString().trim();
             node.getId().apply(this);
         }
         if (node.getArrayOption() != null) {
@@ -923,46 +1053,36 @@ class PrintTree extends DepthFirstAdapter {
         if (node.getSemicolon() != null) {
             node.getSemicolon().apply(this);
         }
-        if (!array){
-            for(int i = currentScope; i >= 0; i--){
-                if(symbolTables.get(i).containsKey(idVal)){
-                    Symbol var = symbolTables.get(i).get(idVal);
-                    if(var instanceof Variable){
-                        if(!(((Variable) var).getType().equals("INT")  || ((Variable) var).getType().equals("REAL"))){
-                            error.add("Variable " + idVal + " has type " + ((Variable) var).getType() + " which cannot be decremented.");
-                            break;
-                        }
-                        found = true;
-                        if (((Variable) var).getType().equals("INT")){
-                            text.append(DELIMITER + "lw $t0, " + ((Variable)var).getOffset() + "($sp)\n");
-                            text.append(DELIMITER + "li $t1, " + "1" + "\n");
-                            text.append(DELIMITER + "add $t0, " + "$t0, " + "$t1\n");
-                            text.append(DELIMITER + "sw $t0, " + ((Variable)var).getOffset() + "($sp)\n");
-                        }
-                        else {
-                            text.append(DELIMITER + "lw $f0, " + ((Variable)var).getOffset() + "($sp)\n");
-                            text.append(DELIMITER + "li $f1, " + "1.0" + "\n");
-                            text.append(DELIMITER + "add $f0, " + "f0, " + "f1\n");
-                            text.append(DELIMITER + "sw $f0, " + ((Variable)var).getOffset() + "($sp)\n");
-                        }
-                        break;
-                    }
-                }
+        if (!array) {
+            int scope = getScope(id);
+            if (scope == -1) {
+                error.add("Variable " + id + " has not been declared.");
             }
-            if (found == false){
-                error.add("Variable " + idVal + " has not been declared.");
+            Variable var = (Variable) getSymbol(scope, id);
+            if(!(var.getType().equals("INT")
+                || var.getType().equals("REAL"))){
+                error.add("Variable " + id + " has type " + var.getType() + " which cannot be decremented.");
+            }
+            if (var.getType().equals("INT")){
+                text.append(DELIMITER + "lw $t0, " + var.getOffset() + "($sp)\n");
+                text.append(DELIMITER + "li $t1, " + "1" + "\n");
+                text.append(DELIMITER + "add $t0, " + "$t0, " + "$t1\n");
+                text.append(DELIMITER + "sw $t0, " + var.getOffset() + "($sp)\n");
+            } else {
+                text.append(DELIMITER + "lw $f0, " + var.getOffset() + "($sp)\n");
+                text.append(DELIMITER + "li $f1, " + "1.0" + "\n");
+                text.append(DELIMITER + "add $f0, " + "f0, " + "f1\n");
+                text.append(DELIMITER + "sw $f0, " + var.getOffset() + "($sp)\n");
             }
         }
     }
 
     @Override
     public void caseADecrStmt(ADecrStmt node) {
-        String idVal = "";
-        boolean found = false;
+        String id = "";
         boolean array = false;
-        Object val;
         if (node.getId() != null) {
-            idVal = node.getId().toString().trim();
+            id = node.getId().toString().trim();
             node.getId().apply(this);
         }
         if (node.getArrayOption() != null) {
@@ -977,34 +1097,26 @@ class PrintTree extends DepthFirstAdapter {
         if (node.getSemicolon() != null) {
             node.getSemicolon().apply(this);
         }
-        if (!array){
-            for(int i = currentScope; i >= 0; i--){
-                if(symbolTables.get(i).containsKey(idVal)){
-                    Symbol var = symbolTables.get(i).get(idVal);
-                    if(var instanceof Variable){
-                        if(!(((Variable) var).getType().equals("INT")  || ((Variable) var).getType().equals("REAL"))){
-                            error.add("Variable " + idVal + " has type " + ((Variable) var).getType() + " which cannot be decremented.");
-                            break;
-                        }
-                        found = true;
-                        if (((Variable) var).getType().equals("INT")){
-                            text.append(DELIMITER + "lw $t0, " + ((Variable)var).getOffset() + "($sp)\n");
-                            text.append(DELIMITER + "li $t1, " + "1" + "\n");
-                            text.append(DELIMITER + "sub $t0, " + "$t0, " + "$t1\n");
-                            text.append(DELIMITER + "sw $t0, " + ((Variable)var).getOffset() + "($sp)\n");
-                        }
-                        else {
-                            text.append(DELIMITER + "lw $f0, " + ((Variable)var).getOffset() + "($sp)\n");
-                            text.append(DELIMITER + "li $f1, " + "1.0" + "\n");
-                            text.append(DELIMITER + "sub $f0, " + "$f0, " + "$f1\n");
-                            text.append(DELIMITER + "sw $f0, " + ((Variable)var).getOffset() + "($sp)\n");
-                        }
-                        break;
-                    }
-                }
+        if (!array) {
+            int scope = getScope(id);
+            if (scope == -1) {
+                error.add("Variable " + id + " has not been declared.");
             }
-            if (found == false){
-                error.add("Variable " + idVal + " has not been declared.");
+            Variable var = (Variable) getSymbol(scope, id);
+            if (!(var.getType().equals("INT")
+                || var.getType().equals("REAL"))) {
+                error.add("Variable " + id + " has type " + var.getType() + " which cannot be decremented.");
+            }
+            if (var.getType().equals("INT")) {
+                text.append(DELIMITER + "lw $t0, " + var.getOffset() + "($sp)\n");
+                text.append(DELIMITER + "li $t1, " + "1" + "\n");
+                text.append(DELIMITER + "sub $t0, " + "$t0, " + "$t1\n");
+                text.append(DELIMITER + "sw $t0, " + var.getOffset() + "($sp)\n");
+            } else {
+                text.append(DELIMITER + "lw $f0, " + var.getOffset() + "($sp)\n");
+                text.append(DELIMITER + "li $f1, " + "1.0" + "\n");
+                text.append(DELIMITER + "sub $f0, " + "$f0, " + "$f1\n");
+                text.append(DELIMITER + "sw $f0, " + var.getOffset() + "($sp)\n");
             }
         }
     }
