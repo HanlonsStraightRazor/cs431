@@ -1,19 +1,15 @@
 package FinalProject;
 
 class Array extends Symbol {
-    private String type;
     private int size;
     public boolean[] initialized;
     public Array(String type, int size) {
-        this.type = type;
+        super(type);
         this.size = size;
         initialized = new boolean[size];
         for (boolean b : initialized) {
             b = false;
         }
-    }
-    public String getType() {
-        return type;
     }
     public int getSize() {
         return size;
