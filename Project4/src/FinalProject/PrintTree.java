@@ -437,9 +437,9 @@ class PrintTree extends DepthFirstAdapter {
         }
     }
 
-    //FIXME
     @Override
     public void caseAAssignStringStmt(AAssignStringStmt node) {
+        //need to get the string Variable and say it was inited
         String idVal = "", type = "";
         boolean isArray = false;
         if (node.getId() != null) {
@@ -462,7 +462,18 @@ class PrintTree extends DepthFirstAdapter {
             node.getSemicolon().apply(this);
         }
         if(!isArray){
-            data.append(idVal + ": .asciiz \"" + node.getAnychars().toString() + "\"");
+            data.append(idVal + ":\n" +
+                        DELIMITER + ".asciiz " + node.getAnychars().toString() + "\n");
+            int scope = getScope(idVal);
+            if (scope == -1) {
+                error.add("Variable "
+                    + idVal
+                    + " has not been declared.");
+            } else {
+                Variable var = (Variable)getSymbol(scope, idVal);
+                var.initialize();
+                addToSymbolTable(idVal, var, scope);
+            }
         }
     }
 
@@ -1387,7 +1398,36 @@ class PrintTree extends DepthFirstAdapter {
             } else if(node.parent() instanceof AAssignExprStmt){
                 //FIXME
             } else if(node.parent() instanceof AAssignStringStmt){
-                //FIXME
+                String idVal = "";
+                int index = 0;
+                String anyChar = "";
+                AAssignStringStmt AAssignStringStmtNode = (AAssignStringStmt)node.parent();
+                idVal = AAssignStringStmtNode.getId().toString().trim();
+                index = Integer.parseInt(node.getInt().toString().trim());
+
+                int scope = getScope(idVal);
+                if(scope == -1){
+                    error.add("Array " + idVal + " has not been declared.");
+                } else {
+                    Array var = (Array)getSymbol(scope, idVal);
+                    if(!var.getType().equals("STRING")){
+                        error.add("Array " + idVal + " has type " + var.getType() + " which cannot be converted to STRING.");
+                    } else {
+                        var.initializeAt(index);
+                        addToSymbolTable(idVal, var, scope);
+                        anyChar = AAssignStringStmtNode.getAnychars().toString();
+                        String label = LABELPREFIX + labelnum;
+                                labelnum++;
+                        data.append(label + ":\n" +
+                                    DELIMITER  + ".asciiz " + anyChar + "\n");
+                        Variable dumbyString = new Variable("String", offset);
+                        offset = offset + 4;
+                        addToSymbolTable(label, dumbyString, scope);
+                        text.append(DELIMITER + "la $t0, " + label + "\n");
+                        text.append(DELIMITER + "la $t1, " + idVal + "\n");
+                        text.append(DELIMITER + "sw $t0, " + Integer.toString(index).trim() + "($t1)\n");
+                    }
+                }              
             } else if(node.parent() instanceof AIncrStmt){
                 //FIXME
             } else if(node.parent() instanceof ADecrStmt){
