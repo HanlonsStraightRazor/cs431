@@ -1215,6 +1215,22 @@ class PrintTree extends DepthFirstAdapter {
             node.getReturn().apply(this);
         }
         if (node.getExprOrBool() != null) {
+            if (node.getExprOrBool() instanceof AExprOrBool) {
+                //TODO: Add value to S0 when expr works
+            }
+            else if (node.getExprOrBool() instanceof ABoolExprOrBool) {
+                if(((ABoolExprOrBool)node.getExprOrBool()).getBoolean() instanceof AFalseBoolean) {
+                    text.append(DELIMITER 
+                        + "li $s0, 0");
+                }
+                else{
+                    text.append(DELIMITER 
+                        + "li $s0, 1");
+                }
+            }
+            else {
+                error.add("Return type is not an expression or boolean.");
+            }
             node.getExprOrBool().apply(this);
         }
         if (node.getSemicolon() != null) {
