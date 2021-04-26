@@ -1404,7 +1404,6 @@ class PrintTree extends DepthFirstAdapter {
                 AAssignStringStmt AAssignStringStmtNode = (AAssignStringStmt)node.parent();
                 idVal = AAssignStringStmtNode.getId().toString().trim();
                 index = Integer.parseInt(node.getInt().toString().trim());
-
                 int scope = getScope(idVal);
                 if(scope == -1){
                     error.add("Array " + idVal + " has not been declared.");
