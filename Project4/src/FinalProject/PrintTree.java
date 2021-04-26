@@ -1635,4 +1635,23 @@ class PrintTree extends DepthFirstAdapter {
     public void addToSymbolTable(String idVal, Symbol val, int scope){
         symbolTables.get(scope).put(idVal, val);
     }
+
+    public int getScope(String id) {
+        int scope = -1;
+        for(int i = currentScope; i >= 0; i--){
+            if(symbolTables.get(i).containsKey(id)){
+                scope = i;
+                break;
+            }
+        }
+        return scope;
+    }
+
+    public Symbol getSymbol(int scope, String id) {
+        return symbolTables.get(scope).get(id);
+    }
+
+    public boolean isArray(Symbol symbol) {
+        return symbol instanceof Array;
+    }
 }
