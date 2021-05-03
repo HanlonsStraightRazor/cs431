@@ -1234,7 +1234,7 @@ class PrintTree extends DepthFirstAdapter {
                     text.append(DELIMITER 
                         + "li $s0, 0\n");
                 }
-                else{
+                else {
                     text.append(DELIMITER 
                         + "li $s0, 1\n");
                 }
