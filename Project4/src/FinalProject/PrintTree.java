@@ -428,7 +428,7 @@ class PrintTree extends DepthFirstAdapter {
                         + " which cannot be converted to INT.");
             }
             text.append(DELIMITER
-                + "sw $s0, "
+                + "sw $s0, -"
                 + Integer.toString(var.getOffset())
                 + "($sp)\n");
             var.initialize();
@@ -555,7 +555,7 @@ class PrintTree extends DepthFirstAdapter {
                         + " which cannot be converted to BOOLEAN.");
                 }
                 text.append(DELIMITER
-                    + "lw $t0, "
+                    + "lw $t0, -"
                     + var.getOffset()
                     + "($sp)\n");
                 text.append(DELIMITER
@@ -634,7 +634,7 @@ class PrintTree extends DepthFirstAdapter {
                         + " which cannot be converted to BOOLEAN.");
                 }
                 text.append(DELIMITER
-                    + "lw $t0, "
+                    + "lw $t0, -"
                     + var.getOffset()
                     + "($sp)\n");
                 text.append(DELIMITER
@@ -740,7 +740,7 @@ class PrintTree extends DepthFirstAdapter {
                         + " which cannot be converted to BOOLEAN.");
                 }
                 text.append(DELIMITER
-                    + "lw $t0, "
+                    + "lw $t0, -"
                     + var.getOffset()
                     + "($sp)\n");
                 text.append(DELIMITER
@@ -785,7 +785,7 @@ class PrintTree extends DepthFirstAdapter {
             else if(!isConstant) {
                 node.getStmtseq().apply(this);
                 text.append(DELIMITER
-                    + "lw $t0, "
+                    + "lw $t0, -"
                     + var.getOffset()
                     + "($sp)\n");
                 text.append(DELIMITER
@@ -943,7 +943,7 @@ class PrintTree extends DepthFirstAdapter {
                             + "($a0)\n");
                     } else {
                         text.append(DELIMITER
-                            + "lw $a0, "
+                            + "lw $a0, -"
                             + ((Variable) symbol).getOffset()
                             + "($sp)\n");
                     }
@@ -961,7 +961,7 @@ class PrintTree extends DepthFirstAdapter {
                             + "($t0)\n");
                     } else {
                         text.append(DELIMITER
-                            + "lw $f12, "
+                            + "lw $f12, -"
                             + ((Variable) symbol).getOffset()
                             + "($sp)\n");
                     }
@@ -979,7 +979,7 @@ class PrintTree extends DepthFirstAdapter {
                             + "($a0)\n");
                     } else {
                         text.append(DELIMITER
-                            + "lw $a0, "
+                            + "lw $a0, -"
                             + ((Variable) symbol).getOffset()
                             + "($sp)\n");
                     }
@@ -997,7 +997,7 @@ class PrintTree extends DepthFirstAdapter {
                             + "($t0)\n");
                     } else {
                         text.append(DELIMITER
-                            + "lw $t0, "
+                            + "lw $t0, -"
                             + ((Variable) symbol).getOffset()
                             + "($sp)\n");
                     }
@@ -1035,7 +1035,7 @@ class PrintTree extends DepthFirstAdapter {
                             + "($a0)\n");
                     } else {
                         text.append(DELIMITER
-                            + "lw $a0, "
+                            + "lw $a0, -"
                             + ((Variable) symbol).getOffset()
                             + "($sp)\n");
                     }
@@ -1084,15 +1084,15 @@ class PrintTree extends DepthFirstAdapter {
                 error.add("Variable " + id + " has type " + var.getType() + " which cannot be decremented.");
             } else {
                 if (var.getType().equals("INT")){
-                    text.append(DELIMITER + "lw $t0, " + var.getOffset() + "($sp)\n");
+                    text.append(DELIMITER + "lw $t0, -" + var.getOffset() + "($sp)\n");
                     text.append(DELIMITER + "li $t1, " + "1" + "\n");
                     text.append(DELIMITER + "add $t0, " + "$t0, " + "$t1\n");
-                    text.append(DELIMITER + "sw $t0, " + var.getOffset() + "($sp)\n");
+                    text.append(DELIMITER + "sw $t0, -" + var.getOffset() + "($sp)\n");
                 } else {
-                    text.append(DELIMITER + "lw $f0, " + var.getOffset() + "($sp)\n");
+                    text.append(DELIMITER + "lw $f0, -" + var.getOffset() + "($sp)\n");
                     text.append(DELIMITER + "li $f1, " + "1.0" + "\n");
                     text.append(DELIMITER + "add $f0, " + "f0, " + "f1\n");
-                    text.append(DELIMITER + "sw $f0, " + var.getOffset() + "($sp)\n");
+                    text.append(DELIMITER + "sw $f0, -" + var.getOffset() + "($sp)\n");
                 }
             }
         }
@@ -1129,15 +1129,15 @@ class PrintTree extends DepthFirstAdapter {
                 error.add("Variable " + id + " has type " + var.getType() + " which cannot be decremented.");
             }
             if (var.getType().equals("INT")) {
-                text.append(DELIMITER + "lw $t0, " + var.getOffset() + "($sp)\n");
+                text.append(DELIMITER + "lw $t0, -" + var.getOffset() + "($sp)\n");
                 text.append(DELIMITER + "li $t1, " + "1" + "\n");
                 text.append(DELIMITER + "sub $t0, " + "$t0, " + "$t1\n");
-                text.append(DELIMITER + "sw $t0, " + var.getOffset() + "($sp)\n");
+                text.append(DELIMITER + "sw $t0, -" + var.getOffset() + "($sp)\n");
             } else {
-                text.append(DELIMITER + "lw $f0, " + var.getOffset() + "($sp)\n");
+                text.append(DELIMITER + "lw $f0, -" + var.getOffset() + "($sp)\n");
                 text.append(DELIMITER + "li $f1, " + "1.0" + "\n");
                 text.append(DELIMITER + "sub $f0, " + "$f0, " + "$f1\n");
-                text.append(DELIMITER + "sw $f0, " + var.getOffset() + "($sp)\n");
+                text.append(DELIMITER + "sw $f0, -" + var.getOffset() + "($sp)\n");
             }
         }
     }
@@ -1280,10 +1280,10 @@ class PrintTree extends DepthFirstAdapter {
                 addToSymbolTable(id, var, scope);
                 if (node.getBoolean() instanceof ATrueBoolean) {
                     text.append(DELIMITER + "li $t0, " + 1 + "\n");
-                    text.append(DELIMITER + "sw $t0, " + var.getOffset() + "($sp)\n");
+                    text.append(DELIMITER + "sw $t0, -" + var.getOffset() + "($sp)\n");
                 } else if (node.getBoolean() instanceof AFalseBoolean) {
                     text.append(DELIMITER + "li $t0, " + 0 + "\n");
-                    text.append(DELIMITER + "sw $t0, " + var.getOffset() + "($sp)\n");
+                    text.append(DELIMITER + "sw $t0, -" + var.getOffset() + "($sp)\n");
                 } else if(node.getBoolean() instanceof AConditionalBoolean){
                     //FIXME : AConditionalBoolean has not been implemented yet
                 }
