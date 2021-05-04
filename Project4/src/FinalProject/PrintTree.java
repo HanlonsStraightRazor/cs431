@@ -21,6 +21,7 @@ class PrintTree extends DepthFirstAdapter {
     private static int offset;
     private static Queue<String> error;
     private static int currentScope;
+    private static boolean isFloat;
     /*
      * Constructor. Initializes non final class variables.
      */
@@ -34,6 +35,7 @@ class PrintTree extends DepthFirstAdapter {
         labelnum = 0;
         offset = 0;
         currentScope = 0;
+        isFloat = false;
     }
     /*
      * <Prog> ::= BEGIN <ClassMethodStmts> END
@@ -427,10 +429,17 @@ class PrintTree extends DepthFirstAdapter {
                         + var.getType()
                         + " which cannot be converted to INT.");
             }
-            text.append(DELIMITER
-                + "sw $s0, -"
-                + Integer.toString(var.getOffset())
-                + "($sp)\n");
+            if (isFloat) {
+                text.append(DELIMITER
+                    + "sw $s0, -"
+                    + Integer.toString(var.getOffset())
+                    + "($sp)\n");
+            } else {
+                text.append(DELIMITER
+                    + "sw $f0, -"
+                    + Integer.toString(var.getOffset())
+                    + "($sp)\n");
+            }
             var.initialize();
             addToSymbolTable(id, var, scope);
             node.getExpr().apply(this);
@@ -1676,14 +1685,56 @@ class PrintTree extends DepthFirstAdapter {
 
     @Override
     public void caseAAddExpr(AAddExpr node) {
+        boolean addition = true;
         if (node.getExpr() != null) {
             node.getExpr().apply(this);
+            if (isFloat) {
+                System.out.println(DELIMITER
+                        + "sw $f0, -"
+                        + offset
+                        + "($sp)");
+            } else {
+                System.out.println(DELIMITER
+                        + "sw $s0, -"
+                        + offset
+                        + "($sp)");
+            }
+            offset += 4;
         }
         if (node.getAddop() != null) {
+            if (node.getAddop() instanceof APlusAddop) {
+                addition = false;
+            }
             node.getAddop().apply(this);
         }
         if (node.getTerm() != null) {
             node.getTerm().apply(this);
+            offset -= 4;
+            if (isFloat) {
+                System.out.println(DELIMITER
+                        + "lw $f1, -"
+                        + offset
+                        + "($sp)");
+                if (addition) {
+                    System.out.println(DELIMITER
+                            + "add $f0, $f0, $f1");
+                } else {
+                    System.out.println(DELIMITER
+                            + "sub $f0, $f0, $f1");
+                }
+            } else {
+                System.out.println(DELIMITER
+                        + "lw $t0, -"
+                        + offset
+                        + "($sp)");
+                if (addition) {
+                    System.out.println(DELIMITER
+                            + "add $s0, $s0, $t0");
+                } else {
+                    System.out.println(DELIMITER
+                            + "sub $s0, $s0, $t0");
+                }
+            }
         }
     }
 
