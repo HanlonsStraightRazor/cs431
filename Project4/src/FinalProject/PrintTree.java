@@ -1874,13 +1874,50 @@ class PrintTree extends DepthFirstAdapter {
 
     @Override
     public void caseAArrayArrayOrId(AArrayArrayOrId node) {
+        String id = "";
+        int scope = -1;
         if (node.getId() != null) {
+            id = node.getId().getText();
+            scope = getScope(id);
+            if (scope == -1) {
+                error.add("Variable "
+                        + id
+                        + " has not been declared.");
+            }
             node.getId().apply(this);
         }
         if (node.getLbracket() != null) {
             node.getLbracket().apply(this);
         }
         if (node.getInt() != null) {
+            if (scope != -1) {
+                Array array = (Array) getSymbol(scope, id);
+                int index = Integer.parseInt(node.getInt().getText());
+                if (array.isInitializedAt(index)) {
+                    text.append(DELIMITER
+                            + "la $t0, "
+                            + id
+                            + "\n");
+                    if (isFloat || array.getType().equals("REAL")) {
+                        isFloat = true;
+                        text.append(DELIMITER
+                                + "li $f0, "
+                                + index
+                                + "($t0)\n");
+                    } else {
+                        text.append(DELIMITER
+                                + "li $s0, "
+                                + index
+                                + "($t0)\n");
+                    }
+                } else {
+                    error.add("Array "
+                            + id
+                            + " has not been initialized at index "
+                            + index
+                            + ".");
+                }
+            }
             node.getInt().apply(this);
         }
         if (node.getRbracket() != null) {
@@ -1890,7 +1927,36 @@ class PrintTree extends DepthFirstAdapter {
 
     @Override
     public void caseAIdArrayOrId(AIdArrayOrId node) {
+        String id = "";
+        int scope = -1;
         if (node.getId() != null) {
+            id = node.getId().getText();
+            scope = getScope(id);
+            if (scope == -1) {
+                error.add("Variable "
+                        + id
+                        + " has not been declared.");
+            } else {
+                Variable var = (Variable) getSymbol(scope, id);
+                if (var.isInitialized()) {
+                    if (isFloat || var.getType().equals("REAL")) {
+                        isFloat = true;
+                        text.append(DELIMITER
+                                + "li $f0, "
+                                + var.getOffset()
+                                + "($sp)\n");
+                    } else {
+                        text.append(DELIMITER
+                                + "li $s0, "
+                                + var.getOffset()
+                                + "($sp)\n");
+                    }
+                } else {
+                    error.add("Variable "
+                            + id
+                            + " has not been initialized.");
+                }
+            }
             node.getId().apply(this);
         }
     }
