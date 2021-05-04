@@ -1714,15 +1714,15 @@ class PrintTree extends DepthFirstAdapter {
             offset -= 4;
             if (isFloat) {
                 text.append(DELIMITER
-                        + "lw $f1, -"
+                        + "l.s $f1, -"
                         + offset
                         + "($sp)\n");
                 if (addition) {
                     text.append(DELIMITER
-                            + "add $f0, $f1, $f0\n");
+                            + "add.s $f0, $f1, $f0\n");
                 } else {
                     text.append(DELIMITER
-                            + "sub $f0, $f1, $f0\n");
+                            + "sub.s $f0, $f1, $f0\n");
                 }
             } else {
                 text.append(DELIMITER
@@ -1749,14 +1749,57 @@ class PrintTree extends DepthFirstAdapter {
 
     @Override
     public void caseAMultTerm(AMultTerm node) {
+        boolean divison = true;
         if (node.getTerm() != null) {
             node.getTerm().apply(this);
+            if (isFloat) {
+                text.append(DELIMITER
+                        + "s.s $f0, -"
+                        + offset
+                        + "($sp)\n");
+            } else {
+                text.append(DELIMITER
+                        + "sw $s0, -"
+                        + offset
+                        + "($sp)\n");
+            }
+            offset += 4;
         }
         if (node.getMultop() != null) {
+            if (node.getMultop().getText().equals("*")) {
+                divison = false;
+            }
             node.getMultop().apply(this);
         }
         if (node.getFactor() != null) {
             node.getFactor().apply(this);
+            offset -= 4;
+            if (isFloat) {
+                text.append(DELIMITER
+                        + "l.s $f1, -"
+                        + offset
+                        + "($sp)\n");
+                if (divison) {
+                    text.append(DELIMITER
+                            + "div.s $f0, $f1, $f0\n");
+                } else {
+                    text.append(DELIMITER
+                            + "mult.s $f0, $f1, $f0\n");
+                }
+            } else {
+                text.append(DELIMITER
+                        + "lw $t0, -"
+                        + offset
+                        + "($sp)\n");
+                if (divison) {
+                    text.append(DELIMITER
+                            + "div $t0, $s0\n"
+                            + "mflo $s0");
+                } else {
+                    text.append(DELIMITER
+                            + "mult $t0, $s0\n");
+                }
+            }
         }
     }
 
