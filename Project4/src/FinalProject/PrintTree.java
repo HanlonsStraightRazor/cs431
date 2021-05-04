@@ -1563,13 +1563,13 @@ class PrintTree extends DepthFirstAdapter {
                             text.append(DELIMITER + "la $t2, " + idVal + "\n");
                             text.append(DELIMITER + "lw $t0, " + Integer.toString(index).trim() + "($t2)\n");
                             text.append(DELIMITER + "li $t1, " + "1" + "\n");
-                            text.append(DELIMITER + "add $t0, " + "$t0, " + "$t1\n");
+                            text.append(DELIMITER + "add $t0, " + "$t1, " + "$t0\n");
                             text.append(DELIMITER + "sw $t0, " + Integer.toString(index).trim() + "($t2)\n");
                         } else {
                             text.append(DELIMITER + "la $f2, " + idVal + "\n");
                             text.append(DELIMITER + "lw $f0, " + Integer.toString(index).trim() + "($f2)\n");
                             text.append(DELIMITER + "li $f1, " + "1" + "\n");
-                            text.append(DELIMITER + "add $f0, " + "$f0, " + "$f1\n");
+                            text.append(DELIMITER + "add $f0, " + "$f1, " + "$f0\n");
                             text.append(DELIMITER + "sw $f0, " + Integer.toString(index).trim() + "($f2)\n");
                         }
                     } else {
@@ -1719,10 +1719,10 @@ class PrintTree extends DepthFirstAdapter {
                         + "($sp)\n");
                 if (addition) {
                     text.append(DELIMITER
-                            + "add $f0, $f0, $f1\n");
+                            + "add $f0, $f1, $f0\n");
                 } else {
                     text.append(DELIMITER
-                            + "sub $f0, $f0, $f1\n");
+                            + "sub $f0, $f1, $f0\n");
                 }
             } else {
                 text.append(DELIMITER
@@ -1731,10 +1731,10 @@ class PrintTree extends DepthFirstAdapter {
                         + "($sp)\n");
                 if (addition) {
                     text.append(DELIMITER
-                            + "add $s0, $s0, $t0\n");
+                            + "add $s0, $t0, $s0\n");
                 } else {
                     text.append(DELIMITER
-                            + "sub $s0, $s0, $t0\n");
+                            + "sub $s0, $t0, $s0\n");
                 }
             }
         }
