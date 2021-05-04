@@ -1,13 +1,8 @@
 BEGIN
   VOID MAIN() {
-    cond    : STRING;
-    cond    := "VaLuE";
-    idOne   : INT;
+    intOne   : INT;
     idPie   : REAL;
-    idOne   := 1;
-    idPie   := 3.14;
-    idOne++;
-    idOne--;
-    PUT(idOne);
+    intOne   := 3 + 4;
+    idPie   := 2 + 1.14;
   }
 END

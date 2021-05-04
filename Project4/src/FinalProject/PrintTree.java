@@ -405,8 +405,15 @@ class PrintTree extends DepthFirstAdapter {
 
     @Override
     public void caseAAssignExprStmt(AAssignExprStmt node) {
+        String id = "";
+        int scope = -1;
         if (node.getId() != null) {
             node.getId().apply(this);
+            id = node.getId().toString().trim();
+            scope = getScope(id);
+            if (scope == -1) {
+                error.add("Variable " + id + " has not been declared.");
+            }
         }
         if (node.getArrayOption() != null) {
             node.getArrayOption().apply(this);
@@ -415,11 +422,7 @@ class PrintTree extends DepthFirstAdapter {
             node.getEquals().apply(this);
         }
         if (node.getExpr() != null) {
-            String id = node.getId().toString().trim();
-            int scope = getScope(id);
-            if (scope == -1) {
-                error.add("Variable " + id + " has not been declared.");
-            }
+            node.getExpr().apply(this);
             Variable var = (Variable) getSymbol(scope, id);
             if(!(var.getType().equals("INT")
                 || var.getType().equals("REAL"))) {
@@ -431,18 +434,17 @@ class PrintTree extends DepthFirstAdapter {
             }
             if (isFloat) {
                 text.append(DELIMITER
-                    + "sw $s0, -"
+                    + "sw $f0, -"
                     + Integer.toString(var.getOffset())
                     + "($sp)\n");
             } else {
                 text.append(DELIMITER
-                    + "sw $f0, -"
+                    + "sw $s0, -"
                     + Integer.toString(var.getOffset())
                     + "($sp)\n");
             }
             var.initialize();
             addToSymbolTable(id, var, scope);
-            node.getExpr().apply(this);
         }
         if (node.getSemicolon() != null) {
             node.getSemicolon().apply(this);
@@ -1692,17 +1694,17 @@ class PrintTree extends DepthFirstAdapter {
                 text.append(DELIMITER
                         + "sw $f0, -"
                         + offset
-                        + "($sp)");
+                        + "($sp)\n");
             } else {
                 text.append(DELIMITER
                         + "sw $s0, -"
                         + offset
-                        + "($sp)");
+                        + "($sp)\n");
             }
             offset += 4;
         }
         if (node.getAddop() != null) {
-            if (node.getAddop() instanceof APlusAddop) {
+            if (node.getAddop() instanceof AMinusAddop) {
                 addition = false;
             }
             node.getAddop().apply(this);
@@ -1714,25 +1716,25 @@ class PrintTree extends DepthFirstAdapter {
                 text.append(DELIMITER
                         + "lw $f1, -"
                         + offset
-                        + "($sp)");
+                        + "($sp)\n");
                 if (addition) {
                     text.append(DELIMITER
-                            + "add $f0, $f0, $f1");
+                            + "add $f0, $f0, $f1\n");
                 } else {
                     text.append(DELIMITER
-                            + "sub $f0, $f0, $f1");
+                            + "sub $f0, $f0, $f1\n");
                 }
             } else {
                 text.append(DELIMITER
                         + "lw $t0, -"
                         + offset
-                        + "($sp)");
+                        + "($sp)\n");
                 if (addition) {
                     text.append(DELIMITER
-                            + "add $s0, $s0, $t0");
+                            + "add $s0, $s0, $t0\n");
                 } else {
                     text.append(DELIMITER
-                            + "sub $s0, $s0, $t0");
+                            + "sub $s0, $s0, $t0\n");
                 }
             }
         }
