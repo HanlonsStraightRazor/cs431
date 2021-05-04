@@ -1689,12 +1689,12 @@ class PrintTree extends DepthFirstAdapter {
         if (node.getExpr() != null) {
             node.getExpr().apply(this);
             if (isFloat) {
-                System.out.println(DELIMITER
+                text.append(DELIMITER
                         + "sw $f0, -"
                         + offset
                         + "($sp)");
             } else {
-                System.out.println(DELIMITER
+                text.append(DELIMITER
                         + "sw $s0, -"
                         + offset
                         + "($sp)");
@@ -1711,27 +1711,27 @@ class PrintTree extends DepthFirstAdapter {
             node.getTerm().apply(this);
             offset -= 4;
             if (isFloat) {
-                System.out.println(DELIMITER
+                text.append(DELIMITER
                         + "lw $f1, -"
                         + offset
                         + "($sp)");
                 if (addition) {
-                    System.out.println(DELIMITER
+                    text.append(DELIMITER
                             + "add $f0, $f0, $f1");
                 } else {
-                    System.out.println(DELIMITER
+                    text.append(DELIMITER
                             + "sub $f0, $f0, $f1");
                 }
             } else {
-                System.out.println(DELIMITER
+                text.append(DELIMITER
                         + "lw $t0, -"
                         + offset
                         + "($sp)");
                 if (addition) {
-                    System.out.println(DELIMITER
+                    text.append(DELIMITER
                             + "add $s0, $s0, $t0");
                 } else {
-                    System.out.println(DELIMITER
+                    text.append(DELIMITER
                             + "sub $s0, $s0, $t0");
                 }
             }
@@ -1784,16 +1784,33 @@ class PrintTree extends DepthFirstAdapter {
             node.getNegop().apply(this);
         }
         if (node.getFactor() != null) {
+            if (isFloat) {
+                text.append(DELIMITER + "li $f1, -1\n");
+                text.append(DELIMITER + "mul $f1, $f0\n");
+                text.append(DELIMITER + "mflo $f0\n");
+            } else {
+                text.append(DELIMITER + "li $t0, -1\n");
+                text.append(DELIMITER + "mul $t0, $s0\n");
+                text.append(DELIMITER + "mflo $s0\n");
+            }
             node.getFactor().apply(this);
-            text.append(DELIMITER + "li $t0, -1\n");
-            text.append(DELIMITER + "mul $t0, $s0\n");
-            text.append(DELIMITER + "mflo $s0\n");
         }
     }
 
     @Override
     public void caseAIntFactor(AIntFactor node) { 
         if (node.getInt() != null) {
+            if (isFloat) {
+                text.append(DELIMITER
+                        + "li $f0, "
+                        + Integer.parseInt(node.getInt().getText())
+                        + "\n");
+            } else {
+                text.append(DELIMITER
+                        + "li $s0, "
+                        + Integer.parseInt(node.getInt().getText())
+                        + "\n");
+            }
             node.getInt().apply(this);
         }
     }
@@ -1801,6 +1818,11 @@ class PrintTree extends DepthFirstAdapter {
     @Override
     public void caseARealFactor(ARealFactor node) {
         if (node.getReal() != null) {
+            isFloat = true;
+            text.append(DELIMITER
+                    + "li $f0, "
+                    + Float.parseFloat(node.getReal().getText())
+                    + "\n");
             node.getReal().apply(this);
         }
     }
