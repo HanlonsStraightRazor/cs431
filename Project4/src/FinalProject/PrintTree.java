@@ -2111,8 +2111,8 @@ class PrintTree extends DepthFirstAdapter {
                     default:
                         error.add("Invalid condition");
                 }
-                // FIXME: Set $s0 to appropriate value here
-                text.append(DELIMITER + "li $s0, 0\n");
+                text.append(DELIMITER + "li $s0, 1\n");
+                text.append(DELIMITER + "movf $s0, $zero\n");
             } else {
                 text.append(DELIMITER
                         + "lw $t0, "
