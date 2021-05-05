@@ -548,6 +548,7 @@ class PrintTree extends DepthFirstAdapter {
             node.getLparen().apply(this);
         }
         if (node.getBoolid() != null) {
+            node.getBoolid().apply(this);
             if(node.getBoolid() instanceof AIdBoolid){
                 String id = ((AIdBoolid) node.getBoolid()).getId().getText().trim();
                 int scope = getScope(id);
@@ -582,11 +583,20 @@ class PrintTree extends DepthFirstAdapter {
                 } else if (node2.getBoolean() instanceof AFalseBoolean) {
                     isConstant = true;
                 } else if (node2.getBoolean() instanceof AConditionalBoolean) {
-                    isConstant = true;
-                    //FIXME : AConditionalBoolean
+                    if (isFloat) {
+                        text.append(DELIMITER
+                            + "bc1f "
+                            + falselabel
+                            + "\n");
+                    } else {
+                        text.append(DELIMITER
+                            + "beq $zero, $s0, "
+                            + falselabel
+                            + "\n");
+                    }
+                    isFloat = false;
                 }
             }
-            node.getBoolid().apply(this);
         }
         if (node.getRparen() != null) {
             node.getRparen().apply(this);
@@ -661,8 +671,18 @@ class PrintTree extends DepthFirstAdapter {
                 } else if (node2.getBoolean() instanceof AFalseBoolean) {
                     isConstant = true;
                 } else if (node2.getBoolean() instanceof AConditionalBoolean) {
-                    isConstant = true;
-                    // FIXME: Add conditional support
+                    if (isFloat) {
+                        text.append(DELIMITER
+                            + "bc1f "
+                            + falselabel
+                            + "\n");
+                    } else {
+                        text.append(DELIMITER
+                            + "beq $zero, $s0, "
+                            + falselabel
+                            + "\n");
+                    }
+                    isFloat = false;
                 }
             }
             node.getBoolid().apply(this);
@@ -718,9 +738,9 @@ class PrintTree extends DepthFirstAdapter {
 
     @Override
     public void caseAWhileStmt(AWhileStmt node) {
-        String trueLabel = LABELPREFIX
+        String truelabel = LABELPREFIX
             + labelnum;
-        String falseLabel = LABELPREFIX
+        String falselabel = LABELPREFIX
             + (labelnum + 1);
         boolean isConstant = false;
         boolean constant = false;
@@ -757,9 +777,9 @@ class PrintTree extends DepthFirstAdapter {
                     + "($sp)\n");
                 text.append(DELIMITER
                     + "beq $zero, $t0, "
-                    + falseLabel
+                    + falselabel
                     + "\n");
-                text.append(trueLabel
+                text.append(truelabel
                     + ":\n");
                 }
             else {
@@ -767,14 +787,25 @@ class PrintTree extends DepthFirstAdapter {
                 if((ABoolBoolidNode.getBoolean()) instanceof ATrueBoolean) {
                     isConstant = true;
                     constant = true;
-                    text.append(trueLabel
+                    text.append(truelabel
                     + ":\n");
                     }
                 else if((ABoolBoolidNode.getBoolean()) instanceof AFalseBoolean) {
                     isConstant = true;
-                } 
+                }
                 else if((ABoolBoolidNode.getBoolean()) instanceof AConditionalBoolean) {
-                    //FIXME : AConditionalBoolean
+                    if (isFloat) {
+                        text.append(DELIMITER
+                            + "bc1f "
+                            + falselabel
+                            + "\n");
+                    } else {
+                        text.append(DELIMITER
+                            + "beq $zero, $s0, "
+                            + falselabel
+                            + "\n");
+                    }
+                    isFloat = false;
                 }
             }
             node.getBoolid().apply(this);
@@ -791,7 +822,7 @@ class PrintTree extends DepthFirstAdapter {
                 node.getStmtseq().apply(this);
                 text.append(DELIMITER
                     + "j "
-                    + trueLabel
+                    + truelabel
                     + "\n");
             }
             else if(!isConstant) {
@@ -802,17 +833,17 @@ class PrintTree extends DepthFirstAdapter {
                     + "($sp)\n");
                 text.append(DELIMITER
                     + "bne $zero, $t0, "
-                    + trueLabel
+                    + truelabel
                     + "\n");
                 text.append(DELIMITER
                     + "j "
-                    + falseLabel
+                    + falselabel
                     + "\n");
             }
         }
         if (node.getRcurly() != null) {
             if (!isConstant) {
-                text.append(falseLabel
+                text.append(falselabel
                     + ":\n");
             }
             decScope();
@@ -1013,11 +1044,11 @@ class PrintTree extends DepthFirstAdapter {
                             + ((Variable) symbol).getOffset()
                             + "($sp)\n");
                     }
-                    String falseLabel = LABELPREFIX + labelnum++;
+                    String falselabel = LABELPREFIX + labelnum++;
                     String endLabel   = LABELPREFIX + labelnum++;
                     text.append(DELIMITER
                         + "beq $zero, $t0, "
-                        + falseLabel
+                        + falselabel
                         + "\n");
                     text.append(DELIMITER
                         + "la $a0, TRUE\n");
@@ -1026,7 +1057,7 @@ class PrintTree extends DepthFirstAdapter {
                         + endLabel
                         + "\n");
                     text.append("\n"
-                        + falseLabel
+                        + falselabel
                         + ":\n");
                     text.append(DELIMITER
                         + "la $a0, FALSE\n");
@@ -1247,11 +1278,11 @@ class PrintTree extends DepthFirstAdapter {
             }
             else if (node.getExprOrBool() instanceof ABoolExprOrBool) {
                 if(((ABoolExprOrBool)node.getExprOrBool()).getBoolean() instanceof AFalseBoolean) {
-                    text.append(DELIMITER 
+                    text.append(DELIMITER
                         + "li $s0, 0\n");
                 }
                 else {
-                    text.append(DELIMITER 
+                    text.append(DELIMITER
                         + "li $s0, 1\n");
                 }
             }
@@ -1301,7 +1332,19 @@ class PrintTree extends DepthFirstAdapter {
                     text.append(DELIMITER + "li $t0, " + 0 + "\n");
                     text.append(DELIMITER + "sw $t0, -" + var.getOffset() + "($sp)\n");
                 } else if(node.getBoolean() instanceof AConditionalBoolean){
-                    //FIXME : AConditionalBoolean has not been implemented yet
+                    if (isFloat) {
+                        // FIXME: Need value of floating point flag register.
+                        // The code below may or may not be relevant
+                        // String falselabel = LABELPREFIX
+                        //     + labelnum;
+                        // text.append(DELIMITER
+                        //     + "bc1f "
+                        //     + falselabel
+                        //     + "\n");
+                    } else {
+                        text.append(DELIMITER + "sw $s0, -" + var.getOffset() + "($sp)\n");
+                    }
+                    isFloat = false;
                 }
             }
             node.getBoolean().apply(this);
@@ -1548,13 +1591,13 @@ class PrintTree extends DepthFirstAdapter {
                         text.append(DELIMITER + "la $t1, " + idVal + "\n");
                         text.append(DELIMITER + "sw $t0, " + Integer.toString(index).trim() + "($t1)\n");
                     }
-                }              
+                }
             } else if(node.parent() instanceof AIncrStmt){
                 AIncrStmt AIncrStmtNode = (AIncrStmt)node.parent();
                 String idVal = AIncrStmtNode.getId().toString().trim();
                 int scope = getScope(idVal);
                 int index = Integer.parseInt(node.getInt().toString().trim());
-                
+
                 if (scope == -1) {
                     error.add("Array " + idVal + " has not been declared.");
                 }
@@ -1575,7 +1618,7 @@ class PrintTree extends DepthFirstAdapter {
                             text.append(DELIMITER + "lw $f0, " + Integer.toString(index).trim() + "($f2)\n");
                             text.append(DELIMITER + "li $f1, " + "1" + "\n");
                             text.append(DELIMITER + "add $f0, " + "$f1, " + "$f0\n");
-                            text.append(DELIMITER + "sw $f0, " + Integer.toString(index).trim() + "($f2)\n");
+                            text.append(DELIMITER + "swc1 $f0, " + Integer.toString(index).trim() + "($f2)\n");
                         }
                     } else {
                         error.add("Array " + idVal + " at index: " + index + " has not been initialized yet.");
@@ -1606,7 +1649,7 @@ class PrintTree extends DepthFirstAdapter {
                             text.append(DELIMITER + "lw $f0, " + Integer.toString(index).trim() + "($f2)\n");
                             text.append(DELIMITER + "li $f1, " + "1" + "\n");
                             text.append(DELIMITER + "sub $f0, " + "$f0, " + "$f1\n");
-                            text.append(DELIMITER + "sw $f0, " + Integer.toString(index).trim() + "($f2)\n");
+                            text.append(DELIMITER + "swc1 $f0, " + Integer.toString(index).trim() + "($f2)\n");
                         }
                     } else {
                         error.add("Array " + idVal + " at index: " + index + " has not been initialized yet.");
@@ -1636,7 +1679,20 @@ class PrintTree extends DepthFirstAdapter {
                     text.append(DELIMITER + "la $t1, " + id + "\n");
                     text.append(DELIMITER + "sw $t0, " + Integer.toString(index).trim() + "($t1)\n");
                 } else if (bool instanceof AConditionalBoolean) {
-                    //FIXME : AConditionalBoolean
+                    if (isFloat) {
+                        // FIXME: Need value of floating point flag register.
+                        // The code below may or may not be relevant
+                        // String falselabel = LABELPREFIX
+                        //     + labelnum;
+                        // text.append(DELIMITER
+                        //     + "bc1f "
+                        //     + falselabel
+                        //     + "\n");
+                    } else {
+                        text.append(DELIMITER + "la $t1, " + id + "\n");
+                        text.append(DELIMITER + "sw $s0, " + Integer.toString(index).trim() + "($t1)\n");
+                    }
+                    isFloat = false;
                 }
             }
             node.getInt().apply(this);
@@ -1848,16 +1904,17 @@ class PrintTree extends DepthFirstAdapter {
     }
 
     @Override
-    public void caseAIntFactor(AIntFactor node) { 
+    public void caseAIntFactor(AIntFactor node) {
         if (node.getInt() != null) {
             if (isFloat) {
                 text.append(DELIMITER
-                        + "li $t1, "
-                        + Float.floatToIntBits(Integer.parseInt(node.getInt().getText()))
+                        + "li $t0, "
+                        + Integer.parseInt(node.getInt().getText())
                         + "\n");
                 text.append(DELIMITER
-                        + "mtc1 $t1, $f0"
-                        + "\n");
+                        + "mtc1 $t0, $f0\n");
+                text.append(DELIMITER
+                        + "cvt.s.w $f0, $f0\n");
             } else {
                 text.append(DELIMITER
                         + "li $s0, "
@@ -1879,6 +1936,8 @@ class PrintTree extends DepthFirstAdapter {
             text.append(DELIMITER
                     + "mtc1 $t1, $f0"
                     + "\n");
+            text.append(DELIMITER
+                    + "mtc1 $t0, $f0\n");
             node.getReal().apply(this);
         }
     }
@@ -1957,12 +2016,12 @@ class PrintTree extends DepthFirstAdapter {
                     if (isFloat || array.getType().equals("REAL")) {
                         isFloat = true;
                         text.append(DELIMITER
-                                + "li $f0, "
+                                + "lwc1 $f0, "
                                 + index
                                 + "($t0)\n");
                     } else {
                         text.append(DELIMITER
-                                + "li $s0, "
+                                + "lw $s0, "
                                 + index
                                 + "($t0)\n");
                     }
@@ -2003,7 +2062,7 @@ class PrintTree extends DepthFirstAdapter {
                                 + "($sp)\n");
                     } else {
                         text.append(DELIMITER
-                                + "li $s0, "
+                                + "lw $s0, "
                                 + var.getOffset()
                                 + "($sp)\n");
                     }
@@ -2020,6 +2079,14 @@ class PrintTree extends DepthFirstAdapter {
     @Override
     public void caseATrueBoolean(ATrueBoolean node) {
         if (node.getTrue() != null) {
+            if (isFloat) {
+                text.append(DELIMITER + "la $t0, TRUE\n");
+                text.append(DELIMITER + "lwc1 $f0, ($t0)\n");
+                text.append(DELIMITER + "cvt.s.w $f0, $f0\n");
+            } else {
+                text.append(DELIMITER + "la $t0, TRUE\n");
+                text.append(DELIMITER + "lw $s0, ($t0)\n");
+            }
             node.getTrue().apply(this);
         }
     }
@@ -2027,20 +2094,101 @@ class PrintTree extends DepthFirstAdapter {
     @Override
     public void caseAFalseBoolean(AFalseBoolean node) {
         if (node.getFalse() != null) {
+            if (isFloat) {
+                text.append(DELIMITER + "la $t0, FALSE\n");
+                text.append(DELIMITER + "lwc1 $f0, ($t0)\n");
+                text.append(DELIMITER + "cvt.s.w $f0, $f0\n");
+            } else {
+                text.append(DELIMITER + "la $t0, FALSE\n");
+                text.append(DELIMITER + "lw $s0, ($t0)\n");
+            }
             node.getFalse().apply(this);
         }
     }
 
     @Override
     public void caseAConditionalBoolean(AConditionalBoolean node) {
+        String cond = "";
         if (node.getFirst() != null) {
+            isFloat = false;
             node.getFirst().apply(this);
+            if (isFloat) {
+                text.append(DELIMITER
+                        + "swc1 $f0, "
+                        + offset
+                        + "($sp)\n");
+            } else {
+                text.append(DELIMITER
+                        + "sw $s0, "
+                        + offset
+                        + "($sp)\n");
+            }
+            offset += 4;
         }
         if (node.getCond() != null) {
+            cond = node.getCond().getText();
             node.getCond().apply(this);
         }
         if (node.getSec() != null) {
             node.getSec().apply(this);
+            if (isFloat) {
+                text.append(DELIMITER
+                        + "lwc1 $f1, "
+                        + offset
+                        + "($sp)\n"
+                        + DELIMITER);
+                switch (cond) {
+                    case "==":
+                        text.append("c.eq.s $f1, $f0\n");
+                        break;
+                    case "!=":
+                        text.append("c.ne.s $f1, $f0\n");
+                        break;
+                    case ">":
+                        text.append("c.lt.s $f0, $f1\n");
+                        break;
+                    case "<":
+                        text.append("c.lt.s $f1, $f0\n");
+                        break;
+                    case ">=":
+                        text.append("c.le.s $f0, $f1\n");
+                        break;
+                    case "<=":
+                        text.append("c.le.s $f1, $f0\n");
+                        break;
+                    default:
+                        error.add("Invalid condition");
+                }
+            } else {
+                text.append(DELIMITER
+                        + "lw $t0, "
+                        + offset
+                        + "($sp)\n"
+                        + DELIMITER);
+                switch (cond) {
+                    case "==":
+                        text.append("seq $s0, $t0, $s0\n");
+                        break;
+                    case "!=":
+                        text.append("sne $s0, $t0, $s0\n");
+                        break;
+                    case ">":
+                        text.append("sgt $s0, $t0, $s0\n");
+                        break;
+                    case "<":
+                        text.append("slt $s0, $t0, $s0\n");
+                        break;
+                    case ">=":
+                        text.append("sge $s0, $t0, $s0\n");
+                        break;
+                    case "<=":
+                        text.append("sle $s0, $t0, $s0\n");
+                        break;
+                    default:
+                        error.add("Invalid condition");
+                }
+            }
+            offset -= 4;
         }
     }
 

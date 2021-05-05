@@ -1,8 +1,33 @@
 BEGIN
   VOID MAIN() {
-    idPie   : REAL;
-    idPie := 3.14;
-    idPiePlusOne : REAL;
-    idPiePlusOne := 1 + idPie;
+    intOne      : INT;
+    idPie       : REAL;
+    outputOne   : STRING;
+    outputTwo   : STRING;
+    outputThree : STRING;
+    outputFour  : STRING;
+    bool        : BOOLEAN;
+
+    intOne      := 4 + 2;
+    idPie       := 1 + 3.14;
+    outputOne   := "First works";
+    outputTwo   := "Second fails";
+    outputThree := "Third works";
+    outputFour  := "Fourth fails";
+    bool        := TRUE;
+
+    IF (intOne > idPie) THEN {
+        PUT(outputOne);
+    }
+    IF (intOne < idPie) THEN {
+        PUT(outputTwo);
+    }
+    IF (bool) THEN {
+        PUT(outputThree);
+    }
+    bool := FALSE;
+    IF (bool) THEN {
+        PUT(outputFour);
+    }
   }
 END
