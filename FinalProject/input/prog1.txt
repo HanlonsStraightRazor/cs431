@@ -1,0 +1,7 @@
+BEGIN
+  VOID MAIN() {
+    idPie   : REAL;
+    idPie := 3.87;
+    idPie++;
+  }
+END
