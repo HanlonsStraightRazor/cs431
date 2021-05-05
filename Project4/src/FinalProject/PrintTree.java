@@ -1697,7 +1697,7 @@ class PrintTree extends DepthFirstAdapter {
             node.getExpr().apply(this);
             if (isFloat) {
                 text.append(DELIMITER
-                        + "sw $f0, -"
+                        + "swc1 $f0, -"
                         + offset
                         + "($sp)\n");
             } else {
@@ -1852,8 +1852,11 @@ class PrintTree extends DepthFirstAdapter {
         if (node.getInt() != null) {
             if (isFloat) {
                 text.append(DELIMITER
-                        + "li $f0, "
-                        + Integer.parseInt(node.getInt().getText())
+                        + "li $t1, "
+                        + Float.floatToIntBits(Integer.parseInt(node.getInt().getText()))
+                        + "\n");
+                text.append(DELIMITER
+                        + "mtc1 $t1, $f0"
                         + "\n");
             } else {
                 text.append(DELIMITER
@@ -1875,7 +1878,7 @@ class PrintTree extends DepthFirstAdapter {
                     + "\n");
             text.append(DELIMITER
                     + "mtc1 $t1, $f0"
-                    + "\n");  
+                    + "\n");
             node.getReal().apply(this);
         }
     }
@@ -1995,7 +1998,7 @@ class PrintTree extends DepthFirstAdapter {
                     if (isFloat || var.getType().equals("REAL")) {
                         isFloat = true;
                         text.append(DELIMITER
-                                + "li $f0, "
+                                + "lwc1 $f0, "
                                 + var.getOffset()
                                 + "($sp)\n");
                     } else {
