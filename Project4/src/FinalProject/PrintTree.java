@@ -583,6 +583,7 @@ class PrintTree extends DepthFirstAdapter {
                 } else if (node2.getBoolean() instanceof AFalseBoolean) {
                     isConstant = true;
                 } else if (node2.getBoolean() instanceof AConditionalBoolean) {
+                    labelnum++;
                     text.append(DELIMITER
                         + "beq $zero, $s0, "
                         + falselabel
@@ -663,6 +664,7 @@ class PrintTree extends DepthFirstAdapter {
                 } else if (node2.getBoolean() instanceof AFalseBoolean) {
                     isConstant = true;
                 } else if (node2.getBoolean() instanceof AConditionalBoolean) {
+                    labelnum += 2;
                     text.append(DELIMITER
                         + "beq $zero, $s0, "
                         + falselabel
@@ -778,6 +780,7 @@ class PrintTree extends DepthFirstAdapter {
                     isConstant = true;
                 }
                 else if((ABoolBoolidNode.getBoolean()) instanceof AConditionalBoolean) {
+                    labelnum += 2;
                     text.append(DELIMITER
                         + "beq $zero, $s0, "
                         + falselabel
@@ -2109,7 +2112,7 @@ class PrintTree extends DepthFirstAdapter {
                         error.add("Invalid condition");
                 }
                 // FIXME: Set $s0 to appropriate value here
-                text.append(DELIMITER + "li $s0, 0");
+                text.append(DELIMITER + "li $s0, 0\n");
             } else {
                 text.append(DELIMITER
                         + "lw $t0, "
