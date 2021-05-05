@@ -583,18 +583,10 @@ class PrintTree extends DepthFirstAdapter {
                 } else if (node2.getBoolean() instanceof AFalseBoolean) {
                     isConstant = true;
                 } else if (node2.getBoolean() instanceof AConditionalBoolean) {
-                    if (isFloat) {
-                        text.append(DELIMITER
-                            + "bc1f "
-                            + falselabel
-                            + "\n");
-                    } else {
-                        text.append(DELIMITER
-                            + "beq $zero, $s0, "
-                            + falselabel
-                            + "\n");
-                    }
-                    isFloat = false;
+                    text.append(DELIMITER
+                        + "beq $zero, $s0, "
+                        + falselabel
+                        + "\n");
                 }
             }
         }
@@ -671,18 +663,10 @@ class PrintTree extends DepthFirstAdapter {
                 } else if (node2.getBoolean() instanceof AFalseBoolean) {
                     isConstant = true;
                 } else if (node2.getBoolean() instanceof AConditionalBoolean) {
-                    if (isFloat) {
-                        text.append(DELIMITER
-                            + "bc1f "
-                            + falselabel
-                            + "\n");
-                    } else {
-                        text.append(DELIMITER
-                            + "beq $zero, $s0, "
-                            + falselabel
-                            + "\n");
-                    }
-                    isFloat = false;
+                    text.append(DELIMITER
+                        + "beq $zero, $s0, "
+                        + falselabel
+                        + "\n");
                 }
             }
             node.getBoolid().apply(this);
@@ -794,18 +778,10 @@ class PrintTree extends DepthFirstAdapter {
                     isConstant = true;
                 }
                 else if((ABoolBoolidNode.getBoolean()) instanceof AConditionalBoolean) {
-                    if (isFloat) {
-                        text.append(DELIMITER
-                            + "bc1f "
-                            + falselabel
-                            + "\n");
-                    } else {
-                        text.append(DELIMITER
-                            + "beq $zero, $s0, "
-                            + falselabel
-                            + "\n");
-                    }
-                    isFloat = false;
+                    text.append(DELIMITER
+                        + "beq $zero, $s0, "
+                        + falselabel
+                        + "\n");
                 }
             }
             node.getBoolid().apply(this);
@@ -1332,19 +1308,7 @@ class PrintTree extends DepthFirstAdapter {
                     text.append(DELIMITER + "li $t0, " + 0 + "\n");
                     text.append(DELIMITER + "sw $t0, -" + var.getOffset() + "($sp)\n");
                 } else if(node.getBoolean() instanceof AConditionalBoolean){
-                    if (isFloat) {
-                        // FIXME: Need value of floating point flag register.
-                        // The code below may or may not be relevant
-                        // String falselabel = LABELPREFIX
-                        //     + labelnum;
-                        // text.append(DELIMITER
-                        //     + "bc1f "
-                        //     + falselabel
-                        //     + "\n");
-                    } else {
-                        text.append(DELIMITER + "sw $s0, -" + var.getOffset() + "($sp)\n");
-                    }
-                    isFloat = false;
+                    text.append(DELIMITER + "sw $s0, -" + var.getOffset() + "($sp)\n");
                 }
             }
             node.getBoolean().apply(this);
@@ -1679,20 +1643,7 @@ class PrintTree extends DepthFirstAdapter {
                     text.append(DELIMITER + "la $t1, " + id + "\n");
                     text.append(DELIMITER + "sw $t0, " + Integer.toString(index).trim() + "($t1)\n");
                 } else if (bool instanceof AConditionalBoolean) {
-                    if (isFloat) {
-                        // FIXME: Need value of floating point flag register.
-                        // The code below may or may not be relevant
-                        // String falselabel = LABELPREFIX
-                        //     + labelnum;
-                        // text.append(DELIMITER
-                        //     + "bc1f "
-                        //     + falselabel
-                        //     + "\n");
-                    } else {
-                        text.append(DELIMITER + "la $t1, " + id + "\n");
-                        text.append(DELIMITER + "sw $s0, " + Integer.toString(index).trim() + "($t1)\n");
-                    }
-                    isFloat = false;
+                    text.append(DELIMITER + "sw $s0, " + Integer.toString(index).trim() + "($t1)\n");
                 }
             }
             node.getInt().apply(this);
@@ -1936,8 +1887,6 @@ class PrintTree extends DepthFirstAdapter {
             text.append(DELIMITER
                     + "mtc1 $t1, $f0"
                     + "\n");
-            text.append(DELIMITER
-                    + "mtc1 $t0, $f0\n");
             node.getReal().apply(this);
         }
     }
@@ -2159,6 +2108,8 @@ class PrintTree extends DepthFirstAdapter {
                     default:
                         error.add("Invalid condition");
                 }
+                // FIXME: Set $s0 to appropriate value here
+                text.append(DELIMITER + "li $s0, 0");
             } else {
                 text.append(DELIMITER
                         + "lw $t0, "
@@ -2189,6 +2140,7 @@ class PrintTree extends DepthFirstAdapter {
                 }
             }
             offset -= 4;
+            isFloat = false;
         }
     }
 
