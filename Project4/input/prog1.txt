@@ -1,13 +1,7 @@
 BEGIN
   VOID MAIN() {
-    intOne   : INT;
     idPie   : REAL;
-    intOnePlusidPie : REAL;
-    intOne   := 4 + 2;
-    idPie   := 1 + 3.14;
-    intOne := 5 * 6;
-    idPie := 3 * 4.55;
-    intOne := 6/2;
-    idPie := 5.55/1.11;
+    idPie := 3.87;
+    idPie++;
   }
 END

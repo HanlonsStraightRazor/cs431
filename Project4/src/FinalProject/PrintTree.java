@@ -2,6 +2,7 @@ package FinalProject;
 import FinalProject.analysis.*;
 import FinalProject.node.*;
 import java.util.*;
+import java.lang.*;
 
 /*
 * Project 4
@@ -434,7 +435,7 @@ class PrintTree extends DepthFirstAdapter {
             }
             if (isFloat) {
                 text.append(DELIMITER
-                    + "sw $f0, -"
+                    + "swc1 $f0, -"
                     + Integer.toString(var.getOffset())
                     + "($sp)\n");
             } else {
@@ -1100,10 +1101,12 @@ class PrintTree extends DepthFirstAdapter {
                     text.append(DELIMITER + "add $t0, " + "$t0, " + "$t1\n");
                     text.append(DELIMITER + "sw $t0, -" + var.getOffset() + "($sp)\n");
                 } else {
-                    text.append(DELIMITER + "lw $f0, -" + var.getOffset() + "($sp)\n");
-                    text.append(DELIMITER + "li $f1, " + "1.0" + "\n");
-                    text.append(DELIMITER + "add $f0, " + "f0, " + "f1\n");
-                    text.append(DELIMITER + "sw $f0, -" + var.getOffset() + "($sp)\n");
+                    text.append(DELIMITER + "lwc1 $f0, -" + var.getOffset() + "($sp)\n");
+                    text.append(DELIMITER + "li $t2, " + "1" + "\n");
+                    text.append(DELIMITER + "mtc1 $t2, " + "$f1" + "\n");
+                    text.append(DELIMITER + "cvt.s.w $f1, " + "$f1" + "\n");
+                    text.append(DELIMITER + "add.s $f0, " + "$f0, " + "$f1\n");
+                    text.append(DELIMITER + "swc1 $f0, -" + var.getOffset() + "($sp)\n");
                 }
             }
         }
@@ -1145,10 +1148,12 @@ class PrintTree extends DepthFirstAdapter {
                 text.append(DELIMITER + "sub $t0, " + "$t0, " + "$t1\n");
                 text.append(DELIMITER + "sw $t0, -" + var.getOffset() + "($sp)\n");
             } else {
-                text.append(DELIMITER + "lw $f0, -" + var.getOffset() + "($sp)\n");
-                text.append(DELIMITER + "li $f1, " + "1.0" + "\n");
-                text.append(DELIMITER + "sub $f0, " + "$f0, " + "$f1\n");
-                text.append(DELIMITER + "sw $f0, -" + var.getOffset() + "($sp)\n");
+                text.append(DELIMITER + "lwc1 $f0, -" + var.getOffset() + "($sp)\n");
+                text.append(DELIMITER + "li $t2, " + "1" + "\n");
+                text.append(DELIMITER + "mtc1 $t2, " + "$f1" + "\n");
+                text.append(DELIMITER + "cvt.s.w $f1, " + "$f1" + "\n");
+                text.append(DELIMITER + "sub.s $f0, " + "$f0, " + "$f1\n");
+                text.append(DELIMITER + "swc1 $f0, -" + var.getOffset() + "($sp)\n");
             }
         }
     }
@@ -1865,9 +1870,12 @@ class PrintTree extends DepthFirstAdapter {
         if (node.getReal() != null) {
             isFloat = true;
             text.append(DELIMITER
-                    + "li $f0, "
-                    + Float.parseFloat(node.getReal().getText())
+                    + "li $t1, "
+                    + Float.floatToIntBits(Float.parseFloat(node.getReal().getText()))
                     + "\n");
+            text.append(DELIMITER
+                    + "mtc1 $t1, $f0"
+                    + "\n");  
             node.getReal().apply(this);
         }
     }
