@@ -1581,9 +1581,11 @@ class PrintTree extends DepthFirstAdapter {
                             text.append(DELIMITER + "add $t0, " + "$t1, " + "$t0\n");
                             text.append(DELIMITER + "sw $t0, " + Integer.toString(index).trim() + "($t2)\n");
                         } else {
-                            text.append(DELIMITER + "la $f2, " + idVal + "\n");
-                            text.append(DELIMITER + "lw $f0, " + Integer.toString(index).trim() + "($f2)\n");
-                            text.append(DELIMITER + "li $f1, " + "1" + "\n");
+                            text.append(DELIMITER + "la $t1, " + idVal + "\n");
+                            text.append(DELIMITER + "lw $f0, " + Integer.toString(index).trim() + "($t1)\n");
+                            text.append(DELIMITER + "li $t2, " + "1" + "\n");
+                            text.append(DELIMITER + "mtc1 $t2, " + "$f1" + "\n");
+                            text.append(DELIMITER + "cvt.s.w $f1, " + "$f1" + "\n");
                             text.append(DELIMITER + "add $f0, " + "$f1, " + "$f0\n");
                             text.append(DELIMITER + "swc1 $f0, " + Integer.toString(index).trim() + "($f2)\n");
                         }
@@ -1612,9 +1614,11 @@ class PrintTree extends DepthFirstAdapter {
                             text.append(DELIMITER + "sub $t0, " + "$t0, " + "$t1\n");
                             text.append(DELIMITER + "sw $t0, " + Integer.toString(index).trim() + "($t2)\n");
                         } else {
-                            text.append(DELIMITER + "la $f2, " + idVal + "\n");
-                            text.append(DELIMITER + "lw $f0, " + Integer.toString(index).trim() + "($f2)\n");
-                            text.append(DELIMITER + "li $f1, " + "1" + "\n");
+                            text.append(DELIMITER + "la $t1, " + idVal + "\n");
+                            text.append(DELIMITER + "lw $f0, " + Integer.toString(index).trim() + "($t1)\n");
+                            text.append(DELIMITER + "li $t2, " + "1" + "\n");
+                            text.append(DELIMITER + "mtc1 $t2, " + "$f1" + "\n");
+                            text.append(DELIMITER + "cvt.s.w $f1, " + "$f1" + "\n");
                             text.append(DELIMITER + "sub $f0, " + "$f0, " + "$f1\n");
                             text.append(DELIMITER + "swc1 $f0, " + Integer.toString(index).trim() + "($f2)\n");
                         }
@@ -1845,7 +1849,9 @@ class PrintTree extends DepthFirstAdapter {
         }
         if (node.getFactor() != null) {
             if (isFloat) {
-                text.append(DELIMITER + "li $f1, -1\n");
+                text.append(DELIMITER + "li $t2, " + "-1" + "\n");
+                text.append(DELIMITER + "mtc1 $t2, " + "$f1" + "\n");
+                text.append(DELIMITER + "cvt.s.w $f1, " + "$f1" + "\n");
                 text.append(DELIMITER + "mul $f1, $f0\n");
                 text.append(DELIMITER + "mflo $f0\n");
             } else {

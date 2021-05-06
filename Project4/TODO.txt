@@ -1,4 +1,4 @@
-reassign string values in data
+reassign string values in data -> put stmt as well
 float values and all the stuff that goes with that
 switch stmts
 get stmt
