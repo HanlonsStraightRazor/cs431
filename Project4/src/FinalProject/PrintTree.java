@@ -1324,17 +1324,42 @@ class PrintTree extends DepthFirstAdapter {
 
     @Override
     public void caseASwitchStmt(ASwitchStmt node) {
+        boolean break = false;
+        String breakCase = LABELPREFIX
+            + labelnum;
+        String caseOneLable = LABELPREFIX
+            + (labelnum + 1);
+        labelnum += 2;
+
         if (node.getSwitch() != null) {
             node.getSwitch().apply(this);
         }
         if (node.getFirst() != null) {
+            incScope();
             node.getFirst().apply(this);
         }
         if (node.getExprOrBool() != null) {
+            if (node.getExprOrBool() instanceof AExprOrBool) {
+                //TODO: Add value to S0 when expr works
+            }
+            else if (node.getExprOrBool() instanceof ABoolExprOrBool) {
+                if(((ABoolExprOrBool)node.getExprOrBool()).getBoolean() instanceof AFalseBoolean) {
+                    text.append(DELIMITER
+                        + "li $s1, 0\n");
+                }
+                else {
+                    text.append(DELIMITER
+                        + "li $s1, 1\n");
+                }
+            }
+            else {
+                error.add("Switch expression type is not an expression or boolean.");
+            }
             node.getExprOrBool().apply(this);
         }
         if (node.getSecond() != null) {
             node.getSecond().apply(this);
+            decScope();
         }
         if (node.getLcurly() != null) {
             node.getLcurly().apply(this);
@@ -1346,16 +1371,31 @@ class PrintTree extends DepthFirstAdapter {
             node.getThird().apply(this);
         }
         if (node.getInt() != null) {
+            text.append(DELIMITER
+                    + "li $t0, "
+                    + node.getInt() + "\n");
+            text.append(DELIMITER
+                    + "beq $s1, $t0, "
+                    + caseOneLable
+                    + "\n");
+            text.append(DELIMITER
+                + "j "
+                + afterCaseOneLable
+                + "\n");
             node.getInt().apply(this);
         }
         if (node.getFourth() != null) {
             node.getFourth().apply(this);
         }
         if (node.getFifth() != null) {
+            incScope();
             node.getFifth().apply(this);
         }
         if (node.getStmts() != null) {
+            text.append("\n" + caseOneLable
+                    + ":\n");
             node.getStmts().apply(this);
+            decScope();
         }
         if (node.getBreakHelper() != null) {
             node.getBreakHelper().apply(this);
@@ -1373,6 +1413,12 @@ class PrintTree extends DepthFirstAdapter {
             node.getDefaultStmts().apply(this);
         }
         if (node.getRcurly() != null) {
+            text.append(DELIMITER
+                + "j "
+                + breakLabel
+                + "\n");
+            text.append("\n" + breakLable
+                    + ":\n");
             node.getRcurly().apply(this);
         }
     }
@@ -1408,6 +1454,10 @@ class PrintTree extends DepthFirstAdapter {
     @Override
     public void caseABreakBreakHelper(ABreakBreakHelper node) {
         if (node.getBreak() != null) {
+            text.append(DELIMITER
+                + "j "
+                + breakLabel
+                + "\n");
             node.getBreak().apply(this);
         }
         if (node.getSemicolon() != null) {
