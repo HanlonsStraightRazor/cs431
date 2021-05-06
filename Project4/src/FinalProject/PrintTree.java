@@ -447,6 +447,7 @@ class PrintTree extends DepthFirstAdapter {
             var.initialize();
             addToSymbolTable(id, var, scope);
         }
+        isFloat = false;
         if (node.getSemicolon() != null) {
             node.getSemicolon().apply(this);
         }
@@ -1685,6 +1686,7 @@ class PrintTree extends DepthFirstAdapter {
         if (node.getExpr() != null) {
             node.getExpr().apply(this);
         }
+        isFloat = false;
     }
 
     @Override
@@ -1707,6 +1709,7 @@ class PrintTree extends DepthFirstAdapter {
     @Override
     public void caseAAddExpr(AAddExpr node) {
         boolean addition = true;
+        boolean isFloatAfterFirstExpr = false;
         if (node.getExpr() != null) {
             node.getExpr().apply(this);
             if (isFloat) {
@@ -1714,11 +1717,13 @@ class PrintTree extends DepthFirstAdapter {
                         + "swc1 $f0, -"
                         + offset
                         + "($sp)\n");
+                        isFloatAfterFirstExpr = true;
             } else {
                 text.append(DELIMITER
                         + "sw $s0, -"
                         + offset
                         + "($sp)\n");
+                        isFloatAfterFirstExpr = false;
             }
             offset += 4;
         }
@@ -1732,10 +1737,21 @@ class PrintTree extends DepthFirstAdapter {
             node.getTerm().apply(this);
             offset -= 4;
             if (isFloat) {
-                text.append(DELIMITER
+                if(!isFloatAfterFirstExpr){
+                    text.append(DELIMITER
+                        + "lw $t2, -"
+                        + offset
+                        + "($sp)\n");
+                    text.append(DELIMITER
+                        + "mtc1 $t2, $f1\n");
+                    text.append(DELIMITER
+                        + "cvt.s.w $f1, $f1\n");
+                } else {
+                    text.append(DELIMITER
                         + "l.s $f1, -"
                         + offset
                         + "($sp)\n");
+                }
                 if (addition) {
                     text.append(DELIMITER
                             + "add.s $f0, $f1, $f0\n");
@@ -1768,6 +1784,7 @@ class PrintTree extends DepthFirstAdapter {
 
     @Override
     public void caseAMultTerm(AMultTerm node) {
+        boolean isFloatAfterFirstExpr = false;
         boolean divison = true;
         if (node.getTerm() != null) {
             node.getTerm().apply(this);
@@ -1776,11 +1793,13 @@ class PrintTree extends DepthFirstAdapter {
                         + "s.s $f0, -"
                         + offset
                         + "($sp)\n");
+                        isFloatAfterFirstExpr = true;
             } else {
                 text.append(DELIMITER
                         + "sw $s0, -"
                         + offset
                         + "($sp)\n");
+                        isFloatAfterFirstExpr = false;
             }
             offset += 4;
         }
@@ -1794,16 +1813,27 @@ class PrintTree extends DepthFirstAdapter {
             node.getFactor().apply(this);
             offset -= 4;
             if (isFloat) {
-                text.append(DELIMITER
-                        + "l.s $f1, -"
+                if(!isFloatAfterFirstExpr){
+                    text.append(DELIMITER
+                        + "lw $t2, -"
                         + offset
                         + "($sp)\n");
+                    text.append(DELIMITER
+                        + "mtc1 $t2, $f1\n");
+                    text.append(DELIMITER
+                        + "cvt.s.w $f1, $f1\n");
+                } else {
+                    text.append(DELIMITER
+                    + "l.s $f1, -"
+                    + offset
+                    + "($sp)\n");
+                }
                 if (divison) {
                     text.append(DELIMITER
                             + "div.s $f0, $f1, $f0\n");
                 } else {
                     text.append(DELIMITER
-                            + "mult.s $f0, $f1, $f0\n");
+                            + "mul.s $f0, $f1, $f0\n");
                 }
             } else {
                 text.append(DELIMITER
@@ -2015,12 +2045,12 @@ class PrintTree extends DepthFirstAdapter {
                     if (isFloat || var.getType().equals("REAL")) {
                         isFloat = true;
                         text.append(DELIMITER
-                                + "lwc1 $f0, "
+                                + "lwc1 $f0, -"
                                 + var.getOffset()
                                 + "($sp)\n");
                     } else {
                         text.append(DELIMITER
-                                + "lw $s0, "
+                                + "lw $s0, -"
                                 + var.getOffset()
                                 + "($sp)\n");
                     }
@@ -2091,7 +2121,7 @@ class PrintTree extends DepthFirstAdapter {
             node.getSec().apply(this);
             if (isFloat) {
                 text.append(DELIMITER
-                        + "lwc1 $f1, "
+                        + "lwc1 $f1, -"
                         + offset
                         + "($sp)\n"
                         + DELIMITER);

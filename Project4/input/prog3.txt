@@ -1,8 +1,10 @@
 BEGIN
   VOID MAIN() {
     idPie : REAL;
-    idPie := 3.14;
+    idOne : INT;
     idPiePlusOne : REAL;
-    idPiePlusOne := 1 + idPie;
+    idOne := 2;
+    idPie := 3.5;
+    idPiePlusOne := idPie * idOne;
  }
 END
