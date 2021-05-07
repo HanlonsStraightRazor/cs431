@@ -1,33 +1,43 @@
 BEGIN
   VOID MAIN() {
-    intOne      : INT;
-    idPie       : REAL;
-    outputOne   : STRING;
-    outputTwo   : STRING;
-    outputThree : STRING;
-    outputFour  : STRING;
-    bool        : BOOLEAN;
+    numint     :  INTEGER;
+    numints    :  INTEGER[4];
+    numint     := 69;
+    numints[0] := 420;
+    PUT(numint);
+    PUT(numints[0]);
 
-    intOne      := 4 + 2;
-    idPie       := 1 + 3.14;
-    outputOne   := "First works";
-    outputTwo   := "Second fails";
-    outputThree := "Third works";
-    outputFour  := "Fourth fails";
-    bool        := TRUE;
+    numreal      :  REAL;
+    numreals     :  REAL[4];
+    numreal      := 2.2;
+    numreals[1]  := 4.4;
+    PUT(numreal);
+    PUT(numreal[1]);
 
-    IF (intOne > idPie) THEN {
-        PUT(outputOne);
-    }
-    IF (intOne < idPie) THEN {
-        PUT(outputTwo);
-    }
-    IF (bool) THEN {
-        PUT(outputThree);
-    }
-    bool := FALSE;
-    IF (bool) THEN {
-        PUT(outputFour);
-    }
+    str     :  STRING;
+    strs    :  STRING[4];
+    str     := "Gigiddy";
+    strs[0] := "First string";
+    strs[1] := "Second string";
+    strs[2] := "Third string";
+    strs[3] := "Fourth string";
+    PUT(strs[0]);
+    PUT(strs[1]);
+    PUT(strs[2]);
+    PUT(strs[3]);
+
+    bool     :  BOOLEAN;
+    bools    :  BOOLEAN[4];
+    bool     := TRUE;
+    bools[2] := FALSE;
+    PUT(bool);
+    PUT(bools[2]);
+
+    none     :  VOID;
+    nones    :  VOID[4];
+    none     := 42;
+    nones[3] := 43;
+    PUT(none);
+    PUT(nones[3]);
   }
 END
