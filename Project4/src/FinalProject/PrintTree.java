@@ -434,6 +434,12 @@ class PrintTree extends DepthFirstAdapter {
                         + var.getType()
                         + " which cannot be converted to INT.");
             }
+            if(var.getType().equals("INT") && isFloat){
+                error.add("Variable "
+                        + id
+                        + " has type INT"
+                        + " which cannot be converted to REAL.");
+            }
             if (isFloat) {
                 text.append(DELIMITER
                     + "swc1 $f0, -"
@@ -1811,11 +1817,11 @@ class PrintTree extends DepthFirstAdapter {
             if (isFloat) {
                 if(!isFloatAfterFirstExpr){
                     text.append(DELIMITER
-                        + "lw $t2, -"
+                        + "lw $s0, -"
                         + offset
                         + "($sp)\n");
                     text.append(DELIMITER
-                        + "mtc1 $t2, $f1\n");
+                        + "mtc1 $s0, $f1\n");
                     text.append(DELIMITER
                         + "cvt.s.w $f1, $f1\n");
                 } else {
@@ -1914,11 +1920,14 @@ class PrintTree extends DepthFirstAdapter {
                         + "($sp)\n");
                 if (divison) {
                     text.append(DELIMITER
-                            + "div $t0, $s0\n"
-                            + "mflo $s0");
+                            + "div $t0, $s0\n");
+                    text.append(DELIMITER   
+                            + "mflo $s0\n");
                 } else {
                     text.append(DELIMITER
                             + "mult $t0, $s0\n");
+                    text.append(DELIMITER
+                            + "mflo $s0\n");
                 }
             }
         }
@@ -2116,10 +2125,21 @@ class PrintTree extends DepthFirstAdapter {
                 if (var.isInitialized()) {
                     if (isFloat || var.getType().equals("REAL")) {
                         isFloat = true;
-                        text.append(DELIMITER
+                        if(var.getType().equals("REAL")){
+                            text.append(DELIMITER
                                 + "lwc1 $f0, -"
                                 + var.getOffset()
                                 + "($sp)\n");
+                        } else {
+                            text.append(DELIMITER
+                                + "lw $t2, -"
+                                + var.getOffset()
+                                + "($sp)\n");
+                            text.append(DELIMITER
+                                + "mtc1 $t2, $f0\n");
+                            text.append(DELIMITER
+                                + "cvt.s.w $f0, $f0\n");
+                        }
                     } else {
                         text.append(DELIMITER
                                 + "lw $s0, -"
