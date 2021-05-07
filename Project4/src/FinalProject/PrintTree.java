@@ -1960,7 +1960,7 @@ class PrintTree extends DepthFirstAdapter {
                         + "cvt.s.w $f1, $f1\n");
                 } else {
                     text.append(DELIMITER
-                    + "l.s $f1, -"
+                    + "l.s $f1, "
                     + offset
                     + "($sp)\n");
                 }
@@ -2271,7 +2271,7 @@ class PrintTree extends DepthFirstAdapter {
             node.getSec().apply(this);
             if (isFloat) {
                 text.append(DELIMITER
-                        + "lwc1 $f1, -"
+                        + "lwc1 $f1, "
                         + offset
                         + "($sp)\n"
                         + DELIMITER);
