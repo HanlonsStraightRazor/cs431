@@ -424,8 +424,11 @@ class PrintTree extends DepthFirstAdapter {
             node.getEquals().apply(this);
         }
         if (node.getExpr() != null) {
-            node.getExpr().apply(this);
             Variable var = (Variable) getSymbol(scope, id);
+            if(var.getType().equals("REAL")){
+                isFloat = true;
+            }
+            node.getExpr().apply(this);
             if(!(var.getType().equals("INT")
                 || var.getType().equals("REAL"))) {
                 error.add("Variable "
