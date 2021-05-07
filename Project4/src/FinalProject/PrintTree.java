@@ -963,6 +963,12 @@ class PrintTree extends DepthFirstAdapter {
             node.getForOptionalType().apply(this);
         }
         if (node.getId() != null) {
+            int scope = getScope(node.getId());
+                if ((scope != -1) && (node.getForOptionalType() != null)) {
+                    error.add("Variable "
+                        + id
+                        + " has already been declared.");
+                }
             node.getId().apply(this);
         }
         if (node.getEquals() != null) {
@@ -1444,7 +1450,6 @@ class PrintTree extends DepthFirstAdapter {
             node.getSwitch().apply(this);
         }
         if (node.getFirst() != null) {
-            incScope();
             node.getFirst().apply(this);
         }
         if (node.getExprOrBool() != null) {
@@ -1454,7 +1459,6 @@ class PrintTree extends DepthFirstAdapter {
         }
         if (node.getSecond() != null) {
             node.getSecond().apply(this);
-            decScope();
         }
         if (node.getLcurly() != null) {
             node.getLcurly().apply(this);
@@ -1483,14 +1487,12 @@ class PrintTree extends DepthFirstAdapter {
             node.getFourth().apply(this);
         }
         if (node.getFifth() != null) {
-            incScope();
             node.getFifth().apply(this);
         }
         if (node.getStmts() != null) {
             text.append("\n" + caseOneLabel
                     + ":\n");
             node.getStmts().apply(this);
-            decScope();
         }
         if (node.getBreakHelper() != null) {
             node.getBreakHelper().apply(this);
@@ -1508,14 +1510,12 @@ class PrintTree extends DepthFirstAdapter {
             node.getDefault().apply(this);
         }
         if (node.getSeccolon() != null) {
-            incScope();
             node.getSeccolon().apply(this);
         }
         if (node.getDefaultStmts() != null) {
             node.getDefaultStmts().apply(this);
         }
         if (node.getRcurly() != null) {
-            decScope();
             text.append(DELIMITER
                 + "j "
                 + breakLabel
@@ -1537,7 +1537,6 @@ class PrintTree extends DepthFirstAdapter {
             node.getCase().apply(this);
         }
         if (node.getLparen() != null) {
-            incScope();
             node.getLparen().apply(this);
         }
         if (node.getInt() != null) {
@@ -1555,7 +1554,6 @@ class PrintTree extends DepthFirstAdapter {
             node.getInt().apply(this);
         }
         if (node.getRparen() != null) {
-            decScope();
             node.getRparen().apply(this);
         }
         if (node.getColon() != null) {
