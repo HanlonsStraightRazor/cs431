@@ -1329,7 +1329,9 @@ class PrintTree extends DepthFirstAdapter {
             + labelnum;
         String caseOneLable = LABELPREFIX
             + (labelnum + 1);
-        labelnum += 2;
+        String afterCaseOneLable = LABELPREFIX
+            + (labelnum + 2);
+        labelnum += 3;
 
         if (node.getSwitch() != null) {
             node.getSwitch().apply(this);
@@ -1395,7 +1397,13 @@ class PrintTree extends DepthFirstAdapter {
             text.append("\n" + caseOneLable
                     + ":\n");
             node.getStmts().apply(this);
+            text.append(DELIMITER
+                + "j "
+                + afterCaseOneLable
+                + "\n");
             decScope();
+            text.append("\n" + afterCaseOneLable
+                + ":\n");
         }
         if (node.getBreakHelper() != null) {
             node.getBreakHelper().apply(this);
@@ -1407,12 +1415,14 @@ class PrintTree extends DepthFirstAdapter {
             node.getDefault().apply(this);
         }
         if (node.getSeccolon() != null) {
+            incScope();
             node.getSeccolon().apply(this);
         }
         if (node.getDefaultStmts() != null) {
             node.getDefaultStmts().apply(this);
         }
         if (node.getRcurly() != null) {
+            decScope();
             text.append(DELIMITER
                 + "j "
                 + breakLabel
@@ -1425,23 +1435,49 @@ class PrintTree extends DepthFirstAdapter {
 
     @Override
     public void caseAAnotherCaseCaseHelper(AAnotherCaseCaseHelper node) {
+        String caseNLable = LABELPREFIX
+            + labelnum;
+        String afterCaseNLable = LABELPREFIX
+            + (labelnum + 1);
+        labelnum += 2;
         if (node.getCase() != null) {
             node.getCase().apply(this);
         }
         if (node.getLparen() != null) {
+            incScope();
             node.getLparen().apply(this);
         }
         if (node.getInt() != null) {
+            text.append(DELIMITER
+                    + "li $t0, "
+                    + node.getInt() + "\n");
+            text.append(DELIMITER
+                    + "beq $s1, $t0, "
+                    + caseNLable
+                    + "\n");
+            text.append(DELIMITER
+                + "j "
+                + afterCaseNLable
+                + "\n");
             node.getInt().apply(this);
         }
         if (node.getRparen() != null) {
+            decScope();
             node.getRparen().apply(this);
         }
         if (node.getColon() != null) {
             node.getColon().apply(this);
         }
         if (node.getStmtseq() != null) {
+           text.append("\n" + caseNLable
+                    + ":\n");
             node.getStmtseq().apply(this);
+            text.append(DELIMITER
+                + "j "
+                + afterCaseNLable
+                + "\n");
+            text.append("\n" + afterCaseNLable
+                + ":\n");
         }
         if (node.getBreakHelper() != null) {
             node.getBreakHelper().apply(this);
