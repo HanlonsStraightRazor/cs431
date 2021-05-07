@@ -23,6 +23,7 @@ class PrintTree extends DepthFirstAdapter {
     private static Queue<String> error;
     private static int currentScope;
     private static boolean isFloat;
+    private static String breakLabel;
     /*
      * Constructor. Initializes non final class variables.
      */
@@ -1324,12 +1325,11 @@ class PrintTree extends DepthFirstAdapter {
 
     @Override
     public void caseASwitchStmt(ASwitchStmt node) {
-        boolean break = false;
-        String breakCase = LABELPREFIX
+        breakLabel = LABELPREFIX
             + labelnum;
-        String caseOneLable = LABELPREFIX
+        String caseOneLabel = LABELPREFIX
             + (labelnum + 1);
-        String afterCaseOneLable = LABELPREFIX
+        String afterCaseOneLabel = LABELPREFIX
             + (labelnum + 2);
         labelnum += 3;
 
@@ -1341,23 +1341,9 @@ class PrintTree extends DepthFirstAdapter {
             node.getFirst().apply(this);
         }
         if (node.getExprOrBool() != null) {
-            if (node.getExprOrBool() instanceof AExprOrBool) {
-                //TODO: Add value to S0 when expr works
-            }
-            else if (node.getExprOrBool() instanceof ABoolExprOrBool) {
-                if(((ABoolExprOrBool)node.getExprOrBool()).getBoolean() instanceof AFalseBoolean) {
-                    text.append(DELIMITER
-                        + "li $s1, 0\n");
-                }
-                else {
-                    text.append(DELIMITER
-                        + "li $s1, 1\n");
-                }
-            }
-            else {
-                error.add("Switch expression type is not an expression or boolean.");
-            }
             node.getExprOrBool().apply(this);
+            text.append(DELIMITER
+                    + "lw $s1, ($s0)\n");
         }
         if (node.getSecond() != null) {
             node.getSecond().apply(this);
@@ -1378,11 +1364,11 @@ class PrintTree extends DepthFirstAdapter {
                     + node.getInt() + "\n");
             text.append(DELIMITER
                     + "beq $s1, $t0, "
-                    + caseOneLable
+                    + caseOneLabel
                     + "\n");
             text.append(DELIMITER
                 + "j "
-                + afterCaseOneLable
+                + afterCaseOneLabel
                 + "\n");
             node.getInt().apply(this);
         }
@@ -1394,21 +1380,21 @@ class PrintTree extends DepthFirstAdapter {
             node.getFifth().apply(this);
         }
         if (node.getStmts() != null) {
-            text.append("\n" + caseOneLable
+            text.append("\n" + caseOneLabel
                     + ":\n");
             node.getStmts().apply(this);
-            text.append(DELIMITER
-                + "j "
-                + afterCaseOneLable
-                + "\n");
             decScope();
-            text.append("\n" + afterCaseOneLable
-                + ":\n");
         }
         if (node.getBreakHelper() != null) {
             node.getBreakHelper().apply(this);
         }
         if (node.getCaseHelper() != null) {
+            text.append(DELIMITER
+                + "j "
+                + afterCaseOneLabel
+                + "\n");
+            text.append("\n" + afterCaseOneLabel
+                + ":\n");
             node.getCaseHelper().apply(this);
         }
         if (node.getDefault() != null) {
@@ -1427,7 +1413,7 @@ class PrintTree extends DepthFirstAdapter {
                 + "j "
                 + breakLabel
                 + "\n");
-            text.append("\n" + breakLable
+            text.append("\n" + breakLabel
                     + ":\n");
             node.getRcurly().apply(this);
         }
@@ -1435,9 +1421,9 @@ class PrintTree extends DepthFirstAdapter {
 
     @Override
     public void caseAAnotherCaseCaseHelper(AAnotherCaseCaseHelper node) {
-        String caseNLable = LABELPREFIX
+        String caseNLabel = LABELPREFIX
             + labelnum;
-        String afterCaseNLable = LABELPREFIX
+        String afterCaseNLabel = LABELPREFIX
             + (labelnum + 1);
         labelnum += 2;
         if (node.getCase() != null) {
@@ -1453,11 +1439,11 @@ class PrintTree extends DepthFirstAdapter {
                     + node.getInt() + "\n");
             text.append(DELIMITER
                     + "beq $s1, $t0, "
-                    + caseNLable
+                    + caseNLabel
                     + "\n");
             text.append(DELIMITER
                 + "j "
-                + afterCaseNLable
+                + afterCaseNLabel
                 + "\n");
             node.getInt().apply(this);
         }
@@ -1469,20 +1455,20 @@ class PrintTree extends DepthFirstAdapter {
             node.getColon().apply(this);
         }
         if (node.getStmtseq() != null) {
-           text.append("\n" + caseNLable
+           text.append("\n" + caseNLabel
                     + ":\n");
             node.getStmtseq().apply(this);
-            text.append(DELIMITER
-                + "j "
-                + afterCaseNLable
-                + "\n");
-            text.append("\n" + afterCaseNLable
-                + ":\n");
         }
         if (node.getBreakHelper() != null) {
             node.getBreakHelper().apply(this);
         }
         if (node.getCaseHelper() != null) {
+            text.append(DELIMITER
+                + "j "
+                + afterCaseNLabel
+                + "\n");
+            text.append("\n" + afterCaseNLabel
+                + ":\n");
             node.getCaseHelper().apply(this);
         }
     }
