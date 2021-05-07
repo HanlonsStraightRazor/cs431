@@ -1005,11 +1005,17 @@ class PrintTree extends DepthFirstAdapter {
 
     @Override
     public void caseAGetStmt(AGetStmt node) {
+        Symbol val;
+        int scope = 0;
+        boolean arrayOption = false;
         if (node.getId() != null) {
             node.getId().apply(this);
+            scope = getScope(node.getId().toString());
+            val = getSymbol(scope, node.getId().toString());
         }
         if (node.getArrayOption() != null) {
             node.getArrayOption().apply(this);
+            arrayOption = true;
         }
         if (node.getEquals() != null) {
             node.getEquals().apply(this);
@@ -1026,6 +1032,12 @@ class PrintTree extends DepthFirstAdapter {
         if (node.getSemicolon() != null) {
             node.getSemicolon().apply(this);
         }
+        if(!arrayOption){
+            //FIXME re assign the id to the user input value
+        } else {
+            //FIXME array
+        }
+        
     }
 
     @Override
