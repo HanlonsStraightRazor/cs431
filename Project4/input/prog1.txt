@@ -1,43 +1,37 @@
 BEGIN
   VOID MAIN() {
-    numint     :  INTEGER;
-    numints    :  INTEGER[4];
+    numint     :  INT;
+    numints    :  INT[10];
     numint     := 69;
     numints[0] := 420;
     PUT(numint);
     PUT(numints[0]);
 
     numreal      :  REAL;
-    numreals     :  REAL[4];
+    numreals     :  REAL[2];
     numreal      := 2.2;
     numreals[1]  := 4.4;
     PUT(numreal);
-    PUT(numreal[1]);
+    PUT(numreals[1]);
 
     str     :  STRING;
-    strs    :  STRING[4];
+    strs    :  STRING[3];
     str     := "Gigiddy";
-    strs[0] := "First string";
-    strs[1] := "Second string";
-    strs[2] := "Third string";
-    strs[3] := "Fourth string";
-    PUT(strs[0]);
-    PUT(strs[1]);
+    strs[2] := "Second string";
     PUT(strs[2]);
-    PUT(strs[3]);
 
     bool     :  BOOLEAN;
     bools    :  BOOLEAN[4];
     bool     := TRUE;
-    bools[2] := FALSE;
+    bools[3] := FALSE;
     PUT(bool);
-    PUT(bools[2]);
+    PUT(bools[3]);
 
     none     :  VOID;
-    nones    :  VOID[4];
+    nones    :  VOID[5];
     none     := 42;
-    nones[3] := 43;
+    nones[4] := 43;
     PUT(none);
-    PUT(nones[3]);
+    PUT(nones[4]);
   }
 END
