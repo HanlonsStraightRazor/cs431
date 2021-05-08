@@ -996,24 +996,22 @@ class PrintTree extends DepthFirstAdapter {
 
     @Override
     public void caseAForStmt(AForStmt node) {
+        String id = "";
+        Symbol s = null;
+        String type = "";
         if (node.getFor() != null) {
             node.getFor().apply(this);
         }
         if (node.getLparen() != null) {
+            incScope();
             node.getLparen().apply(this);
         }
         if (node.getForOptionalType() != null) {
+            type = ((ATypesType) ((AForOptionalType) node.getForOptionalType()).getType()).getTypeDecl().getText();
             node.getForOptionalType().apply(this);
         }
         if (node.getId() != null) {
             String id = node.getId().getText();
-            int scope = getScope(id);
-                if ((scope != -1) && (node.getForOptionalType() != null)) {
-                    error.add("Variable "
-                        + id
-                        + " has already been declared.");
-                }
-                */
             node.getId().apply(this);
         }
         if (node.getEquals() != null) {
@@ -1044,6 +1042,7 @@ class PrintTree extends DepthFirstAdapter {
             node.getStmtseq().apply(this);
         }
         if (node.getRcurly() != null) {
+            decScope();
             node.getRcurly().apply(this);
         }
     }
