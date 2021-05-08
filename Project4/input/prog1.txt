@@ -21,10 +21,13 @@ BEGIN
     PUT(strs[2]);
 
     bool     :  BOOLEAN;
+    boola    :  BOOLEAN;
     bools    :  BOOLEAN[4];
     bool     := TRUE;
+    boola    := FALSE;
     bools[3] := FALSE;
     PUT(bool);
+    PUT(boola);
     PUT(bools[3]);
 
     none     :  VOID;

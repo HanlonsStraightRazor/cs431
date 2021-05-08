@@ -1522,28 +1522,26 @@ class PrintTree extends DepthFirstAdapter {
                             + "($sp)\n");
                     if (isFloat) {
                         text.append(DELIMITER
-                                + "swc1 $f0, "
-                                + (index * 4)
-                                + "($t0)\n");
-                    } else {
-                        text.append(DELIMITER
-                                + "sw $s0, "
-                                + (index * 4)
-                                + "($t0)\n");
+                                + "cvt.w.s $f0, $f0\n"
+                                + DELIMITER
+                                + "mfc1 $f0, $s0\n");
                     }
+                    text.append(DELIMITER
+                            + "sw $s0, "
+                            + (index * 4)
+                            + "($t0)\n");
                     ((Array) s).initializeAt(index);
                 } else {
                     if (isFloat) {
                         text.append(DELIMITER
-                                + "swc1 $f0, "
-                                + s.getOffset()
-                                + "($sp)\n");
-                    } else {
-                        text.append(DELIMITER
-                                + "sw $s0, "
-                                + s.getOffset()
-                                + "($sp)\n");
+                                + "cvt.w.s $f0, $f0\n"
+                                + DELIMITER
+                                + "mfc1 $f0, $s0\n");
                     }
+                    text.append(DELIMITER
+                            + "sw $s0, "
+                            + s.getOffset()
+                            + "($sp)\n");
                     ((Variable) s).initialize();
                 }
             }
@@ -2312,7 +2310,7 @@ class PrintTree extends DepthFirstAdapter {
                 text.append(DELIMITER + "mtc1 $f0, $t0\n");
                 text.append(DELIMITER + "cvt.s.w $f0, $f0\n");
             } else {
-                text.append(DELIMITER + "li $t0, 1\n");
+                text.append(DELIMITER + "li $s0, 1\n");
             }
             node.getTrue().apply(this);
         }
@@ -2326,7 +2324,7 @@ class PrintTree extends DepthFirstAdapter {
                 text.append(DELIMITER + "mtc1 $f0, $t0\n");
                 text.append(DELIMITER + "cvt.s.w $f0, $f0\n");
             } else {
-                text.append(DELIMITER + "li $t0, 0\n");
+                text.append(DELIMITER + "li $s0, 0\n");
             }
             node.getFalse().apply(this);
         }
