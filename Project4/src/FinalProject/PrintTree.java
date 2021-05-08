@@ -999,6 +999,7 @@ class PrintTree extends DepthFirstAdapter {
         String id = "";
         Symbol s = null;
         String type = "";
+        boolean controlVarIsFloat = false;
         if (node.getFor() != null) {
             node.getFor().apply(this);
         }
@@ -1008,6 +1009,9 @@ class PrintTree extends DepthFirstAdapter {
         }
         if (node.getForOptionalType() != null) {
             type = ((ATypesType) ((AForOptionalType) node.getForOptionalType()).getType()).getTypeDecl().getText();
+            if (type.equals("REAL")){
+                controlVarIsFloat = true;
+            }
             node.getForOptionalType().apply(this);
         }
         if (node.getId() != null) {
@@ -1030,7 +1034,13 @@ class PrintTree extends DepthFirstAdapter {
             node.getSecond().apply(this);
         }
         if (node.getForIncrStep() != null) {
+            if (controlVarIsFloat){
+                isFloat = true;
+            }
             node.getForIncrStep().apply(this);
+            if (controlVarIsFloat){
+                isFloat = false;
+            }
         }
         if (node.getRparen() != null) {
             node.getRparen().apply(this);
