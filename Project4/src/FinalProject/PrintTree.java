@@ -19,6 +19,7 @@ class PrintTree extends DepthFirstAdapter {
     private static final String LABELPREFIX = "label";
     private static final String ARRAYPREFIX = "array";
     private static final String STRINGPREFIX = "string";
+    private static final String BUFFERPREFIX = "buffer";
     private static final String TRUE = "TRUE";
     private static final String FALSE = "FALSE";
     private static int labelnum;
@@ -969,6 +970,7 @@ class PrintTree extends DepthFirstAdapter {
                         + id
                         + " has already been declared.");
                 }
+                */
             node.getId().apply(this);
         }
         if (node.getEquals() != null) {
@@ -1005,17 +1007,28 @@ class PrintTree extends DepthFirstAdapter {
 
     @Override
     public void caseAGetStmt(AGetStmt node) {
-        Symbol val;
+        Symbol var = null;
         int scope = 0;
+        String type = "";
         boolean arrayOption = false;
         if (node.getId() != null) {
             node.getId().apply(this);
-            scope = getScope(node.getId().toString());
-            val = getSymbol(scope, node.getId().toString());
+            scope = getScope(node.getId().getText());
+            if(scope == -1){
+                error.add("Variable "
+                        + node.getId().getText()
+                        + " has not been declared.");
+            }
+            var = getSymbol(scope, node.getId().getText());
+            type = var.getType().trim();
         }
         if (node.getArrayOption() != null) {
             node.getArrayOption().apply(this);
-            arrayOption = true;
+            if(node.getArrayOption() instanceof AEpsilonArrayOption){
+                arrayOption = false;
+            } else {
+                arrayOption = true;
+            }
         }
         if (node.getEquals() != null) {
             node.getEquals().apply(this);
@@ -1033,9 +1046,57 @@ class PrintTree extends DepthFirstAdapter {
             node.getSemicolon().apply(this);
         }
         if(!arrayOption){
-            //FIXME re assign the id to the user input value
+            if(type.equals("INT") && type.equals("VOID")){
+                text.append(DELIMITER
+                            + "li $v0, 5\n");
+                text.append(DELIMITER
+                            + "syscall\n");
+                text.append(DELIMITER
+                            + "sw $v0, "
+                            + var.getOffset()
+                            + "($sp)\n");
+            } else if(type.equals("REAL")){
+                text.append(DELIMITER
+                            + "li $v0, 6\n");
+                text.append(DELIMITER
+                            + "syscall\n");
+                text.append(DELIMITER
+                            + "s.s $f0, "
+                            + var.getOffset()
+                            + "($sp)\n");
+            } else if(type.equals("STRING")){
+                arrays.append(BUFFERPREFIX + arraynum + ":\n"
+                        + DELIMITER
+                        + ".word 100\n");
+                text.append(DELIMITER
+                            + "li $v0, 8\n");
+                text.append(DELIMITER
+                            + "la $a0, buffer" + arraynum + "\n");
+                text.append(DELIMITER
+                            + "li $a1, 100\n");
+                text.append(DELIMITER
+                            + "syscall\n");
+                text.append(DELIMITER
+                            + "la $t0, buffer" + arraynum + "\n");
+                arraynum++;
+                text.append(DELIMITER
+                            + "sw $t0, " + var.getOffset() + "($sp)\n");
+            } else if(type.equals("BOOLEAN")){
+                text.append(DELIMITER
+                            + "li $v0, 5\n");
+                text.append(DELIMITER
+                            + "syscall\n");
+                //FIXME 0 = FALSE AND ANYTHING ELSE = TRUE
+                text.append(DELIMITER
+                            + "sw $v0, "
+                            + var.getOffset()
+                            + "($sp)\n");
+                arraynum++;
+            } else {
+                error.add("Type is not valid for variable: " + node.getId().getText());
+            }
         } else {
-            //FIXME array
+            //FIXME array with get
         }
         
     }
