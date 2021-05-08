@@ -1,8 +1,8 @@
 BEGIN
   VOID MAIN() {
-    idOne   : INT;
-    idPie   : REAL;
-    stringBoy : STRING;
-    stringBoy := GET();
+    numints, numintsTwo   :  INT[10];
+    numreals   :  REAL[2];
+    numints[0] := 3;
+    numintsTwo[1] := 4;
  }
 END
