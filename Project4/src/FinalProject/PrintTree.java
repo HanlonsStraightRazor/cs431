@@ -619,81 +619,89 @@ class PrintTree extends DepthFirstAdapter {
 
     @Override
     public void caseAVarDeclStmt(AVarDeclStmt node) {
-        String[] id = new String[1];
+        ArrayList<String> id = new ArrayList<String>();
         int scope = -1;
         Symbol s = null;
         String type = "";
         int size = -1;
         if (node.getId() != null) {
-            id[0] = node.getId().getText();
-            scope = getScope(id[0]);
-            if(scope != -1){
-                error.add(id + " has already been declared in this scope.");
-            }
+            id.add(node.getId().getText());
+            scope = currentScope;
             node.getId().apply(this);
         }
         if (node.getMoreIds() != null) {
+            Node childNode = null;
+            if(node.getMoreIds() instanceof AMoreIdsMoreIds){
+                childNode = node.getMoreIds();
+                while(childNode instanceof AMoreIdsMoreIds){
+                    id.add(((AMoreIdsMoreIds) childNode).getId().getText());
+                    childNode = ((AMoreIdsMoreIds) childNode).getMoreIds();
+                }
+            }
             node.getMoreIds().apply(this);
+            for(int i = 0; i < id.size(); i++){
+                if(getScope(id.get(i)) == currentScope){
+                    error.add(id.get(i) + " has already been declared in this scope.");
+                }
+            }
         }
         if (node.getColon() != null) {
             node.getColon().apply(this);
         }
         if (node.getType() != null) {
-            if (scope == -1) {
-                if(node.getType() instanceof ATypesType){
-                    type = ((ATypesType) node.getType()).getTypeDecl().getText();
-                } else {
-                    error.add("Invalid type "
-                            + ((AIdType) node.getType()).getId().getText()
-                            + ".");
-                }
+            if(node.getType() instanceof ATypesType){
+                type = ((ATypesType) node.getType()).getTypeDecl().getText();
+            } else {
+                error.add("Invalid type "
+                        + ((AIdType) node.getType()).getId().getText()
+                        + ".");
             }
             node.getType().apply(this);
         }
         if (node.getArrayOption() != null) {
-            if (scope == -1) {
-                if(node.getArrayOption() instanceof AArrayArrayOption){
-                    size = Integer.parseInt(
-                        ((AArrayArrayOption) node.getArrayOption()).getInt().getText()
-                    );
-                    if (size < 1) {
-                        error.add(size + " is not a valid array size.");
-                    }
-                } else {
-                    size = 0;
+            if(node.getArrayOption() instanceof AArrayArrayOption){
+                size = Integer.parseInt(
+                    ((AArrayArrayOption) node.getArrayOption()).getInt().getText()
+                );
+                if (size < 1) {
+                    error.add(size + " is not a valid array size.");
                 }
+            } else {
+                size = 0;
             }
             node.getArrayOption().apply(this);
         }
         if (node.getSemicolon() != null) {
             if (size > -1) {
+                //if it is not an array
                 if (size == 0) {
-                    for (String name : id) {
-                        addToSymbolTable(name, new Variable(type, offset));
+                    for(int i = 0; i < id.size(); i++){
+                        addToSymbolTable(id.get(i), new Variable(type, offset));
+                        offset -= 4;
                     }
                 } else {
-                    arrays.append(ARRAYPREFIX
+                    for(int i = 0; i < id.size(); i++){
+                        arrays.append(ARRAYPREFIX
                             + arraynum
                             + ":\n");
-                    arrays.append(DELIMITER
-                            + ".word "
-                            + size
-                            + "\n");
-                    text.append(DELIMITER
-                            + "la $t0, "
-                            + ARRAYPREFIX
-                            + arraynum
-                            + "\n");
-                    text.append(DELIMITER
-                            + "sw $t0, "
-                            + offset
-                            +"($sp)\n");
-                    for (String name : id) {
-                        addToSymbolTable(name, new Array(type, offset, size));
+                        arrays.append(DELIMITER
+                                + ".word "
+                                + size
+                                + "\n");
+                        text.append(DELIMITER
+                                + "la $t0, "
+                                + ARRAYPREFIX
+                                + arraynum
+                                + "\n");
+                        text.append(DELIMITER
+                                + "sw $t0, "
+                                + offset
+                                +"($sp)\n");
+                        arraynum++;
+                        addToSymbolTable(id.get(i), new Array(type, offset, size));
+                        offset -= 4;
                     }
-                    arraynum++;
                 }
-                offset -= 4;
             }
             node.getSemicolon().apply(this);
         }
@@ -1013,7 +1021,6 @@ class PrintTree extends DepthFirstAdapter {
                         + id
                         + " has already been declared.");
                 }
-                */
             node.getId().apply(this);
         }
         if (node.getEquals() != null) {
@@ -2334,12 +2341,12 @@ class PrintTree extends DepthFirstAdapter {
                         isFloat = true;
                         if(var.getType().equals("REAL")){
                             text.append(DELIMITER
-                                + "lwc1 $f0, -"
+                                + "lwc1 $f0, "
                                 + var.getOffset()
                                 + "($sp)\n");
                         } else {
                             text.append(DELIMITER
-                                + "lw $t2, -"
+                                + "lw $t2, "
                                 + var.getOffset()
                                 + "($sp)\n");
                             text.append(DELIMITER
