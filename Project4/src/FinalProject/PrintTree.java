@@ -1492,10 +1492,12 @@ class PrintTree extends DepthFirstAdapter {
             }
             Variable var = (Variable) getSymbol(scope, id);
             if(!(var.getType().equals("INT")
-                || var.getType().equals("REAL"))){
-                error.add("Variable " + id + " has type " + var.getType() + " which cannot be decremented.");
+                || var.getType().equals("REAL")
+                || var.getType().equals("VOID"))){
+                error.add("Variable " + id + " has type " + var.getType() + " which cannot be incremented.");
             } else {
-                if (var.getType().equals("INT")){
+                if (var.getType().equals("INT")
+                    || var.getType().equals("VOID")){
                     text.append(DELIMITER + "lw $t0, " + var.getOffset() + "($sp)\n");
                     text.append(DELIMITER + "li $t1, " + "1" + "\n");
                     text.append(DELIMITER + "add $t0, " + "$t0, " + "$t1\n");
@@ -1539,10 +1541,12 @@ class PrintTree extends DepthFirstAdapter {
             }
             Variable var = (Variable) getSymbol(scope, id);
             if (!(var.getType().equals("INT")
-                || var.getType().equals("REAL"))) {
+                || var.getType().equals("REAL")
+                || var.getType().equals("VOID"))) {
                 error.add("Variable " + id + " has type " + var.getType() + " which cannot be decremented.");
             }
-            if (var.getType().equals("INT")) {
+            if (var.getType().equals("INT")
+                || var.getType().equals("VOID")) {
                 text.append(DELIMITER + "lw $t0, " + var.getOffset() + "($sp)\n");
                 text.append(DELIMITER + "li $t1, " + "1" + "\n");
                 text.append(DELIMITER + "sub $t0, " + "$t0, " + "$t1\n");
