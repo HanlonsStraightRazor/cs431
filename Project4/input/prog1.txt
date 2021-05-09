@@ -1,40 +1,73 @@
 BEGIN
   VOID MAIN() {
-    numint     :  INT;
-    numints    :  INT[10];
-    numint     := 69;
-    numints[0] := 420;
-    PUT(numint);
-    PUT(numints[0]);
+    prompts    : STRING[6];
+    prompts[0] := "Enter an int";
+    prompts[1] := "Enter a real";
+    prompts[2] := "Enter a string";
+    prompts[3] := "Enter a boolean";
+    prompts[4] := "Enter a void";
+    prompts[5] := "You entered:";
 
-    numreal      :  REAL;
-    numreals     :  REAL[2];
-    numreal      := 2.2;
-    numreals[1]  := 4.4;
-    PUT(numreal);
-    PUT(numreals[1]);
+    one   :  INT;
+    two   :  REAL;
+    three :  STRING;
+    four  :  BOOLEAN;
+    five  :  VOID;
 
-    str     :  STRING;
-    strs    :  STRING[3];
-    str     := "Gigiddy";
-    strs[2] := "Second string";
-    PUT(strs[2]);
+    PUT(prompts[0]);
+    one   := GET();
+    PUT(prompts[5]);
+    PUT(one);
 
-    bool     :  BOOLEAN;
-    boola    :  BOOLEAN;
-    bools    :  BOOLEAN[4];
-    bool     := TRUE;
-    boola    := FALSE;
-    bools[3] := FALSE;
-    PUT(bool);
-    PUT(boola);
-    PUT(bools[3]);
+    PUT(prompts[1]);
+    two   := GET();
+    PUT(prompts[5]);
+    PUT(two);
 
-    none     :  VOID;
-    nones    :  VOID[5];
-    none     := 42;
-    nones[4] := 43;
-    PUT(none);
-    PUT(nones[4]);
+    PUT(prompts[2]);
+    three := GET();
+    PUT(prompts[5]);
+    PUT(three);
+
+    PUT(prompts[3]);
+    four  := GET();
+    PUT(prompts[5]);
+    PUT(four);
+
+    PUT(prompts[4]);
+    five  := GET();
+    PUT(prompts[5]);
+    PUT(five);
+
+    oneArray   :  INT[10];
+    twoArray   :  REAL[10];
+    threeArray :  STRING[10];
+    fourArray  :  BOOLEAN[10];
+    fiveArray  :  VOID[10];
+
+    PUT(prompts[0]);
+    oneArray[0] := GET();
+    PUT(prompts[5]);
+    PUT(oneArray[0]);
+
+    PUT(prompts[1]);
+    twoArray[1] := GET();
+    PUT(prompts[5]);
+    PUT(twoArray[1]);
+
+    PUT(prompts[2]);
+    threeArray[2] := GET();
+    PUT(prompts[5]);
+    PUT(threeArray[2]);
+
+    PUT(prompts[3]);
+    fourArray[3] := GET();
+    PUT(prompts[5]);
+    PUT(fourArray[3]);
+
+    PUT(prompts[4]);
+    fiveArray[4] := GET();
+    PUT(prompts[5]);
+    PUT(fiveArray[4]);
   }
 END

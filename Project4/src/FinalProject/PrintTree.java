@@ -1013,7 +1013,6 @@ class PrintTree extends DepthFirstAdapter {
                         + id
                         + " has already been declared.");
                 }
-                */
             node.getId().apply(this);
         }
         if (node.getEquals() != null) {
@@ -1050,28 +1049,51 @@ class PrintTree extends DepthFirstAdapter {
 
     @Override
     public void caseAGetStmt(AGetStmt node) {
-        Symbol var = null;
-        int scope = 0;
-        String type = "";
-        boolean arrayOption = false;
+        String id = "";
+        int scope = -1;
+        Symbol s = null;
+        int index = -1;
         if (node.getId() != null) {
-            node.getId().apply(this);
-            scope = getScope(node.getId().getText());
-            if(scope == -1){
+            id = node.getId().getText();
+            scope = getScope(id);
+            if (scope == -1) {
                 error.add("Variable "
-                        + node.getId().getText()
+                        + id
                         + " has not been declared.");
+            } else {
+                s = getSymbol(scope, id);
             }
-            var = getSymbol(scope, node.getId().getText());
-            type = var.getType().trim();
+            node.getId().apply(this);
         }
         if (node.getArrayOption() != null) {
-            node.getArrayOption().apply(this);
-            if(node.getArrayOption() instanceof AEpsilonArrayOption){
-                arrayOption = false;
+            if (isArray(s)) {
+                if(node.getArrayOption() instanceof AArrayArrayOption){
+                    index = Integer.parseInt(
+                        ((AArrayArrayOption) node.getArrayOption()).getInt().getText()
+                    );
+                    if ((index < 0) || (index >= ((Array) s).getSize())) {
+                        error.add("Index "
+                                + index
+                                + " is invalid for array "
+                                + id
+                                + ".");
+                        index = -1;
+                    }
+                } else {
+                    error.add("No index given for array "
+                            + id
+                            + ".");
+                }
             } else {
-                arrayOption = true;
+                if(node.getArrayOption() instanceof AEpsilonArrayOption){
+                    index = 0;
+                } else {
+                    error.add("Variable "
+                            + id
+                            + " is not an array and may not be given an index.");
+                }
             }
+            node.getArrayOption().apply(this);
         }
         if (node.getEquals() != null) {
             node.getEquals().apply(this);
@@ -1086,62 +1108,183 @@ class PrintTree extends DepthFirstAdapter {
             node.getRparen().apply(this);
         }
         if (node.getSemicolon() != null) {
+            if (index != -1) {
+                if (isArray(s)) {
+                    switch (s.getType()) {
+                        case "REAL":
+                            text.append(DELIMITER
+                                    + "lw $t0, "
+                                    + s.getOffset()
+                                    + "($sp)\n"
+                                    + DELIMITER
+                                    + "li $v0, 6\n"
+                                    + DELIMITER
+                                    + "syscall\n"
+                                    + DELIMITER
+                                    + "s.s $f0, "
+                                    + (index * 4)
+                                    + "($t0)\n");
+                            break;
+                        case "STRING":
+                            arrays.append(BUFFERPREFIX
+                                    + arraynum
+                                    + ":\n"
+                                    + DELIMITER
+                                    + ".word 100\n");
+                            text.append(DELIMITER
+                                    + "lw $t0, "
+                                    + s.getOffset()
+                                    + "($sp)\n"
+                                    + DELIMITER
+                                    + "li $v0, 8\n"
+                                    + DELIMITER
+                                    + "la $a0, buffer"
+                                    + arraynum
+                                    + "\n"
+                                    + DELIMITER
+                                    + "li $a1, 399\n"
+                                    + DELIMITER
+                                    + "syscall\n"
+                                    + DELIMITER
+                                    + "la $t1, "
+                                    + BUFFERPREFIX
+                                    + arraynum
+                                    + "\n"
+                                    + DELIMITER
+                                    + "sw $t1, "
+                                    + (index * 4)
+                                    + "($t0)\n");
+                            arraynum++;
+                            break;
+                        case "BOOLEAN":
+                            String falselabel = LABELPREFIX + labelnum++;
+                            String endlabel   = LABELPREFIX + labelnum++;
+                            text.append(DELIMITER
+                                    + "lw $t0, "
+                                    + s.getOffset()
+                                    + "($sp)\n"
+                                    + DELIMITER
+                                    + "li $v0, 5\n"
+                                    + DELIMITER
+                                    + "syscall\n"
+                                    + DELIMITER
+                                    + "beq $zero, $v0, "
+                                    + falselabel
+                                    + "\n"
+                                    + DELIMITER
+                                    + "li $t1, 1\n"
+                                    + DELIMITER
+                                    + "j "
+                                    + endlabel
+                                    + "\n\n"
+                                    + falselabel
+                                    + ":\n"
+                                    + DELIMITER
+                                    + "li $t1, 0\n\n"
+                                    + endlabel
+                                    + ":\n"
+                                    + DELIMITER
+                                    + "sw $t1, "
+                                    + (index * 4)
+                                    + "($t0)\n");
+                            break;
+                        default:
+                            text.append(DELIMITER
+                                    + "lw $t0, "
+                                    + s.getOffset()
+                                    + "($sp)\n"
+                                    + DELIMITER
+                                    + "li $v0, 5\n"
+                                    + DELIMITER
+                                    + "syscall\n"
+                                    + DELIMITER
+                                    + "sw $v0, "
+                                    + (index * 4)
+                                    + "($t0)\n");
+                    }
+                    ((Array) s).initializeAt(index);
+                } else {
+                    switch (s.getType()) {
+                        case "REAL":
+                            text.append(DELIMITER
+                                    + "li $v0, 6\n"
+                                    + DELIMITER
+                                    + "syscall\n"
+                                    + DELIMITER
+                                    + "s.s $f0, "
+                                    + s.getOffset()
+                                    + "($sp)\n");
+                            break;
+                        case "STRING":
+                            arrays.append(BUFFERPREFIX
+                                    + arraynum
+                                    + ":\n"
+                                    + DELIMITER
+                                    + ".word 100\n");
+                            text.append(DELIMITER
+                                    + "li $v0, 8\n"
+                                    + DELIMITER
+                                    + "la $a0, buffer"
+                                    + arraynum
+                                    + "\n"
+                                    + DELIMITER
+                                    + "li $a1, 399\n"
+                                    + DELIMITER
+                                    + "syscall\n"
+                                    + DELIMITER
+                                    + "la $t0, "
+                                    + BUFFERPREFIX
+                                    + arraynum
+                                    + "\n"
+                                    + DELIMITER
+                                    + "sw $t0, "
+                                    + s.getOffset()
+                                    + "($sp)\n");
+                            arraynum++;
+                            break;
+                        case "BOOLEAN":
+                            String falselabel = LABELPREFIX + labelnum++;
+                            String endlabel   = LABELPREFIX + labelnum++;
+                            text.append(DELIMITER
+                                    + "li $v0, 5\n"
+                                    + DELIMITER
+                                    + "syscall\n"
+                                    + DELIMITER
+                                    + "beq $zero, $v0, "
+                                    + falselabel
+                                    + "\n"
+                                    + DELIMITER
+                                    + "li $t0, 1\n"
+                                    + DELIMITER
+                                    + "j "
+                                    + endlabel
+                                    + "\n\n"
+                                    + falselabel
+                                    + ":\n"
+                                    + DELIMITER
+                                    + "li $t0, 0\n\n"
+                                    + endlabel
+                                    + ":\n"
+                                    + DELIMITER
+                                    + "sw $t0, "
+                                    + s.getOffset()
+                                    + "($sp)\n");
+                            break;
+                        default:
+                            text.append(DELIMITER
+                                    + "li $v0, 5\n"
+                                    + DELIMITER
+                                    + "syscall\n"
+                                    + DELIMITER
+                                    + "sw $v0, "
+                                    + s.getOffset()
+                                    + "($sp)\n");
+                    }
+                    ((Variable) s).initialize();
+                }
+            }
             node.getSemicolon().apply(this);
         }
-        if(!arrayOption){
-            if(type.equals("INT") && type.equals("VOID")){
-                text.append(DELIMITER
-                            + "li $v0, 5\n");
-                text.append(DELIMITER
-                            + "syscall\n");
-                text.append(DELIMITER
-                            + "sw $v0, "
-                            + var.getOffset()
-                            + "($sp)\n");
-            } else if(type.equals("REAL")){
-                text.append(DELIMITER
-                            + "li $v0, 6\n");
-                text.append(DELIMITER
-                            + "syscall\n");
-                text.append(DELIMITER
-                            + "s.s $f0, "
-                            + var.getOffset()
-                            + "($sp)\n");
-            } else if(type.equals("STRING")){
-                arrays.append(BUFFERPREFIX + arraynum + ":\n"
-                        + DELIMITER
-                        + ".word 100\n");
-                text.append(DELIMITER
-                            + "li $v0, 8\n");
-                text.append(DELIMITER
-                            + "la $a0, buffer" + arraynum + "\n");
-                text.append(DELIMITER
-                            + "li $a1, 100\n");
-                text.append(DELIMITER
-                            + "syscall\n");
-                text.append(DELIMITER
-                            + "la $t0, buffer" + arraynum + "\n");
-                arraynum++;
-                text.append(DELIMITER
-                            + "sw $t0, " + var.getOffset() + "($sp)\n");
-            } else if(type.equals("BOOLEAN")){
-                text.append(DELIMITER
-                            + "li $v0, 5\n");
-                text.append(DELIMITER
-                            + "syscall\n");
-                //FIXME 0 = FALSE AND ANYTHING ELSE = TRUE
-                text.append(DELIMITER
-                            + "sw $v0, "
-                            + var.getOffset()
-                            + "($sp)\n");
-                arraynum++;
-            } else {
-                error.add("Type is not valid for variable: " + node.getId().getText());
-            }
-        } else {
-            //FIXME array with get
-        }
-
     }
 
     @Override
