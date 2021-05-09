@@ -1,5 +1,90 @@
 BEGIN
   VOID MAIN() {
+
+    singleIntVarDec    : INT;
+    singleRealVarDec   : REAL;
+    singleStringVarDec : STRING;
+    singleBoolVarDec   : BOOLEAN;
+    singleVoidVarDec   : VOID;
+
+    singleIntVarDec    := 4;
+    singleRealVarDec   := 4.2;
+    singleStringVarDec := "String Init";
+    singleBoolVarDec   := TRUE;
+    singleVoidVarDec   := 3;
+
+    multIntVarDecOne, multIntVarDecTwo       : INT;
+    multRealVarDecOne, multRealVarDecTwo     : REAL;
+    multStringVarDecOne, multStringVarDecTwo, multStringVarDecThree : STRING;
+    multBoolVarDecOne, multBoolVarDecTwo     : BOOLEAN;
+    multVoidVarDecOne, multVoidVarDecTwo     : VOID;
+
+    multIntVarDecOne      := 4 + 6;
+    multIntVarDecOne--;
+    multIntVarDecTwo      := 15 - multIntVarDecOne;
+    multIntVarDecTwo++;
+    singleIntVarDec       := singleIntVarDec * multIntVarDecOne;
+    singleIntVarDec       := (singleIntVarDec / 2) - 3 + 2;
+    multRealVarDecOne     := 4.236 + 3.275;
+    multRealVarDecOne--;
+    multRealVarDecTwo     := 6.21 - 3.21;
+    multRealVarDecTwo++;
+    singleRealVarDec      := multRealVarDecOne * multRealVarDecTwo;
+    singleRealVarDec      := singleRealVarDec / multRealVarDecTwo;
+    multStringVarDecThree := "Multi String Int";
+    multBoolVarDecOne     := FALSE;
+    multBoolVarDecTwo     := multBoolVarDecOne;
+    multVoidVarDecTwo     := 3;
+
+    singleIntVarDecArray    : INT[6];
+    singleRealVarDecArray   : REAL[3];
+    singleStringVarDecArray : STRING[5];
+    singleBoolVarDecArray   : BOOLEAN[9];
+    singleVoidVarDecArray   : VOID[2];
+
+    singleIntVarDecArray[3] := 4 + 6;
+    singleIntVarDecArray[2] := 2 - 1;
+    singleRealVarDecArray[1] := 3.21 * 2;
+    singleRealVarDecArray[2] := 4.21 / 2.1;
+
+    multIntVarDecOneArray, multIntVarDecTwoArray       : INT[2];
+    multRealVarDecOneArray, multRealVarDecTwoArray     : REAL[3];
+    multStringVarDecOneArray, multStringVarDecTwoArray : STRING[4];
+    multBoolVarDecOneArray, multBoolVarDecTwoArray     : BOOLEAN[5];
+    multVoidVarDecOneArray, multVoidVarDecTwoArray     : VOID[6];
+
+    multIntVarDecOneArray[1] := 2 + 2 + 2 + 2;
+    multRealVarDecTwoArray[1]   := 2.1 / 1 + 5;
+    multStringVarDecOneArray[2] := "hello world";
+    multStringVarDecOneArray[1] := "multStringVarDecOneArray[1]";
+    multBoolVarDecTwoArray[1] := FALSE;
+    multBoolVarDecTwoArray[2] := TRUE;
+    multBoolVarDecTwoArray[3] := FALSE;
+    multVoidVarDecOneArray[2] := 1;
+
+    IF(multVoidVarDecTwo > 3) THEN {
+      multVoidVarDecTwo := 6;
+    }
+    IF(multVoidVarDecTwo > 2) THEN {
+      multVoidVarDecTwo := 1;
+    }
+    IF(1 == 1) THEN {
+
+    }
+    IF(1 != 1) THEN {
+
+    }
+    IF(3 > 2) THEN {
+
+    } ELSE {
+
+    }
+    IF(6 < 5) THEN {
+
+    } ELSE {
+      
+    }
+
     prompts    : STRING[6];
     prompts[0] := "Enter an int";
     prompts[1] := "Enter a real";
@@ -39,35 +124,5 @@ BEGIN
     PUT(prompts[5]);
     PUT(five);
 
-    oneArray   :  INT[10];
-    twoArray   :  REAL[10];
-    threeArray :  STRING[10];
-    fourArray  :  BOOLEAN[10];
-    fiveArray  :  VOID[10];
-
-    PUT(prompts[0]);
-    oneArray[0] := GET();
-    PUT(prompts[5]);
-    PUT(oneArray[0]);
-
-    PUT(prompts[1]);
-    twoArray[1] := GET();
-    PUT(prompts[5]);
-    PUT(twoArray[1]);
-
-    PUT(prompts[2]);
-    threeArray[2] := GET();
-    PUT(prompts[5]);
-    PUT(threeArray[2]);
-
-    PUT(prompts[3]);
-    fourArray[3] := GET();
-    PUT(prompts[5]);
-    PUT(fourArray[3]);
-
-    PUT(prompts[4]);
-    fiveArray[4] := GET();
-    PUT(prompts[5]);
-    PUT(fiveArray[4]);
   }
 END
