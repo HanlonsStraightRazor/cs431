@@ -1789,7 +1789,7 @@ class PrintTree extends DepthFirstAdapter {
         if (node.getExprOrBool() != null) {
             node.getExprOrBool().apply(this);
             text.append(DELIMITER
-                    + "lw $s1, ($s0)\n");
+                    + "move $s1, $s0\n");
         }
         if (node.getSecond() != null) {
             node.getSecond().apply(this);
