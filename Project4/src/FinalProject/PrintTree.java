@@ -2506,7 +2506,7 @@ class PrintTree extends DepthFirstAdapter {
                         }
                     } else {
                         text.append(DELIMITER
-                                + "lw $s0, -"
+                                + "lw $s0, "
                                 + var.getOffset()
                                 + "($sp)\n");
                     }
