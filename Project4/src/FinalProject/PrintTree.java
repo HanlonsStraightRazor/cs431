@@ -1129,7 +1129,7 @@ class PrintTree extends DepthFirstAdapter {
                                     + DELIMITER
                                     + "syscall\n"
                                     + DELIMITER
-                                    + "s.s $f0, "
+                                    + "swc1 $f0, "
                                     + (index * 4)
                                     + "($t0)\n");
                             break;
@@ -1146,7 +1146,8 @@ class PrintTree extends DepthFirstAdapter {
                                     + DELIMITER
                                     + "li $v0, 8\n"
                                     + DELIMITER
-                                    + "la $a0, buffer"
+                                    + "la $a0, "
+                                    + BUFFERPREFIX
                                     + arraynum
                                     + "\n"
                                     + DELIMITER
@@ -1219,7 +1220,7 @@ class PrintTree extends DepthFirstAdapter {
                                     + DELIMITER
                                     + "syscall\n"
                                     + DELIMITER
-                                    + "s.s $f0, "
+                                    + "swc1 $f0, "
                                     + s.getOffset()
                                     + "($sp)\n");
                             break;
@@ -1232,7 +1233,8 @@ class PrintTree extends DepthFirstAdapter {
                             text.append(DELIMITER
                                     + "li $v0, 8\n"
                                     + DELIMITER
-                                    + "la $a0, buffer"
+                                    + "la $a0, "
+                                    + BUFFERPREFIX
                                     + arraynum
                                     + "\n"
                                     + DELIMITER
