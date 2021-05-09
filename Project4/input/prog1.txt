@@ -69,20 +69,39 @@ BEGIN
       multVoidVarDecTwo := 1;
     }
     IF(1 == 1) THEN {
-
+      multIntVarDecOne++;
     }
     IF(1 != 1) THEN {
-
+      multVoidVarDecTwo := 10;
     }
     IF(3 > 2) THEN {
-
+      multVoidVarDecTwo := 11;
     } ELSE {
-
+      multVoidVarDecTwo := 9;
     }
     IF(6 < 5) THEN {
-
+      multVoidVarDecTwo := 8;
     } ELSE {
-      
+      multVoidVarDecTwo := 7;
+    }
+
+    multVoidVarDecTwo := 1;
+    SWITCH(multVoidVarDecTwo + 1){
+      CASE(0): multVoidVarDecTwo := 0;
+               BREAK;
+      CASE(1): multVoidVarDecTwo := 1;
+               BREAK;
+      CASE(2): multVoidVarDecTwo := 2;
+               BREAK;
+      DEFAULT: multVoidVarDecTwo := 5;
+    }
+
+    SWITCH(TRUE){
+      CASE(0): multVoidVarDecTwo := 0;
+               BREAK;
+      CASE(1): multVoidVarDecTwo := 100;
+               BREAK;
+      DEFAULT: multVoidVarDecTwo := 5;
     }
 
     prompts    : STRING[6];
