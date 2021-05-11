@@ -1,5 +1,18 @@
 TODO
 ---
- - [ ] Implement objects
- - [ ] Allow other methods
+ - [ ] global objects
+ - [ ] global methods
  - [ ] Use VOID MAIN method as entry point
+ - [ ] decl_object
+----
+REDO
+----
+ - [ ] classmethodstmt var_decl
+ - [ ] methodstmtseq var_decl
+ - [ ] methodstmtseq assign_equals (expression)
+ - [ ] methodstmtseq assign_string
+ - [ ] methodstmtseq print_stmt
+ - [ ] methodstmtseq assign_read_in
+ - [ ] methodstmtseq assign_inc
+ - [ ] methodstmtseq assign_dec
+ - [ ] methodstmtseq assign_boolean

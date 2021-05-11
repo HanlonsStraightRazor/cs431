@@ -48,9 +48,7 @@ class PrintTree extends DepthFirstAdapter {
         currentScope = 0;
         isFloat = false;
     }
-    /*
-     * <Prog> ::= BEGIN <ClassMethodStmts> END
-     */
+    
     @Override
     public void caseAProg(AProg node) {
         if (node.getBegin() != null) {
@@ -91,6 +89,7 @@ class PrintTree extends DepthFirstAdapter {
         }
     }
 
+    //seperates the global variables, methods, and classes
     @Override
     public void caseAClassStmtsClassmethodstmts(AClassStmtsClassmethodstmts node) {
         if (node.getClassmethodstmts() != null) {
@@ -101,6 +100,7 @@ class PrintTree extends DepthFirstAdapter {
         }
     }
 
+    //global class methods
     @Override
     public void caseAClassDefClassmethodstmt(AClassDefClassmethodstmt node) {
         if (node.getClassLit() != null) {
@@ -121,6 +121,7 @@ class PrintTree extends DepthFirstAdapter {
         }
     }
 
+    //global method decl
     @Override
     public void caseAMethodDeclClassmethodstmt(AMethodDeclClassmethodstmt node) {
         if (node.getType() != null) {
@@ -165,6 +166,7 @@ class PrintTree extends DepthFirstAdapter {
         }
     }
 
+    //global variables
     @Override
     public void caseAVarDeclClassmethodstmt(AVarDeclClassmethodstmt node) {
         if (node.getId() != null) {
@@ -184,6 +186,7 @@ class PrintTree extends DepthFirstAdapter {
         }
     }
 
+    //inside classes
     @Override
     public void caseAMethodStmtsMethodstmtseqs(AMethodStmtsMethodstmtseqs node) {
         if (node.getMethodstmtseqs() != null) {
@@ -194,6 +197,7 @@ class PrintTree extends DepthFirstAdapter {
         }
     }
 
+    //method decl in classes
     @Override
     public void caseAMethodDeclMethodstmtseq(AMethodDeclMethodstmtseq node) {
         if (node.getType() != null) {
@@ -222,6 +226,7 @@ class PrintTree extends DepthFirstAdapter {
         }
     }
 
+    //var decl in a class
     @Override
     public void caseAVarDeclMethodstmtseq(AVarDeclMethodstmtseq node) {
         if (node.getId() != null) {
