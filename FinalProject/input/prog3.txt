@@ -1,23 +1,16 @@
 BEGIN
   VOID MAIN() {
-    var        :  BOOLEAN;
-    var        := TRUE;
-    num        :  INT;
-    num        := 1;
-    boolOne    :  BOOLEAN [5] ;
-    boolOne[0] := TRUE;
-    IF (var) THEN {
-        var := FALSE;
-    } ELSE {
-        var := TRUE;
-        IF (TRUE) THEN {
-            num := 2;
-        }
-        IF (FALSE) THEN {
-            num := 4;
-        } ELSE {
-            num := 3;
-        }
+    idPie : REAL;
+    idOne : INT;
+    idPiePlusOne : REAL;
+    idOne := 2;
+    idPie := 3.5;
+    idPiePlusOne := idPie * idOne;
+    SWITCH(TRUE){
+      CASE(0): idOne := 1;
+      CASE(1): idOne := 3;
+               BREAK;
+      DEFAULT: idOne := 13;
     }
  }
 END

@@ -2,7 +2,7 @@
 
     <description>
         Implement semantic error checking and generate MIPS aseembly for
-        Project 3's grammar.
+        all of Project 3's grammar.
     </description>
 
     <property name="build" location="build"/>
