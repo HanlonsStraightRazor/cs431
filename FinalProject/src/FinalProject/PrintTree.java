@@ -20,11 +20,13 @@ class PrintTree extends DepthFirstAdapter {
     private static final String ARRAYPREFIX = "array";
     private static final String STRINGPREFIX = "string";
     private static final String BUFFERPREFIX = "buffer";
+    private static final String FUNCTIONPREFIX = "function";
     private static final String TRUE = "TRUE";
     private static final String FALSE = "FALSE";
     private static int labelnum;
     private static int arraynum;
     private static int stringnum;
+    private static int functionnum;
     private static int offset;
     private static Queue<String> error;
     private static int currentScope;
@@ -44,6 +46,7 @@ class PrintTree extends DepthFirstAdapter {
         labelnum  = 0;
         arraynum  = 0;
         stringnum = 0;
+        functionnum = 0;
         offset = 0;
         currentScope = 0;
         isFloat = false;
@@ -77,10 +80,6 @@ class PrintTree extends DepthFirstAdapter {
                     System.err.println(er);
                 }
             } else {
-                text.append(DELIMITER
-                    + "li $v0, 10\n");
-                text.append(DELIMITER
-                    + "syscall");
                 System.out.print(data);
                 System.out.print(arrays);
                 System.out.print(text);
@@ -124,30 +123,46 @@ class PrintTree extends DepthFirstAdapter {
     //global method decl
     @Override
     public void caseAMethodDeclClassmethodstmt(AMethodDeclClassmethodstmt node) {
-        if (node.getType() != null) {
-            String type = node.getType() instanceof AIdType
-                ? ((AIdType) node.getType()).toString().trim()
-                : ((ATypesType) node.getType()).toString().trim();
+        int offset = this.offset;
+        String id = node.getId().getText();
+        String type = node.getType() instanceof AIdType
+            ? ((AIdType) node.getType()).getId().getText()
+            : ((ATypesType) node.getType()).getTypeDecl().getText();
+        if (id.equals("MAIN")) {
+            // TODO: check if main already exists
             if(!type.equals("VOID")){
-                error.add("Method type must be VOID. Got " + type);
+                error.add("Invalid return type for main method. "
+                        + "Must be VOID, got "
+                        + type
+                        + ".");
             }
+            if (!(node.getVarlist() instanceof AEpsilonVarlist)) {
+                error.add("Arguments not allowed in main method. Got "
+                    + node.getVarlist()
+                    + ".");
+            }
+            text.append("main:\n");
+        } else {
+            text.append(FUNCTIONPREFIX
+                    + functionnum
+                    + ":\n");
+            functionnum++;
+            this.offset = 0;
+            text.append(DELIMITER
+                    + "addi $sp, $sp, "
+                    + offset
+                + "\n");
+        }
+        if (node.getType() != null) {
             node.getType().apply(this);
         }
         if (node.getId() != null) {
-            if(!node.getId().toString().trim().equals("MAIN")){
-                error.add("Method ID must be MAIN. Got "
-                    + node.getId().toString());
-            }
             node.getId().apply(this);
         }
         if (node.getLparen() != null) {
             node.getLparen().apply(this);
         }
         if (node.getVarlist() != null) {
-            if (!(node.getVarlist() instanceof AEpsilonVarlist)) {
-                error.add("Argument must be empty in method. Got "
-                    + node.getVarlist());
-            }
             node.getVarlist().apply(this);
         }
         if (node.getRparen() != null) {
@@ -161,8 +176,22 @@ class PrintTree extends DepthFirstAdapter {
             node.getStmtseq().apply(this);
         }
         if (node.getRcurly() != null) {
-            decScope();
             node.getRcurly().apply(this);
+            decScope();
+        }
+        if (id.equals("MAIN")) {
+            text.append(DELIMITER
+                + "li $v0, 10\n");
+            text.append(DELIMITER
+                + "syscall");
+        } else {
+            this.offset = offset;
+            text.append(DELIMITER
+                    + "addi $sp, $sp, "
+                    + (-1 * offset)
+                    + "\n");
+            text.append(DELIMITER
+                    + "jr $ra\n");
         }
     }
 
@@ -200,10 +229,23 @@ class PrintTree extends DepthFirstAdapter {
     //method decl in classes
     @Override
     public void caseAMethodDeclMethodstmtseq(AMethodDeclMethodstmtseq node) {
+        String label = FUNCTIONPREFIX + functionnum;
+        functionnum++;
+        text.append(label
+                + ":\n");
+        int offset = this.offset;
+        this.offset = 0;
+        text.append(DELIMITER
+                + "addi $sp, $sp, "
+                + offset
+                + "\n");
         if (node.getType() != null) {
             node.getType().apply(this);
         }
         if (node.getId() != null) {
+            if (node.getId().getText().equals("MAIN")) {
+                error.add("The main method may not be declared inside of a class.");
+            }
             node.getId().apply(this);
         }
         if (node.getLparen() != null) {
@@ -216,6 +258,7 @@ class PrintTree extends DepthFirstAdapter {
             node.getRparen().apply(this);
         }
         if (node.getLcurly() != null) {
+            incScope();
             node.getLcurly().apply(this);
         }
         if (node.getStmtseq() != null) {
@@ -223,7 +266,15 @@ class PrintTree extends DepthFirstAdapter {
         }
         if (node.getRcurly() != null) {
             node.getRcurly().apply(this);
+            decScope();
         }
+        this.offset = offset;
+        text.append(DELIMITER
+                + "addi $sp, $sp, "
+                + (-1 * offset)
+                + "\n");
+        text.append(DELIMITER
+                + "jr $ra\n");
     }
 
     //var decl in a class
