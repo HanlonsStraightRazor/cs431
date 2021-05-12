@@ -1005,9 +1005,8 @@ class PrintTree extends DepthFirstAdapter {
     @Override
     public void caseAForStmt(AForStmt node) {
         String id = "";
-        Symbol s = null;
         String type = "";
-        boolean controlVarIsFloat = false;
+        Symbol s = null;
         if (node.getFor() != null) {
             node.getFor().apply(this);
         }
@@ -1017,25 +1016,128 @@ class PrintTree extends DepthFirstAdapter {
         }
         if (node.getForOptionalType() != null) {
             type = ((ATypesType) ((AForOptionalType) node.getForOptionalType()).getType()).getTypeDecl().getText();
-            if (type.equals("REAL")){
-                controlVarIsFloat = true;
+            if type.equals("REAL"){
+                isFloat = true;
             }
             node.getForOptionalType().apply(this);
         }
         if (node.getId() != null) {
-            String id = node.getId().getText();
+            id = node.getId().getText();
+            int scope = getScope(id);
+            if ((scope == -1) && type.equals("")) {
+                error.add("Variable " + id + " has not been declared.");
+            }
+            else if ((scope != -1) && type.equals("")) {
+                s = getSymbol(scope, id);
+                if (s.getType().equals("REAL")){
+                    isFloat = true;
+                }
+            }
             node.getId().apply(this);
         }
         if (node.getEquals() != null) {
             node.getEquals().apply(this);
         }
         if (node.getExprOrBool() != null) {
+            if (scope != -1  && type.equals("")){
+                // varible already exists
+                if (s.getType().equals("STRING")) {
+                    error.add("Cannot store numerical types into STRING.");
+                } else {
+                    if ((s.getType().equals("BOOLEAN")
+                            || s.getType().equals("INT"))
+                            && isFloat) {
+                        error.add("Variable "
+                                + id
+                                + " has type "
+                                + s.getType()
+                                + " which cannot be converted to REAL.");
+                    } else {
+                        if (isArray(s)) {
+                            text.append(DELIMITER
+                                    + "lw $t0, "
+                                    + s.getOffset()
+                                    + "($sp)\n");
+                            if (isFloat) {
+                                text.append(DELIMITER
+                                    + "swc1 $f0, "
+                                    + (index * 4)
+                                    + "($t0)\n");
+                            } else {
+                                text.append(DELIMITER
+                                    + "sw $s0, "
+                                    + (index * 4)
+                                    + "($t0)\n");
+                            }
+                        } else {
+                            if (isFloat) {
+                                text.append(DELIMITER
+                                    + "swc1 $f2, "
+                                    + Integer.toString(s.getOffset())
+                                    + "($sp)\n");
+                            } else {
+                                text.append(DELIMITER
+                                    + "sw $s2, "
+                                    + Integer.toString(s.getOffset())
+                                    + "($sp)\n");
+                            }
+                        }
+                    }
+                }
+            } else {
+                // varible is being created in for loop scope
+                if (type.equals("STRING")) {
+                    error.add("Cannot store numerical types into STRING.");
+                }
+                else {
+                    if ((type.equals("BOOLEAN")
+                            || type.equals("INT"))
+                            && isFloat) {
+                        error.add("Variable "
+                                + id
+                                + " has type "
+                                + s.getType()
+                                + " which cannot be converted to REAL.");
+                        }
+
+                        
+                        
+                labelnum++;
+            }
             node.getExprOrBool().apply(this);
+            isFloat = false;
+        
         }
         if (node.getFirst() != null) {
             node.getFirst().apply(this);
         }
         if (node.getBoolid() != null) {
+            if(node.getBoolid() instanceof AIdBoolid){
+                String id = ((AIdBoolid) node.getBoolid()).getId().toString().trim();
+                int scope = getScope(id);
+                if (scope == -1) {
+                    error.add("Variable "
+                        + id
+                        + " has not been declared.");
+                } else {
+                    labelnum += 2;
+                }
+                Variable var = (Variable) getSymbol(scope, id);
+                if(!var.getType().toString().equals("BOOLEAN")){
+                    error.add("Variable "
+                        + id
+                        + " has type "
+                        + var.getType()
+                        + " which cannot be converted to BOOLEAN.");
+                }
+                text.append(DELIMITER
+                    + "lw $t0, "
+                    + var.getOffset()
+                    + "($sp)\n");
+                text.append(DELIMITER
+                    + "beq $zero, $t0, "
+                    + falselabel
+                    + "\n");
             node.getBoolid().apply(this);
         }
         if (node.getSecond() != null) {
@@ -1052,6 +1154,7 @@ class PrintTree extends DepthFirstAdapter {
         }
         if (node.getRparen() != null) {
             node.getRparen().apply(this);
+            incScope();
         }
         if (node.getLcurly() != null) {
             node.getLcurly().apply(this);
