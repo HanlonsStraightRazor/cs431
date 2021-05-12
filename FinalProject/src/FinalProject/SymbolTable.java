@@ -38,6 +38,10 @@ class SymbolTable {
         return b;
     }
 
+    public boolean declaredAtCurrentScope(String id) {
+        return current.contains(id);
+    }
+
     public Symbol getSymbol(String id) {
         Symbol s = null;
         for (Node node = current;
