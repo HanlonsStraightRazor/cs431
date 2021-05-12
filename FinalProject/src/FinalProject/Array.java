@@ -2,9 +2,9 @@ package FinalProject;
 
 class Array extends Symbol {
     private int size;
-    public boolean[] initialized;
-    public Array(String type, int size) {
-        super(type);
+    private boolean[] initialized;
+    public Array(String type, int offset, int size) {
+        super(type, offset);
         this.size = size;
         initialized = new boolean[size];
         for (boolean b : initialized) {

@@ -20,11 +20,13 @@ class PrintTree extends DepthFirstAdapter {
     private static final String ARRAYPREFIX = "array";
     private static final String STRINGPREFIX = "string";
     private static final String BUFFERPREFIX = "buffer";
+    private static final String FUNCTIONPREFIX = "function";
     private static final String TRUE = "TRUE";
     private static final String FALSE = "FALSE";
     private static int labelnum;
     private static int arraynum;
     private static int stringnum;
+    private static int functionnum;
     private static int offset;
     private static Queue<String> error;
     private static int currentScope;
@@ -44,13 +46,12 @@ class PrintTree extends DepthFirstAdapter {
         labelnum  = 0;
         arraynum  = 0;
         stringnum = 0;
+        functionnum = 0;
         offset = 0;
         currentScope = 0;
         isFloat = false;
     }
-    /*
-     * <Prog> ::= BEGIN <ClassMethodStmts> END
-     */
+    
     @Override
     public void caseAProg(AProg node) {
         if (node.getBegin() != null) {
@@ -79,10 +80,6 @@ class PrintTree extends DepthFirstAdapter {
                     System.err.println(er);
                 }
             } else {
-                text.append(DELIMITER
-                    + "li $v0, 10\n");
-                text.append(DELIMITER
-                    + "syscall");
                 System.out.print(data);
                 System.out.print(arrays);
                 System.out.print(text);
@@ -91,6 +88,7 @@ class PrintTree extends DepthFirstAdapter {
         }
     }
 
+    //seperates the global variables, methods, and classes
     @Override
     public void caseAClassStmtsClassmethodstmts(AClassStmtsClassmethodstmts node) {
         if (node.getClassmethodstmts() != null) {
@@ -101,6 +99,7 @@ class PrintTree extends DepthFirstAdapter {
         }
     }
 
+    //global class methods
     @Override
     public void caseAClassDefClassmethodstmt(AClassDefClassmethodstmt node) {
         if (node.getClassLit() != null) {
@@ -121,32 +120,49 @@ class PrintTree extends DepthFirstAdapter {
         }
     }
 
+    //global method decl
     @Override
     public void caseAMethodDeclClassmethodstmt(AMethodDeclClassmethodstmt node) {
-        if (node.getType() != null) {
-            String type = node.getType() instanceof AIdType
-                ? ((AIdType) node.getType()).toString().trim()
-                : ((ATypesType) node.getType()).toString().trim();
+        int offset = this.offset;
+        String id = node.getId().getText();
+        String type = node.getType() instanceof AIdType
+            ? ((AIdType) node.getType()).getId().getText()
+            : ((ATypesType) node.getType()).getTypeDecl().getText();
+        if (id.equals("MAIN")) {
+            // TODO: check if main already exists
             if(!type.equals("VOID")){
-                error.add("Method type must be VOID. Got " + type);
+                error.add("Invalid return type for main method. "
+                        + "Must be VOID, got "
+                        + type
+                        + ".");
             }
+            if (!(node.getVarlist() instanceof AEpsilonVarlist)) {
+                error.add("Arguments not allowed in main method. Got "
+                    + node.getVarlist()
+                    + ".");
+            }
+            text.append("main:\n");
+        } else {
+            text.append(FUNCTIONPREFIX
+                    + functionnum
+                    + ":\n");
+            functionnum++;
+            this.offset = 0;
+            text.append(DELIMITER
+                    + "addi $sp, $sp, "
+                    + offset
+                + "\n");
+        }
+        if (node.getType() != null) {
             node.getType().apply(this);
         }
         if (node.getId() != null) {
-            if(!node.getId().toString().trim().equals("MAIN")){
-                error.add("Method ID must be MAIN. Got "
-                    + node.getId().toString());
-            }
             node.getId().apply(this);
         }
         if (node.getLparen() != null) {
             node.getLparen().apply(this);
         }
         if (node.getVarlist() != null) {
-            if (!(node.getVarlist() instanceof AEpsilonVarlist)) {
-                error.add("Argument must be empty in method. Got "
-                    + node.getVarlist());
-            }
             node.getVarlist().apply(this);
         }
         if (node.getRparen() != null) {
@@ -160,11 +176,26 @@ class PrintTree extends DepthFirstAdapter {
             node.getStmtseq().apply(this);
         }
         if (node.getRcurly() != null) {
-            decScope();
             node.getRcurly().apply(this);
+            decScope();
+        }
+        if (id.equals("MAIN")) {
+            text.append(DELIMITER
+                + "li $v0, 10\n");
+            text.append(DELIMITER
+                + "syscall");
+        } else {
+            this.offset = offset;
+            text.append(DELIMITER
+                    + "addi $sp, $sp, "
+                    + (-1 * offset)
+                    + "\n");
+            text.append(DELIMITER
+                    + "jr $ra\n");
         }
     }
 
+    //global variables
     @Override
     public void caseAVarDeclClassmethodstmt(AVarDeclClassmethodstmt node) {
         if (node.getId() != null) {
@@ -184,6 +215,7 @@ class PrintTree extends DepthFirstAdapter {
         }
     }
 
+    //inside classes
     @Override
     public void caseAMethodStmtsMethodstmtseqs(AMethodStmtsMethodstmtseqs node) {
         if (node.getMethodstmtseqs() != null) {
@@ -194,12 +226,26 @@ class PrintTree extends DepthFirstAdapter {
         }
     }
 
+    //method decl in classes
     @Override
     public void caseAMethodDeclMethodstmtseq(AMethodDeclMethodstmtseq node) {
+        String label = FUNCTIONPREFIX + functionnum;
+        functionnum++;
+        text.append(label
+                + ":\n");
+        int offset = this.offset;
+        this.offset = 0;
+        text.append(DELIMITER
+                + "addi $sp, $sp, "
+                + offset
+                + "\n");
         if (node.getType() != null) {
             node.getType().apply(this);
         }
         if (node.getId() != null) {
+            if (node.getId().getText().equals("MAIN")) {
+                error.add("The main method may not be declared inside of a class.");
+            }
             node.getId().apply(this);
         }
         if (node.getLparen() != null) {
@@ -212,6 +258,7 @@ class PrintTree extends DepthFirstAdapter {
             node.getRparen().apply(this);
         }
         if (node.getLcurly() != null) {
+            incScope();
             node.getLcurly().apply(this);
         }
         if (node.getStmtseq() != null) {
@@ -219,9 +266,18 @@ class PrintTree extends DepthFirstAdapter {
         }
         if (node.getRcurly() != null) {
             node.getRcurly().apply(this);
+            decScope();
         }
+        this.offset = offset;
+        text.append(DELIMITER
+                + "addi $sp, $sp, "
+                + (-1 * offset)
+                + "\n");
+        text.append(DELIMITER
+                + "jr $ra\n");
     }
 
+    //var decl in a class
     @Override
     public void caseAVarDeclMethodstmtseq(AVarDeclMethodstmtseq node) {
         if (node.getId() != null) {
@@ -1004,157 +1060,45 @@ class PrintTree extends DepthFirstAdapter {
 
     @Override
     public void caseAForStmt(AForStmt node) {
-        String id = "";
-        String type = "";
-        Symbol s = null;
         if (node.getFor() != null) {
             node.getFor().apply(this);
         }
         if (node.getLparen() != null) {
-            incScope();
             node.getLparen().apply(this);
         }
         if (node.getForOptionalType() != null) {
-            type = ((ATypesType) ((AForOptionalType) node.getForOptionalType()).getType()).getTypeDecl().getText();
-            if type.equals("REAL"){
-                isFloat = true;
-            }
             node.getForOptionalType().apply(this);
         }
         if (node.getId() != null) {
-            id = node.getId().getText();
+            String id = node.getId().getText();
             int scope = getScope(id);
-            if ((scope == -1) && type.equals("")) {
-                error.add("Variable " + id + " has not been declared.");
-            }
-            else if ((scope != -1) && type.equals("")) {
-                s = getSymbol(scope, id);
-                if (s.getType().equals("REAL")){
-                    isFloat = true;
+                if ((scope != -1) && (node.getForOptionalType() != null)) {
+                    error.add("Variable "
+                        + id
+                        + " has already been declared.");
                 }
-            }
             node.getId().apply(this);
         }
         if (node.getEquals() != null) {
             node.getEquals().apply(this);
         }
         if (node.getExprOrBool() != null) {
-            if (scope != -1  && type.equals("")){
-                // varible already exists
-                if (s.getType().equals("STRING")) {
-                    error.add("Cannot store numerical types into STRING.");
-                } else {
-                    if ((s.getType().equals("BOOLEAN")
-                            || s.getType().equals("INT"))
-                            && isFloat) {
-                        error.add("Variable "
-                                + id
-                                + " has type "
-                                + s.getType()
-                                + " which cannot be converted to REAL.");
-                    } else {
-                        if (isArray(s)) {
-                            text.append(DELIMITER
-                                    + "lw $t0, "
-                                    + s.getOffset()
-                                    + "($sp)\n");
-                            if (isFloat) {
-                                text.append(DELIMITER
-                                    + "swc1 $f0, "
-                                    + (index * 4)
-                                    + "($t0)\n");
-                            } else {
-                                text.append(DELIMITER
-                                    + "sw $s0, "
-                                    + (index * 4)
-                                    + "($t0)\n");
-                            }
-                        } else {
-                            if (isFloat) {
-                                text.append(DELIMITER
-                                    + "swc1 $f2, "
-                                    + Integer.toString(s.getOffset())
-                                    + "($sp)\n");
-                            } else {
-                                text.append(DELIMITER
-                                    + "sw $s2, "
-                                    + Integer.toString(s.getOffset())
-                                    + "($sp)\n");
-                            }
-                        }
-                    }
-                }
-            } else {
-                // varible is being created in for loop scope
-                if (type.equals("STRING")) {
-                    error.add("Cannot store numerical types into STRING.");
-                }
-                else {
-                    if ((type.equals("BOOLEAN")
-                            || type.equals("INT"))
-                            && isFloat) {
-                        error.add("Variable "
-                                + id
-                                + " has type "
-                                + s.getType()
-                                + " which cannot be converted to REAL.");
-                        }
-
-                        
-                        
-                labelnum++;
-            }
             node.getExprOrBool().apply(this);
-            isFloat = false;
-        
         }
         if (node.getFirst() != null) {
             node.getFirst().apply(this);
         }
         if (node.getBoolid() != null) {
-            if(node.getBoolid() instanceof AIdBoolid){
-                String id = ((AIdBoolid) node.getBoolid()).getId().toString().trim();
-                int scope = getScope(id);
-                if (scope == -1) {
-                    error.add("Variable "
-                        + id
-                        + " has not been declared.");
-                } else {
-                    labelnum += 2;
-                }
-                Variable var = (Variable) getSymbol(scope, id);
-                if(!var.getType().toString().equals("BOOLEAN")){
-                    error.add("Variable "
-                        + id
-                        + " has type "
-                        + var.getType()
-                        + " which cannot be converted to BOOLEAN.");
-                }
-                text.append(DELIMITER
-                    + "lw $t0, "
-                    + var.getOffset()
-                    + "($sp)\n");
-                text.append(DELIMITER
-                    + "beq $zero, $t0, "
-                    + falselabel
-                    + "\n");
             node.getBoolid().apply(this);
         }
         if (node.getSecond() != null) {
             node.getSecond().apply(this);
         }
         if (node.getForIncrStep() != null) {
-            if (controlVarIsFloat){
-                isFloat = true;
-            }
             node.getForIncrStep().apply(this);
-            if (controlVarIsFloat){
-                isFloat = false;
-            }
         }
         if (node.getRparen() != null) {
             node.getRparen().apply(this);
-            incScope();
         }
         if (node.getLcurly() != null) {
             node.getLcurly().apply(this);
@@ -1163,7 +1107,6 @@ class PrintTree extends DepthFirstAdapter {
             node.getStmtseq().apply(this);
         }
         if (node.getRcurly() != null) {
-            decScope();
             node.getRcurly().apply(this);
         }
     }
