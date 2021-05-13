@@ -49,7 +49,7 @@ class PrintTree extends DepthFirstAdapter {
         isFloat = false;
         globalSet = new GlobalSet();
     }
-    
+
     @Override
     public void caseAProg(AProg node) {
         if (node.getBegin() != null) {
@@ -100,21 +100,33 @@ class PrintTree extends DepthFirstAdapter {
     //global class methods
     @Override
     public void caseAClassDefClassmethodstmt(AClassDefClassmethodstmt node) {
+        String id = null;
         if (node.getClassLit() != null) {
-            error.add("Erroneous class definition.");
             node.getClassLit().apply(this);
         }
         if (node.getId() != null) {
+            id = node.getId().getText();
+            if (globalSet.containsClass(id)) {
+                error.add("Class " + id + " has already been declared.");
+            } else {
+                globalSet.addClass(id, new Class());
+            }
             node.getId().apply(this);
         }
         if (node.getLcurly() != null) {
             node.getLcurly().apply(this);
+            if (id != null) {
+                globalSet.setCurrentClass(id);
+            }
         }
         if (node.getMethodstmtseqs() != null) {
             node.getMethodstmtseqs().apply(this);
         }
         if (node.getRcurly() != null) {
             node.getRcurly().apply(this);
+            if (id != null) {
+                globalSet.clearCurrentClass();
+            }
         }
     }
 
