@@ -11,7 +11,7 @@ import java.lang.*;
 */
 class PrintTree extends DepthFirstAdapter {
     // Class variables
-    private static ArrayList<HashMap<String, Symbol>> symbolTables;
+    private static SymbolTable symbolTable;
     private static StringBuilder data;
     private static StringBuilder arrays;
     private static StringBuilder text;
@@ -29,16 +29,13 @@ class PrintTree extends DepthFirstAdapter {
     private static int functionnum;
     private static int offset;
     private static Queue<String> error;
-    private static int currentScope;
     private static boolean isFloat;
     private static String breakLabel;
     /*
      * Constructor. Initializes non final class variables.
      */
     public PrintTree() {
-        symbolTables = new ArrayList<HashMap<String, Symbol>>();
-        HashMap<String, Symbol> scopeZeroHashMap = new HashMap<String, Symbol>();
-        symbolTables.add(scopeZeroHashMap);
+        symbolTable = new SymbolTable();
         error = new LinkedList<String>();
         data   = new StringBuilder();
         arrays = new StringBuilder();
@@ -48,7 +45,6 @@ class PrintTree extends DepthFirstAdapter {
         stringnum = 0;
         functionnum = 0;
         offset = 0;
-        currentScope = 0;
         isFloat = false;
     }
     
@@ -169,7 +165,7 @@ class PrintTree extends DepthFirstAdapter {
             node.getRparen().apply(this);
         }
         if (node.getLcurly() != null) {
-            incScope();
+            symbolTable.incScope();
             node.getLcurly().apply(this);
         }
         if (node.getStmtseq() != null) {
@@ -177,7 +173,7 @@ class PrintTree extends DepthFirstAdapter {
         }
         if (node.getRcurly() != null) {
             node.getRcurly().apply(this);
-            decScope();
+            symbolTable.decScope();
         }
         if (id.equals("MAIN")) {
             text.append(DELIMITER
@@ -258,7 +254,7 @@ class PrintTree extends DepthFirstAdapter {
             node.getRparen().apply(this);
         }
         if (node.getLcurly() != null) {
-            incScope();
+            symbolTable.incScope();
             node.getLcurly().apply(this);
         }
         if (node.getStmtseq() != null) {
@@ -266,7 +262,7 @@ class PrintTree extends DepthFirstAdapter {
         }
         if (node.getRcurly() != null) {
             node.getRcurly().apply(this);
-            decScope();
+            symbolTable.decScope();
         }
         this.offset = offset;
         text.append(DELIMITER
@@ -474,19 +470,18 @@ class PrintTree extends DepthFirstAdapter {
     @Override
     public void caseAAssignExprStmt(AAssignExprStmt node) {
         String id = "";
-        int scope = -1;
         Symbol s = null;
         int index = -1;
+        Boolean errorOfSomeType = false;
         if (node.getId() != null) {
             node.getId().apply(this);
             id = node.getId().getText();
-            scope = getScope(id);
-            if (scope == -1) {
+            if (!symbolTable.contains(id)) {
                 error.add("Variable "
                         + id
                         + " has not been declared.");
             } else {
-                s = getSymbol(scope, id);
+                s = symbolTable.getSymbol(id);
             }
         }
         if (node.getArrayOption() != null) {
@@ -500,13 +495,13 @@ class PrintTree extends DepthFirstAdapter {
                                 + " is not a valid index for array "
                                 + id
                                 + ".");
-                        scope = -1;
+                        errorOfSomeType = true;
                     }
                 } else {
                     error.add("Variable "
                             + id
                             + " is not an array.");
-                    scope = -1;
+                    errorOfSomeType = true;
                 }
             }
             node.getArrayOption().apply(this);
@@ -515,11 +510,11 @@ class PrintTree extends DepthFirstAdapter {
             node.getEquals().apply(this);
         }
         if (node.getExpr() != null) {
-            if(scope != -1 && s.getType().equals("REAL")){
+            if(!errorOfSomeType && s.getType().equals("REAL")){
                 isFloat = true;
             }
             node.getExpr().apply(this);
-            if (scope != -1) {
+            if (!errorOfSomeType) {
                 if (s.getType().equals("STRING")) {
                     error.add("Cannot store numerical types into STRING.");
                 } else {
@@ -549,7 +544,7 @@ class PrintTree extends DepthFirstAdapter {
                                     + "($t0)\n");
                             }
                             ((Array) s).initializeAt(index);
-                            addToSymbolTable(id, (Array) s, scope);
+                            symbolTable.add(id, s);
                         } else {
                             if (isFloat) {
                                 text.append(DELIMITER
@@ -563,7 +558,7 @@ class PrintTree extends DepthFirstAdapter {
                                     + "($sp)\n");
                             }
                             ((Variable) s).initialize();
-                            addToSymbolTable(id, (Variable) s, scope);
+                            symbolTable.add(id, (Variable) s);
                         }
                     }
                 }
@@ -578,29 +573,27 @@ class PrintTree extends DepthFirstAdapter {
     @Override
     public void caseAAssignStringStmt(AAssignStringStmt node) {
         String id = node.getId().getText();
-        int scope = getScope(id);
         Symbol s = null;
         int index = -1;
         if (node.getId() != null) {
-            if (scope == -1) {
+            if (!symbolTable.contains(id)) {
                 error.add("Variable "
                         + id
                         + " has not been declared.");
             } else {
-                s = getSymbol(scope, id);
+                s = symbolTable.getSymbol(id);
                 if (!s.getType().equals("STRING")) {
                     error.add("Variable "
                             + id
                             + " is type "
                             + s.getType()
                             + ". Must be type STRING.");
-                    scope = -1;
                 }
             }
             node.getId().apply(this);
         }
         if (node.getArrayOption() != null) {
-            if (scope != -1) {
+            if (symbolTable.contains(id)) {
                 if (node.getArrayOption() instanceof AEpsilonArrayOption) {
                     if (isArray(s)) {
                         error.add("No array index specified");
@@ -676,13 +669,11 @@ class PrintTree extends DepthFirstAdapter {
     @Override
     public void caseAVarDeclStmt(AVarDeclStmt node) {
         ArrayList<String> id = new ArrayList<String>();
-        int scope = -1;
         Symbol s = null;
         String type = "";
         int size = -1;
         if (node.getId() != null) {
             id.add(node.getId().getText());
-            scope = currentScope;
             node.getId().apply(this);
         }
         if (node.getMoreIds() != null) {
@@ -696,7 +687,7 @@ class PrintTree extends DepthFirstAdapter {
             }
             node.getMoreIds().apply(this);
             for(int i = 0; i < id.size(); i++){
-                if(getScope(id.get(i)) == currentScope){
+                if(symbolTable.declaredAtCurrentScope(id.get(i))){
                     error.add(id.get(i) + " has already been declared in this scope.");
                 }
             }
@@ -732,7 +723,7 @@ class PrintTree extends DepthFirstAdapter {
                 //if it is not an array
                 if (size == 0) {
                     for(int i = 0; i < id.size(); i++){
-                        addToSymbolTable(id.get(i), new Variable(type, offset));
+                        symbolTable.add(id.get(i), new Variable(type, offset));
                         offset -= 4;
                     }
                 } else {
@@ -754,7 +745,7 @@ class PrintTree extends DepthFirstAdapter {
                                 + offset
                                 +"($sp)\n");
                         arraynum++;
-                        addToSymbolTable(id.get(i), new Array(type, offset, size));
+                        symbolTable.add(id.get(i), new Array(type, offset, size));
                         offset -= 4;
                     }
                 }
@@ -779,15 +770,14 @@ class PrintTree extends DepthFirstAdapter {
             node.getBoolid().apply(this);
             if(node.getBoolid() instanceof AIdBoolid){
                 String id = ((AIdBoolid) node.getBoolid()).getId().getText().trim();
-                int scope = getScope(id);
-                if (scope == -1) {
+                if (!symbolTable.contains(id)) {
                     error.add("Variable "
                         + id
                         + " has not been declared.");
                 } else {
                     labelnum++;
                 }
-                Variable var = (Variable) getSymbol(scope, id);
+                Variable var = (Variable) symbolTable.getSymbol(id);
                 if(!((Variable) var).getType().toString().equals("BOOLEAN")){
                     error.add("Variable "
                         + id
@@ -827,7 +817,7 @@ class PrintTree extends DepthFirstAdapter {
         }
         if (node.getLcurly() != null) {
             node.getLcurly().apply(this);
-            incScope();
+            symbolTable.incScope();
         }
         if ((node.getStmtseq() != null)
             && (!isConstant || constant)) {
@@ -838,7 +828,7 @@ class PrintTree extends DepthFirstAdapter {
                 text.append("\n" + falselabel
                     + ":\n");
             }
-            decScope();
+            symbolTable.decScope();
             node.getRcurly().apply(this);
         }
     }
@@ -860,15 +850,14 @@ class PrintTree extends DepthFirstAdapter {
         if (node.getBoolid() != null) {
             if(node.getBoolid() instanceof AIdBoolid){
                 String id = ((AIdBoolid) node.getBoolid()).getId().toString().trim();
-                int scope = getScope(id);
-                if (scope == -1) {
+                if (!symbolTable.contains(id)) {
                     error.add("Variable "
                         + id
                         + " has not been declared.");
                 } else {
                     labelnum += 2;
                 }
-                Variable var = (Variable) getSymbol(scope, id);
+                Variable var = (Variable) symbolTable.getSymbol(id);
                 if(!var.getType().toString().equals("BOOLEAN")){
                     error.add("Variable "
                         + id
@@ -908,7 +897,7 @@ class PrintTree extends DepthFirstAdapter {
             node.getThen().apply(this);
         }
         if (node.getIflcurly() != null) {
-            incScope();
+            symbolTable.incScope();
             node.getIflcurly().apply(this);
         }
         if (node.getIfBlockStmts() != null) {
@@ -921,14 +910,14 @@ class PrintTree extends DepthFirstAdapter {
                 text.append(DELIMITER + "j "
                    + endlabel + "\n");
             }
-            decScope();
+            symbolTable.decScope();
             node.getIfrcurly().apply(this);
         }
         if (node.getElse() != null) {
             node.getElse().apply(this);
         }
         if (node.getElselcurly() != null) {
-            incScope();
+            symbolTable.incScope();
             node.getElselcurly().apply(this);
         }
         if (node.getElseBlockStmts() != null) {
@@ -945,7 +934,7 @@ class PrintTree extends DepthFirstAdapter {
                 text.append("\n" + endlabel
                     + ":\n");
             }
-            decScope();
+            symbolTable.decScope();
             node.getElsercurly().apply(this);
         }
     }
@@ -969,15 +958,14 @@ class PrintTree extends DepthFirstAdapter {
             if(node.getBoolid() instanceof AIdBoolid) {
                 boolean found = false;
                 String id = ((AIdBoolid) node.getBoolid()).getId().toString().trim();
-                int scope = getScope(id);
-                if (scope == -1) {
+                if (!symbolTable.contains(id)) {
                     error.add("Variable "
                         + id
                         + " has not been declared.");
                 } else {
                     labelnum += 2;
                 }
-                var = (Variable) getSymbol(scope, id);
+                var = (Variable) symbolTable.getSymbol(id);
                 if(!var.getType().toString().equals("BOOLEAN")) {
                     error.add("Variable "
                         + id
@@ -1022,7 +1010,7 @@ class PrintTree extends DepthFirstAdapter {
         }
         if (node.getLcurly() != null) {
             node.getLcurly().apply(this);
-            incScope();
+            symbolTable.incScope();
         }
         if (node.getStmtseq() != null) {
             if(isConstant && constant) {
@@ -1053,7 +1041,7 @@ class PrintTree extends DepthFirstAdapter {
                 text.append(falselabel
                     + ":\n");
             }
-            decScope();
+            symbolTable.decScope();
             node.getRcurly().apply(this);
         }
     }
@@ -1070,13 +1058,6 @@ class PrintTree extends DepthFirstAdapter {
             node.getForOptionalType().apply(this);
         }
         if (node.getId() != null) {
-            String id = node.getId().getText();
-            int scope = getScope(id);
-                if ((scope != -1) && (node.getForOptionalType() != null)) {
-                    error.add("Variable "
-                        + id
-                        + " has already been declared.");
-                }
             node.getId().apply(this);
         }
         if (node.getEquals() != null) {
@@ -1114,18 +1095,16 @@ class PrintTree extends DepthFirstAdapter {
     @Override
     public void caseAGetStmt(AGetStmt node) {
         String id = "";
-        int scope = -1;
         Symbol s = null;
         int index = -1;
         if (node.getId() != null) {
             id = node.getId().getText();
-            scope = getScope(id);
-            if (scope == -1) {
+            if (!symbolTable.contains(id)) {
                 error.add("Variable "
                         + id
                         + " has not been declared.");
             } else {
-                s = getSymbol(scope, id);
+                s = symbolTable.getSymbol(id);
             }
             node.getId().apply(this);
         }
@@ -1356,7 +1335,6 @@ class PrintTree extends DepthFirstAdapter {
     @Override
     public void caseAPutStmt(APutStmt node) {
         String id = "";
-        int scope = -1;
         Symbol s = null;
         int index = -1;
         if (node.getPut() != null) {
@@ -1367,18 +1345,17 @@ class PrintTree extends DepthFirstAdapter {
         }
         if (node.getId() != null) {
             id = node.getId().getText();
-            scope = getScope(id);
-            if (scope == -1) {
+            if (!symbolTable.contains(id)) {
                 error.add("Variable "
                         + id
                         + " has not been declared.");
             } else {
-                s = getSymbol(scope, id);
+                s = symbolTable.getSymbol(id);
             }
             node.getId().apply(this);
         }
         if (node.getArrayOption() != null) {
-            if (scope != -1) {
+            if (symbolTable.contains(id)) {
                 if (isArray(s)) {
                     if (node.getArrayOption() instanceof AArrayArrayOption) {
                         index = Integer.parseInt(
@@ -1429,7 +1406,7 @@ class PrintTree extends DepthFirstAdapter {
             node.getRparen().apply(this);
         }
         if (node.getSemicolon() != null) {
-            if (scope != -1) {
+            if (symbolTable.contains(id)) {
                 text.append(DELIMITER
                         + "li $v0, ");
                 switch (s.getType()) {
@@ -1542,11 +1519,10 @@ class PrintTree extends DepthFirstAdapter {
             node.getSemicolon().apply(this);
         }
         if (!array) {
-            int scope = getScope(id);
-            if (scope == -1) {
+            if (!symbolTable.contains(id)) {
                 error.add("Variable " + id + " has not been declared.");
             }
-            Variable var = (Variable) getSymbol(scope, id);
+            Variable var = (Variable) symbolTable.getSymbol(id);
             if(!(var.getType().equals("INT")
                 || var.getType().equals("REAL")
                 || var.getType().equals("VOID"))){
@@ -1591,11 +1567,10 @@ class PrintTree extends DepthFirstAdapter {
             node.getSemicolon().apply(this);
         }
         if (!array) {
-            int scope = getScope(id);
-            if (scope == -1) {
+            if (!symbolTable.contains(id)) {
                 error.add("Variable " + id + " has not been declared.");
             }
-            Variable var = (Variable) getSymbol(scope, id);
+            Variable var = (Variable) symbolTable.getSymbol(id);
             if (!(var.getType().equals("INT")
                 || var.getType().equals("REAL")
                 || var.getType().equals("VOID"))) {
@@ -1728,18 +1703,16 @@ class PrintTree extends DepthFirstAdapter {
     @Override
     public void caseAAssignBooleanStmt(AAssignBooleanStmt node) {
         String id = "";
-        int scope = -1;
         Symbol s = null;
         int index = -1;
         if (node.getId() != null) {
             id = node.getId().getText();
-            scope = getScope(id);
-            if (scope == -1) {
+            if (!symbolTable.contains(id)) {
                 error.add("Variable "
                         + id
                         + " has not been declared.");
             } else {
-                s = getSymbol(scope, id);
+                s = symbolTable.getSymbol(id);
                 if(!s.getType().equals("BOOLEAN")){
                     error.add("Variable "
                             + id
@@ -2087,13 +2060,11 @@ class PrintTree extends DepthFirstAdapter {
             } else if(node.parent() instanceof AIncrStmt){
                 AIncrStmt AIncrStmtNode = (AIncrStmt)node.parent();
                 String idVal = AIncrStmtNode.getId().toString().trim();
-                int scope = getScope(idVal);
                 int index = Integer.parseInt(node.getInt().toString().trim());
-
-                if (scope == -1) {
+                if (!symbolTable.contains(idVal)) {
                     error.add("Array " + idVal + " has not been declared.");
                 }
-                Array var = (Array) getSymbol(scope, idVal);
+                Array var = (Array) symbolTable.getSymbol(idVal);
                 if(!(var.getType().equals("INT")
                     || var.getType().equals("REAL"))){
                     error.add("Array " + idVal + " has type " + var.getType() + " which cannot be incremented.");
@@ -2121,12 +2092,11 @@ class PrintTree extends DepthFirstAdapter {
             } else if(node.parent() instanceof ADecrStmt){
                 AIncrStmt AIncrStmtNode = (AIncrStmt)node.parent();
                 String idVal = AIncrStmtNode.getId().toString().trim();
-                int scope = getScope(idVal);
                 int index = Integer.parseInt(node.getInt().toString().trim());
-                if (scope == -1) {
+                if (!symbolTable.contains(idVal)) {
                     error.add("Array " + idVal + " has not been declared.");
                 }
-                Array var = (Array) getSymbol(scope, idVal);
+                Array var = (Array) symbolTable.getSymbol(idVal);
                 if(!(var.getType().equals("INT")
                     || var.getType().equals("REAL"))){
                     error.add("Array " + idVal + " has type " + var.getType() + " which cannot be decremented.");
@@ -2479,11 +2449,9 @@ class PrintTree extends DepthFirstAdapter {
     @Override
     public void caseAArrayArrayOrId(AArrayArrayOrId node) {
         String id = "";
-        int scope = -1;
         if (node.getId() != null) {
             id = node.getId().getText();
-            scope = getScope(id);
-            if (scope == -1) {
+            if (!symbolTable.contains(id)) {
                 error.add("Variable "
                         + id
                         + " has not been declared.");
@@ -2494,8 +2462,8 @@ class PrintTree extends DepthFirstAdapter {
             node.getLbracket().apply(this);
         }
         if (node.getInt() != null) {
-            if (scope != -1) {
-                Array array = (Array) getSymbol(scope, id);
+            if (symbolTable.contains(id)) {
+                Array array = (Array) symbolTable.getSymbol(id);
                 int index = Integer.parseInt(node.getInt().getText());
                 if (array.isInitializedAt(index)) {
                     text.append(DELIMITER
@@ -2532,16 +2500,14 @@ class PrintTree extends DepthFirstAdapter {
     @Override
     public void caseAIdArrayOrId(AIdArrayOrId node) {
         String id = "";
-        int scope = -1;
         if (node.getId() != null) {
             id = node.getId().getText();
-            scope = getScope(id);
-            if (scope == -1) {
+            if (!symbolTable.contains(id)) {
                 error.add("Variable "
                         + id
                         + " has not been declared.");
             } else {
-                Variable var = (Variable) getSymbol(scope, id);
+                Variable var = (Variable) symbolTable.getSymbol(id);
                 if (var.isInitialized()) {
                     if (isFloat || var.getType().equals("REAL")) {
                         isFloat = true;
@@ -2733,42 +2699,6 @@ class PrintTree extends DepthFirstAdapter {
         if (node.getId() != null) {
             node.getId().apply(this);
         }
-    }
-
-    public void incScope(){
-        HashMap<String, Symbol> notinitialized = new HashMap<String, Symbol>();
-        symbolTables.add(notinitialized);
-        currentScope++;
-    }
-
-    public void decScope(){
-        try{
-            symbolTables.remove(currentScope);
-        } catch(Exception ex){};
-        currentScope--;
-    }
-
-    public void addToSymbolTable(String idVal, Symbol val){
-        symbolTables.get(currentScope).put(idVal, val);
-    }
-
-    public void addToSymbolTable(String idVal, Symbol val, int scope){
-        symbolTables.get(scope).put(idVal, val);
-    }
-
-    public int getScope(String id) {
-        int scope = -1;
-        for(int i = currentScope; i >= 0; i--){
-            if(symbolTables.get(i).containsKey(id)){
-                scope = i;
-                break;
-            }
-        }
-        return scope;
-    }
-
-    public Symbol getSymbol(int scope, String id) {
-        return symbolTables.get(scope).get(id);
     }
 
     public boolean isArray(Symbol symbol) {
