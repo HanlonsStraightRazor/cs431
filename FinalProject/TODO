@@ -19,6 +19,6 @@ REDO
  - [ ] assign_string methodstmtseq
  - [x] print_stmt methodstmtseq
  - [ ] assign_read_in methodstmtseq
- - [ ] assign_inc methodstmtseq
+ - [x] assign_inc methodstmtseq
  - [ ] assign_dec methodstmtseq
  - [ ] assign_boolean methodstmtseq
