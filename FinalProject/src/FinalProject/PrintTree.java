@@ -32,6 +32,7 @@ class PrintTree extends DepthFirstAdapter {
     private static int currentScope;
     private static boolean isFloat;
     private static String breakLabel;
+    private static GlobalSet globalSet;
     /*
      * Constructor. Initializes non final class variables.
      */
@@ -50,6 +51,7 @@ class PrintTree extends DepthFirstAdapter {
         offset = 0;
         currentScope = 0;
         isFloat = false;
+        globalSet = new GlobalSet();
     }
     
     @Override
