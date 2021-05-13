@@ -11,11 +11,12 @@ import java.lang.*;
 */
 class PrintTree extends DepthFirstAdapter {
     // Class variables
-    private static GlobalSet globalSet;
-    private static SymbolTable symbolTable;
+    private GlobalSet globalSet;
+    private SymbolTable symbolTable;
     private MIPS mips;
-    private static int offset;
-    private static boolean isFloat;
+    private int offset;
+    private boolean isFloat;
+    private String breakLabel;
     /*
      * Constructor. Initializes non final class variables.
      */
@@ -25,6 +26,7 @@ class PrintTree extends DepthFirstAdapter {
         mips = new MIPS();
         offset = 0;
         isFloat = false;
+        breakLabel = "shouldNotShowUp";
     }
 
     @Override
@@ -1887,12 +1889,12 @@ class PrintTree extends DepthFirstAdapter {
 
     @Override
     public void caseASwitchStmt(ASwitchStmt node) {
-        // FIXME: Needs tweaking to compile
-        // This one used to be global
-        String breakLabel = "testlabel"; // +1
-        String caseOneLabel = "testlabel"; // +2
-        String afterCaseOneLabel = "testlabel"; // +3
-        // labelnum += 3;
+        breakLabel = mips.getLabel();
+        mips.incLabel();
+        String caseOneLabel = mips.getLabel();
+        mips.incLabel();
+        String afterCaseOneLabel = mips.getLabel();
+        mips.incLabel();
         if (node.getSwitch() != null) {
             node.getSwitch().apply(this);
         }
@@ -1949,9 +1951,8 @@ class PrintTree extends DepthFirstAdapter {
             node.getDefaultStmts().apply(this);
         }
         if (node.getRcurly() != null) {
-            mips.j(breakLabel);
-            mips.addLabel(breakLabel);
             node.getRcurly().apply(this);
+            mips.addLabel(breakLabel);
         }
     }
 
@@ -1996,12 +1997,12 @@ class PrintTree extends DepthFirstAdapter {
     @Override
     public void caseABreakBreakHelper(ABreakBreakHelper node) {
         if (node.getBreak() != null) {
-            mips.j("testlabel");
             node.getBreak().apply(this);
         }
         if (node.getSemicolon() != null) {
             node.getSemicolon().apply(this);
         }
+        mips.j(breakLabel);
     }
 
     @Override
@@ -2251,7 +2252,7 @@ class PrintTree extends DepthFirstAdapter {
             } else {
                 mips.lw("$t0", offset, "$sp");
                 if (divison) {
-                    mips.div("s0", "$t0", "$s0");
+                    mips.div("$s0", "$t0", "$s0");
                     mips.mflo("$s0");
                 } else {
                     mips.mult("", "$t0", "$s0");
