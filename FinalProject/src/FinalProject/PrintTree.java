@@ -32,9 +32,7 @@ class PrintTree extends DepthFirstAdapter {
     private static boolean isFloat;
     private static String breakLabel;
     private static GlobalSet globalSet;
-    /*
-     * Constructor. Initializes non final class variables.
-     */
+
     public PrintTree() {
         symbolTable = new SymbolTable();
         error = new LinkedList<String>();
@@ -139,7 +137,9 @@ class PrintTree extends DepthFirstAdapter {
             ? ((AIdType) node.getType()).getId().getText()
             : ((ATypesType) node.getType()).getTypeDecl().getText();
         if (id.equals("MAIN")) {
-            // TODO: check if main already exists
+            if(globalSet.hasMainMethodDecl()){
+                error.add("MAIN has already been declared.");
+            }
             if(!type.equals("VOID")){
                 error.add("Invalid return type for main method. "
                         + "Must be VOID, got "
@@ -151,6 +151,7 @@ class PrintTree extends DepthFirstAdapter {
                     + node.getVarlist()
                     + ".");
             }
+            globalSet.mainMethodCalled();
             text.append("main:\n");
         } else {
             text.append(FUNCTIONPREFIX
