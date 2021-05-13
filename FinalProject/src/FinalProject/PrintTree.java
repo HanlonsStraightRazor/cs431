@@ -860,10 +860,73 @@ class PrintTree extends DepthFirstAdapter {
 
     @Override
     public void caseAAssignBooleanMethodstmtseq(AAssignBooleanMethodstmtseq node) {
+        String id = "";
+        Symbol s = null;
+        int index = -1;
         if (node.getId() != null) {
+            id = node.getId().getText();
+            s = symbolTable.getSymbol(id);
+            if (s == null) {
+                mips.printError(
+                    String.format(
+                        "Variable %s has not been declared.",
+                        id
+                    )
+                );
+            } else {
+                if(s.getType().equals("BOOLEAN")){
+                    index = 0;
+                } else {
+                    mips.printError(
+                        String.format(
+                            "Variable %s has type %s " +
+                            "which cannot be converted to BOOLEAN.",
+                            id,
+                            s.getType()
+                        )
+                    );
+                }
+            }
             node.getId().apply(this);
         }
         if (node.getArrayOption() != null) {
+            if (s != null) {
+                if (node.getArrayOption() instanceof AArrayArrayOption){
+                    if (isArray(s)) {
+                        index = Integer.parseInt(
+                            ((AArrayArrayOption) node.getArrayOption()).getInt().getText()
+                        );
+                        if ((index < 0) || (index >= ((Array) s).getSize())) {
+                            mips.printError(
+                                String.format(
+                                    "Index %d is invalid for array %s.",
+                                    index,
+                                    id
+                                )
+                            );
+                        }
+                    } else {
+                        mips.printError(
+                            String.format(
+                                "Variable %s is not an array " +
+                                "and may not have an index.",
+                                id
+                            )
+                        );
+                    }
+                } else {
+                    if (isArray(s)) {
+                        mips.printError(
+                            String.format(
+                                "Missing index for array %s.",
+                                id
+                            )
+                        );
+                    } else {
+                        index = 0;
+                    }
+                }
+            }
             node.getArrayOption().apply(this);
         }
         if (node.getEquals() != null) {
@@ -871,6 +934,25 @@ class PrintTree extends DepthFirstAdapter {
         }
         if (node.getBoolean() != null) {
             node.getBoolean().apply(this);
+            if (index > -1) {
+                if (isArray(s)) {
+                    mips.lw("$t0", s.getOffset(), "$sp");
+                    if (isFloat) {
+                        mips.cvt_w_s("$f0", "$f0");
+                        mips.mfc1("$f0", "$s0");
+                    }
+                    mips.sw("$s0", 4 * index, "$t0");
+                    ((Array) s).initializeAt(index);
+                } else {
+                    if (isFloat) {
+                        mips.cvt_w_s("$f0", "$f0");
+                        mips.mfc1("$f0", "$s0");
+                    }
+                    mips.sw("$s0", s.getOffset(), "$sp");
+                    ((Variable) s).initialize();
+                }
+            }
+            isFloat = false;
         }
         if (node.getSemicolon() != null) {
             node.getSemicolon().apply(this);
