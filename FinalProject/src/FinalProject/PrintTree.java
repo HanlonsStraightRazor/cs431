@@ -31,6 +31,7 @@ class PrintTree extends DepthFirstAdapter {
     private static Queue<String> error;
     private static boolean isFloat;
     private static String breakLabel;
+    private static GlobalSet globalSet;
     /*
      * Constructor. Initializes non final class variables.
      */
@@ -46,6 +47,7 @@ class PrintTree extends DepthFirstAdapter {
         functionnum = 0;
         offset = 0;
         isFloat = false;
+        globalSet = new GlobalSet();
     }
     
     @Override
