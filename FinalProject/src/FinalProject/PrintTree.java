@@ -167,19 +167,55 @@ class PrintTree extends DepthFirstAdapter {
     //global variables
     @Override
     public void caseAVarDeclClassmethodstmt(AVarDeclClassmethodstmt node) {
+        ArrayList<String> id = new ArrayList<String>();
+        Symbol s = null;
+        String type = "";
         if (node.getId() != null) {
+            id.add(node.getId().getText());
             node.getId().apply(this);
         }
         if (node.getMoreIds() != null) {
+            Node childNode = null;
+            if(node.getMoreIds() instanceof AMoreIdsMoreIds){
+                childNode = node.getMoreIds();
+                while(childNode instanceof AMoreIdsMoreIds){
+                    id.add(((AMoreIdsMoreIds) childNode).getId().getText());
+                    childNode = ((AMoreIdsMoreIds) childNode).getMoreIds();
+                }
+            }
             node.getMoreIds().apply(this);
+            for(int i = 0; i < id.size(); i++){
+                if(symbolTable.declaredAtCurrentScope(id.get(i))){
+                    mips.printError(
+                        String.format(
+                            "Variable %s has already been declared in this scope.",
+                            id.get(i)
+                        )
+                    );
+                }
+            }
         }
         if (node.getColon() != null) {
             node.getColon().apply(this);
         }
         if (node.getType() != null) {
+            if(node.getType() instanceof ATypesType){
+                type = ((ATypesType) node.getType()).getTypeDecl().getText();
+            } else {
+                mips.printError(
+                    String.format(
+                        "Invalid type %s.",
+                        ((AIdType) node.getType()).getId().getText()
+                    )
+                );
+            }
             node.getType().apply(this);
         }
         if (node.getSemicolon() != null) {
+            for(int i = 0; i < id.size(); i++){
+                symbolTable.add(id.get(i), new Variable(type, offset));
+                offset -= 4;
+            }
             node.getSemicolon().apply(this);
         }
     }
@@ -241,36 +277,153 @@ class PrintTree extends DepthFirstAdapter {
     //var decl in a class
     @Override
     public void caseAVarDeclMethodstmtseq(AVarDeclMethodstmtseq node) {
+        ArrayList<String> id = new ArrayList<String>();
+        Symbol s = null;
+        String type = "";
         if (node.getId() != null) {
+            id.add(node.getId().getText());
             node.getId().apply(this);
         }
         if (node.getMoreIds() != null) {
+            Node childNode = null;
+            if(node.getMoreIds() instanceof AMoreIdsMoreIds){
+                childNode = node.getMoreIds();
+                while(childNode instanceof AMoreIdsMoreIds){
+                    id.add(((AMoreIdsMoreIds) childNode).getId().getText());
+                    childNode = ((AMoreIdsMoreIds) childNode).getMoreIds();
+                }
+            }
             node.getMoreIds().apply(this);
+            for(int i = 0; i < id.size(); i++){
+                if(symbolTable.declaredAtCurrentScope(id.get(i))){
+                    mips.printError(
+                        String.format(
+                            "Variable %s has already been declared in this scope.",
+                            id.get(i)
+                        )
+                    );
+                }
+            }
         }
         if (node.getColon() != null) {
             node.getColon().apply(this);
         }
         if (node.getType() != null) {
+            if(node.getType() instanceof ATypesType){
+                type = ((ATypesType) node.getType()).getTypeDecl().getText();
+            } else {
+                mips.printError(
+                    String.format(
+                        "Invalid type %s.",
+                        ((AIdType) node.getType()).getId().getText()
+                    )
+                );
+            }
             node.getType().apply(this);
         }
         if (node.getSemicolon() != null) {
+            for(int i = 0; i < id.size(); i++){
+                symbolTable.add(id.get(i), new Variable(type, offset));
+                offset -= 4;
+            }
             node.getSemicolon().apply(this);
         }
     }
 
     @Override
     public void caseAAssignEqualsMethodstmtseq(AAssignEqualsMethodstmtseq node) {
+        String id = "";
+        Symbol s = null;
+        int index = -1;
+        Boolean errorOfSomeType = false;
         if (node.getId() != null) {
             node.getId().apply(this);
+            id = node.getId().getText();
+            if (!symbolTable.contains(id)) {
+                mips.printError(
+                    String.format(
+                        "Variable %s has not been declared.",
+                        id
+                    )
+                );
+            } else {
+                s = symbolTable.getSymbol(id);
+            }
         }
         if (node.getArrayOption() != null) {
+            if (node.getArrayOption() instanceof AArrayArrayOption) {
+                if (isArray(s)) {
+                    index = Integer.parseInt(
+                        ((AArrayArrayOption) node.getArrayOption()).getInt().getText()
+                    );
+                    if ((index < 0) || (index >= ((Array) s).getSize())) {
+                        mips.printError(
+                            String.format(
+                                "%d is not a valid index for array %s.",
+                                index,
+                                id
+                            )
+                        );
+                        errorOfSomeType = true;
+                    }
+                } else {
+                    mips.printError(
+                        String.format(
+                            "Variable %s is not an array.",
+                            id
+                        )
+                    );
+                    errorOfSomeType = true;
+                }
+            }
             node.getArrayOption().apply(this);
         }
         if (node.getEquals() != null) {
             node.getEquals().apply(this);
         }
         if (node.getExpr() != null) {
+            if(!errorOfSomeType && s.getType().equals("REAL")){
+                isFloat = true;
+            }
             node.getExpr().apply(this);
+            if (!errorOfSomeType) {
+                if (s.getType().equals("STRING")) {
+                    mips.printError("Cannot store numerical types into STRING.");
+                } else {
+                    if ((s.getType().equals("BOOLEAN")
+                            || s.getType().equals("INT"))
+                            && isFloat) {
+                        mips.printError(
+                            String.format(
+                                "Variable %s has type %s which " +
+                                "cannot be converted to REAL.",
+                                id,
+                                s.getType()
+                            )
+                        );
+                    } else {
+                        if (isArray(s)) {
+                            mips.lw("$t0", s.getOffset(), "$sp");
+                            if (isFloat) {
+                                mips.swc1("$f0", 4 * index, "$t0");
+                            } else {
+                                mips.sw("$s0", 4 * index, "$t0");
+                            }
+                            ((Array) s).initializeAt(index);
+                            symbolTable.add(id, s);
+                        } else {
+                            if (isFloat) {
+                                mips.swc1("$f0", s.getOffset(), "$sp");
+                            } else {
+                                mips.sw("$s0", s.getOffset(), "$sp");
+                            }
+                            ((Variable) s).initialize();
+                            symbolTable.add(id, (Variable) s);
+                        }
+                    }
+                }
+            }
+            isFloat = false;
         }
         if (node.getSemicolon() != null) {
             node.getSemicolon().apply(this);

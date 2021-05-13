@@ -13,7 +13,7 @@ TODO
 ----
 REDO
 ----
- - [ ] var_decl classmethodstmt
+ - [done] var_decl classmethodstmt
  - [ ] var_decl methodstmtseq
  - [ ] assign_equals (expression) methodstmtseq
  - [ ] assign_string methodstmtseq
