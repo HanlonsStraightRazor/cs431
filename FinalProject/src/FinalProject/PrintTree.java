@@ -2099,7 +2099,7 @@ class PrintTree extends DepthFirstAdapter {
             } else {
                 mips.lw("$t0", offset, "$sp");
                 if (divison) {
-                    mips.div("s0", "$t0", "$s0");
+                    mips.div("$s0", "$t0", "$s0");
                     mips.mflo("$s0");
                 } else {
                     mips.mult("", "$t0", "$s0");
