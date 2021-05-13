@@ -11,22 +11,22 @@ class MIPS {
     private StringBuilder words;
     private StringBuilder main;
     private StringBuilder text;
-    private StringBuilder errors;
     private int stringnum;
     private int wordnum;
     private int labelnum;
     private boolean isMain;
+    private boolean errors;
 
     public MIPS() {
         strings = new StringBuilder();
         words = new StringBuilder();
         main = new StringBuilder();
         text = new StringBuilder();
-        errors = new StringBuilder();
         stringnum = 0;
         wordnum = 0;
         labelnum = 0;
         isMain = false;
+        errors = false;
 
         strings.append(
             String.format(
@@ -53,19 +53,15 @@ class MIPS {
     }
 
     public String getCode() {
-        if (errors.equals("")) {
-            return strings.toString() + words.toString() + main.toString() + text.toString();
+        if (errors) {
+            return null;
         }
-        return errors.toString();
+        return strings.toString() + words.toString() + main.toString() + text.toString();
     }
 
-    public void addError(String err) {
-        errors.append(
-            String.format(
-                "%s\n",
-                err
-            )
-        );
+    public void printError(String err) {
+        System.err.println(err);
+        errors = true;
     }
 
     public void setMain(boolean b) {
