@@ -16,6 +16,6 @@ BEGIN
     stringTestTwo : STRING;
     stringTest := "something";
     stringTestTwo := "some2";
-    stringTest := stringTestTwo + 3;
+    stringTest := stringTestTwo;
  }
 END
