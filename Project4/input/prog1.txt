@@ -104,6 +104,22 @@ BEGIN
       DEFAULT: multVoidVarDecTwo := 5;
     }
 
+    singleIntVarDec := 100;
+
+    WHILE(singleIntVarDec > 90){
+      singleIntVarDec--;
+    }
+
+    WHILE(singleIntVarDec > 80){
+      whileLoopSingleIntVarDec : INT;
+      whileLoopSingleIntVarDec := -1;
+      singleIntVarDec := singleIntVarDec + whileLoopSingleIntVarDec;
+    }
+
+    FOR(INT i := 0; i < 5; i++){
+      singleIntVarDec := i;
+    }
+
     prompts    : STRING[6];
     prompts[0] := "Enter an int";
     prompts[1] := "Enter a real";

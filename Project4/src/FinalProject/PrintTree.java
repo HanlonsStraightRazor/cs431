@@ -1007,6 +1007,7 @@ class PrintTree extends DepthFirstAdapter {
         String id = "";
         String type = "";
         Symbol s = null;
+        int scope = -1;
         if (node.getFor() != null) {
             node.getFor().apply(this);
         }
@@ -1016,21 +1017,19 @@ class PrintTree extends DepthFirstAdapter {
         }
         if (node.getForOptionalType() != null) {
             type = ((ATypesType) ((AForOptionalType) node.getForOptionalType()).getType()).getTypeDecl().getText();
-            if type.equals("REAL"){
-                isFloat = true;
-            }
             node.getForOptionalType().apply(this);
         }
         if (node.getId() != null) {
             id = node.getId().getText();
-            int scope = getScope(id);
+            scope = getScope(id);
             if ((scope == -1) && type.equals("")) {
                 error.add("Variable " + id + " has not been declared.");
             }
             else if ((scope != -1) && type.equals("")) {
                 s = getSymbol(scope, id);
-                if (s.getType().equals("REAL")){
-                    isFloat = true;
+                if (isArray(s) && type.equals("")){
+                    error.add("Variable + " id + " cannot be used because it 
+                        is an Array.");
                 }
             }
             node.getId().apply(this);
@@ -1039,11 +1038,13 @@ class PrintTree extends DepthFirstAdapter {
             node.getEquals().apply(this);
         }
         if (node.getExprOrBool() != null) {
+            node.getExprOrBool().apply(this);
             if (scope != -1  && type.equals("")){
                 // varible already exists
                 if (s.getType().equals("STRING")) {
                     error.add("Cannot store numerical types into STRING.");
-                } else {
+                } 
+                else {
                     if ((s.getType().equals("BOOLEAN")
                             || s.getType().equals("INT"))
                             && isFloat) {
@@ -1052,39 +1053,24 @@ class PrintTree extends DepthFirstAdapter {
                                 + " has type "
                                 + s.getType()
                                 + " which cannot be converted to REAL.");
-                    } else {
-                        if (isArray(s)) {
+                    } 
+                    else {
+                        if (isFloat) {
                             text.append(DELIMITER
-                                    + "lw $t0, "
-                                    + s.getOffset()
-                                    + "($sp)\n");
-                            if (isFloat) {
-                                text.append(DELIMITER
-                                    + "swc1 $f0, "
-                                    + (index * 4)
-                                    + "($t0)\n");
-                            } else {
-                                text.append(DELIMITER
-                                    + "sw $s0, "
-                                    + (index * 4)
-                                    + "($t0)\n");
-                            }
-                        } else {
-                            if (isFloat) {
-                                text.append(DELIMITER
-                                    + "swc1 $f2, "
-                                    + Integer.toString(s.getOffset())
-                                    + "($sp)\n");
-                            } else {
-                                text.append(DELIMITER
-                                    + "sw $s2, "
-                                    + Integer.toString(s.getOffset())
-                                    + "($sp)\n");
-                            }
+                                + "swc1 $f0, "
+                                + Integer.toString(s.getOffset())
+                                + "($sp)\n");
+                        } 
+                        else {
+                            text.append(DELIMITER
+                                + "sw $s0, "
+                                + Integer.toString(s.getOffset())
+                                + "($sp)\n");
                         }
                     }
                 }
-            } else {
+            } 
+            else {
                 // varible is being created in for loop scope
                 if (type.equals("STRING")) {
                     error.add("Cannot store numerical types into STRING.");
@@ -1096,36 +1082,66 @@ class PrintTree extends DepthFirstAdapter {
                         error.add("Variable "
                                 + id
                                 + " has type "
-                                + s.getType()
+                                + type
                                 + " which cannot be converted to REAL.");
-                        }
-
-                        
-                        
-                labelnum++;
+                    } 
+                    else {
+                        //Regular stuff section
+                        if (isFloat) {
+                            if (type.equals("REAL")){
+                                text.append(DELIMITER
+                                + "swc1 $f0, "
+                                + Integer.toString(offset)
+                                + "($sp)\n");
+                            }
+                            else {
+                                error.add("Variable "
+                                + id
+                                + " has type "
+                                + type
+                                + " which cannot be converted to REAL.");
+                            }
+                        } 
+                        else {
+                            if (type.equals("BOOLEAN") && !(node.getExprOrBool() instanceof ABoolExprOrBool)){
+                                error.add("Variable "
+                                    + id
+                                    + " has been declared as type BOOLEAN");
+                            }
+                            else {
+                                text.append(DELIMITER
+                                    + "sw $s0, "
+                                    + Integer.toString(offset)
+                                    + "($sp)\n");
+                            }
+                        }   
+                    }
+                }
+                addToSymbolTable(id, new Variable(type, offset));
+                s = getSymbol(scope, id);
+                ((Variable) s).initialize();
+                offset -= 4;
             }
-            node.getExprOrBool().apply(this);
             isFloat = false;
-        
         }
         if (node.getFirst() != null) {
             node.getFirst().apply(this);
         }
         if (node.getBoolid() != null) {
             if(node.getBoolid() instanceof AIdBoolid){
-                String id = ((AIdBoolid) node.getBoolid()).getId().toString().trim();
-                int scope = getScope(id);
-                if (scope == -1) {
+                String boolId = ((AIdBoolid) node.getBoolid()).getId().toString().trim();
+                int boolScope = getScope(id);
+                if (boolScope == -1) {
                     error.add("Variable "
                         + id
                         + " has not been declared.");
                 } else {
                     labelnum += 2;
                 }
-                Variable var = (Variable) getSymbol(scope, id);
+                Variable var = (Variable) getSymbol(boolScope, boolId);
                 if(!var.getType().toString().equals("BOOLEAN")){
                     error.add("Variable "
-                        + id
+                        + boolId
                         + " has type "
                         + var.getType()
                         + " which cannot be converted to BOOLEAN.");
@@ -1136,25 +1152,19 @@ class PrintTree extends DepthFirstAdapter {
                     + "($sp)\n");
                 text.append(DELIMITER
                     + "beq $zero, $t0, "
-                    + falselabel
+                    + "place holder for false lable"
                     + "\n");
             node.getBoolid().apply(this);
+            }
         }
         if (node.getSecond() != null) {
             node.getSecond().apply(this);
         }
         if (node.getForIncrStep() != null) {
-            if (controlVarIsFloat){
-                isFloat = true;
-            }
             node.getForIncrStep().apply(this);
-            if (controlVarIsFloat){
-                isFloat = false;
-            }
         }
         if (node.getRparen() != null) {
             node.getRparen().apply(this);
-            incScope();
         }
         if (node.getLcurly() != null) {
             node.getLcurly().apply(this);
