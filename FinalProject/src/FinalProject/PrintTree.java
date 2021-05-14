@@ -2577,6 +2577,9 @@ class PrintTree extends DepthFirstAdapter {
         boolean isFloatAfterFirstExpr = false;
         if (node.getExpr() != null) {
             node.getExpr().apply(this);
+            if(isExprStringOrVoidOrBool){
+                mips.printError("Trying to add or subtract a variable of type VOID, STRING, or BOOLEAN.");
+            }
             if (isFloat) {
                 mips.swc1("$f0", offset, "$sp");
                 isFloatAfterFirstExpr = true;
@@ -2636,6 +2639,9 @@ class PrintTree extends DepthFirstAdapter {
         boolean divison = true;
         if (node.getTerm() != null) {
             node.getTerm().apply(this);
+            if(isExprStringOrVoidOrBool){
+                mips.printError("Trying to multiply or divide a variable of type VOID, STRING, or BOOLEAN.");
+            }
             if (isFloat) {
                 mips.s_s("$f0", offset, "$sp");
                 isFloatAfterFirstExpr = true;
