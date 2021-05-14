@@ -2174,7 +2174,14 @@ class PrintTree extends DepthFirstAdapter {
 
     @Override
     public void caseAReturnStmt(AReturnStmt node) {
-
+        String returnType = "";
+        if(globalSet.getCurrentClass() == null){
+            //if in global function decl
+            returnType = globalSet.getCurrentFunction().getReturnType();
+        } else {
+            //FIXME : a method in a class
+            //returnType = globalSet.getCurrentFunction().getReturnType();
+        }
         if (node.getReturn() != null) {
             node.getReturn().apply(this);
         }
@@ -2182,7 +2189,21 @@ class PrintTree extends DepthFirstAdapter {
         if (node.getExprOrBool() != null) {
             node.getExprOrBool().apply(this);
             if(node.getExprOrBool() instanceof ABoolExprOrBool){
-                
+                if(returnType.equals("BOOLEAN")){
+                    //FIXME
+                } else {
+                    mips.printError("Trying to return a boolean value instead of a " + returnType);
+                } else if(returnType.equals("VOID")){
+
+                } else if(returnType.equals("INT")){
+
+                } else if(returnType.equals("REAL")){
+
+                } else if(returnType.equals("STRING")){
+
+                }
+            } else {
+
             }
             if(isFloat){
                 if(currentFunc.getReturnType().equals("REAL")){

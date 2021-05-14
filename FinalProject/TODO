@@ -2,7 +2,7 @@ TODO
 ---
  - [ ] global objects
  - [ ] global methods
- - [ ] Use VOID MAIN method as entry point
+ - [x] Use VOID MAIN method as entry point
 
  - [ ] decl_object methodstmtseq
  - [ ] decl_object stmt
@@ -13,7 +13,7 @@ TODO
 ----
 REDO
 ----
- - [done] var_decl classmethodstmt
+ - [x] var_decl classmethodstmt
  - [ ] var_decl methodstmtseq
  - [ ] assign_equals (expression) methodstmtseq
  - [ ] assign_string methodstmtseq
