@@ -66,12 +66,7 @@ class PrintTree extends DepthFirstAdapter {
         if (node.getId() != null) {
             id = node.getId().getText();
             if (globalSet.containsClass(id)) {
-                mips.printError(
-                    String.format(
-                        "Class %s has already been declared.",
-                        id
-                    )
-                );
+                errorClassAlreadyDeclared(id);
             } else {
                 globalSet.addClass(id, new Class());
             }
@@ -193,22 +188,17 @@ class PrintTree extends DepthFirstAdapter {
         }
         if (node.getMoreIds() != null) {
             Node childNode = null;
-            if(node.getMoreIds() instanceof AMoreIdsMoreIds){
+            if (node.getMoreIds() instanceof AMoreIdsMoreIds) {
                 childNode = node.getMoreIds();
-                while(childNode instanceof AMoreIdsMoreIds){
+                while (childNode instanceof AMoreIdsMoreIds) {
                     id.add(((AMoreIdsMoreIds) childNode).getId().getText());
                     childNode = ((AMoreIdsMoreIds) childNode).getMoreIds();
                 }
             }
             node.getMoreIds().apply(this);
-            for(int i = 0; i < id.size(); i++){
-                if(symbolTable.declaredAtCurrentScope(id.get(i))){
-                    mips.printError(
-                        String.format(
-                            "Variable %s has already been declared in this scope.",
-                            id.get(i)
-                        )
-                    );
+            for (int i = 0; i < id.size(); i++) {
+                if (symbolTable.declaredAtCurrentScope(id.get(i))) {
+                    errorVariableAlreadyDeclared(id.get(i));
                 }
             }
         }
@@ -216,7 +206,7 @@ class PrintTree extends DepthFirstAdapter {
             node.getColon().apply(this);
         }
         if (node.getType() != null) {
-            if(node.getType() instanceof ATypesType){
+            if (node.getType() instanceof ATypesType) {
                 type = ((ATypesType) node.getType()).getTypeDecl().getText();
             } else {
                 mips.printError(
@@ -320,22 +310,17 @@ class PrintTree extends DepthFirstAdapter {
         }
         if (node.getMoreIds() != null) {
             Node childNode = null;
-            if(node.getMoreIds() instanceof AMoreIdsMoreIds){
+            if (node.getMoreIds() instanceof AMoreIdsMoreIds) {
                 childNode = node.getMoreIds();
-                while(childNode instanceof AMoreIdsMoreIds){
+                while (childNode instanceof AMoreIdsMoreIds) {
                     id.add(((AMoreIdsMoreIds) childNode).getId().getText());
                     childNode = ((AMoreIdsMoreIds) childNode).getMoreIds();
                 }
             }
             node.getMoreIds().apply(this);
-            for(int i = 0; i < id.size(); i++){
-                if(symbolTable.declaredAtCurrentScope(id.get(i))){
-                    mips.printError(
-                        String.format(
-                            "Variable %s has already been declared in this scope.",
-                            id.get(i)
-                        )
-                    );
+            for (int i = 0; i < id.size(); i++) {
+                if (symbolTable.declaredAtCurrentScope(id.get(i))) {
+                    errorVariableAlreadyDeclared(id.get(i));
                 }
             }
         }
@@ -343,7 +328,7 @@ class PrintTree extends DepthFirstAdapter {
             node.getColon().apply(this);
         }
         if (node.getType() != null) {
-            if(node.getType() instanceof ATypesType){
+            if (node.getType() instanceof ATypesType) {
                 type = ((ATypesType) node.getType()).getTypeDecl().getText();
             } else {
                 mips.printError(
@@ -356,7 +341,7 @@ class PrintTree extends DepthFirstAdapter {
             node.getType().apply(this);
         }
         if (node.getSemicolon() != null) {
-            for(int i = 0; i < id.size(); i++){
+            for (int i = 0; i < id.size(); i++) {
                 symbolTable.add(id.get(i), new Variable(type, offset));
                 offset -= 4;
             }
@@ -369,58 +354,24 @@ class PrintTree extends DepthFirstAdapter {
         String id = "";
         Symbol s = null;
         int index = -1;
-        Boolean errorOfSomeType = false;
         if (node.getId() != null) {
             node.getId().apply(this);
             id = node.getId().getText();
-            if (!symbolTable.contains(id)) {
-                mips.printError(
-                    String.format(
-                        "Variable %s has not been declared.",
-                        id
-                    )
-                );
-            } else {
-                s = symbolTable.getSymbol(id);
-            }
+            s = getSymbol(id);
         }
         if (node.getArrayOption() != null) {
-            if (node.getArrayOption() instanceof AArrayArrayOption) {
-                if (isArray(s)) {
-                    index = Integer.parseInt(
-                        ((AArrayArrayOption) node.getArrayOption()).getInt().getText()
-                    );
-                    if ((index < 0) || (index >= ((Array) s).getSize())) {
-                        mips.printError(
-                            String.format(
-                                "%d is not a valid index for array %s.",
-                                index,
-                                id
-                            )
-                        );
-                        errorOfSomeType = true;
-                    }
-                } else {
-                    mips.printError(
-                        String.format(
-                            "Variable %s is not an array.",
-                            id
-                        )
-                    );
-                    errorOfSomeType = true;
-                }
-            }
+            index = setArrayOption(id, s, node.getArrayOption());
             node.getArrayOption().apply(this);
         }
         if (node.getEquals() != null) {
             node.getEquals().apply(this);
         }
         if (node.getExpr() != null) {
-            if(!errorOfSomeType && s.getType().equals("REAL")){
+            if(index > -1 && s.getType().equals("REAL")){
                 isFloat = true;
             }
             node.getExpr().apply(this);
-            if (!errorOfSomeType) {
+            if (index > -1) {
                 if (s.getType().equals("STRING")) {
                     mips.printError("Cannot store numerical types into STRING.");
                 } else {
@@ -496,82 +447,18 @@ class PrintTree extends DepthFirstAdapter {
         }
         if (node.getId() != null) {
             id = node.getId().getText();
-            if (symbolTable.contains(id)) {
-                s = symbolTable.getSymbol(id);
-            } else {
-                mips.printError(
-                    String.format(
-                        "Variable %s has not been declared.",
-                        id
-
-                    )
-                );
-            }
+            s = getSymbol(id);
             node.getId().apply(this);
         }
         if (node.getArrayOption() != null) {
-            if (symbolTable.contains(id)) {
-                if (isArray(s)) {
-                    if (node.getArrayOption() instanceof AArrayArrayOption) {
-                        index = Integer.parseInt(
-                            ((AArrayArrayOption) node.getArrayOption()).getInt().getText()
-                        );
-                        if (index >= 0 && index < (((Array) s).getSize())) {
-                            if (((Array) s).isInitializedAt(index)) {
-                                mips.lw("$t0", s.getOffset(), "$sp");
-                            } else {
-                                mips.printError(
-                                    String.format(
-                                        "Array %s has not been initialized at index %d.",
-                                        id,
-                                        index
-                                    )
-                                );
-                            }
-                        } else {
-                            mips.printError(
-                                String.format(
-                                    "Index %d is not valid for array %s.",
-                                    index,
-                                    id
-                                )
-                            );
-                        }
-                    } else {
-                        mips.printError(
-                            String.format(
-                                "No index specified for array %s.",
-                                id
-                            )
-                        );
-                    }
-                } else {
-                    if (node.getArrayOption() instanceof AEpsilonArrayOption) {
-                        if (!((Variable) s).isInitialized()) {
-                            mips.printError(
-                                String.format(
-                                    "Variable %s has not been initialized.",
-                                    id
-                                )
-                            );
-                        }
-                    } else {
-                        mips.printError(
-                            String.format(
-                                "Variable %s is not an array.",
-                                id
-                            )
-                        );
-                    }
-                }
-            }
+            index = getArrayOption(id, s, node.getArrayOption());
             node.getArrayOption().apply(this);
         }
         if (node.getRparen() != null) {
             node.getRparen().apply(this);
         }
         if (node.getSemicolon() != null) {
-            if (symbolTable.contains(id)) {
+            if (index > -1) {
                 switch (s.getType()) {
                     case "REAL":
                         mips.li("$v0", 2);
@@ -657,57 +544,11 @@ class PrintTree extends DepthFirstAdapter {
         int index = -1;
         if (node.getId() != null) {
             id = node.getId().getText();
-            s = symbolTable.getSymbol(id);
-            if (s == null) {
-                mips.printError(
-                    String.format(
-                        "Variable %s has not been declared.",
-                        id
-                    )
-                );
-            }
+            s = getSymbol(id);
             node.getId().apply(this);
         }
         if (node.getArrayOption() != null) {
-            if (s != null) {
-                if (node.getArrayOption() instanceof AArrayArrayOption) {
-                    if (isArray(s)) {
-                        index = Integer.parseInt(
-                            ((AArrayArrayOption) node.getArrayOption()).getInt().getText()
-                        );
-                        if (index < 0 || index >= ((Array) s).getSize()) {
-                            mips.printError(
-                                String.format(
-                                    "Index %d is not valid for array %s.",
-                                    index,
-                                    id
-                                )
-                            );
-                            index = -1;
-                        }
-                    } else {
-                            mips.printError(
-                                String.format(
-                                    "Variable %s is not an array " +
-                                    "and may not have an index.",
-                                    id
-                                )
-                            );
-                    }
-                } else {
-                    if (isArray(s)) {
-                        mips.printError(
-                            String.format(
-                                "Variable %s is an array " +
-                                "and must have a valid index.",
-                                id
-                            )
-                        );
-                    } else {
-                        index = 0;
-                    }
-                }
-            }
+            index = getArrayOption(id, s, node.getArrayOption());
             node.getArrayOption().apply(this);
         }
         if (node.getIncr() != null) {
@@ -763,57 +604,11 @@ class PrintTree extends DepthFirstAdapter {
         int index = -1;
         if (node.getId() != null) {
             id = node.getId().getText();
-            s = symbolTable.getSymbol(id);
-            if (s == null) {
-                mips.printError(
-                    String.format(
-                        "Variable %s has not been declared.",
-                        id
-                    )
-                );
-            }
+            s = getSymbol(id);
             node.getId().apply(this);
         }
         if (node.getArrayOption() != null) {
-            if (s != null) {
-                if (node.getArrayOption() instanceof AArrayArrayOption) {
-                    if (isArray(s)) {
-                        index = Integer.parseInt(
-                            ((AArrayArrayOption) node.getArrayOption()).getInt().getText()
-                        );
-                        if (index < 0 || index >= ((Array) s).getSize()) {
-                            mips.printError(
-                                String.format(
-                                    "Index %d is not valid for array %s.",
-                                    index,
-                                    id
-                                )
-                            );
-                            index = -1;
-                        }
-                    } else {
-                            mips.printError(
-                                String.format(
-                                    "Variable %s is not an array " +
-                                    "and may not have an index.",
-                                    id
-                                )
-                            );
-                    }
-                } else {
-                    if (isArray(s)) {
-                        mips.printError(
-                            String.format(
-                                "Variable %s is an array " +
-                                "and must have a valid index.",
-                                id
-                            )
-                        );
-                    } else {
-                        index = 0;
-                    }
-                }
-            }
+            index = getArrayOption(id, s, node.getArrayOption());
             node.getArrayOption().apply(this);
         }
         if (node.getDecr() != null) {
@@ -897,15 +692,8 @@ class PrintTree extends DepthFirstAdapter {
         int index = -1;
         if (node.getId() != null) {
             id = node.getId().getText();
-            s = symbolTable.getSymbol(id);
-            if (s == null) {
-                mips.printError(
-                    String.format(
-                        "Variable %s has not been declared.",
-                        id
-                    )
-                );
-            } else {
+            s = getSymbol(id);
+            if (s != null) {
                 if(s.getType().equals("BOOLEAN")){
                     index = 0;
                 } else {
@@ -922,43 +710,7 @@ class PrintTree extends DepthFirstAdapter {
             node.getId().apply(this);
         }
         if (node.getArrayOption() != null) {
-            if (s != null) {
-                if (node.getArrayOption() instanceof AArrayArrayOption){
-                    if (isArray(s)) {
-                        index = Integer.parseInt(
-                            ((AArrayArrayOption) node.getArrayOption()).getInt().getText()
-                        );
-                        if ((index < 0) || (index >= ((Array) s).getSize())) {
-                            mips.printError(
-                                String.format(
-                                    "Index %d is invalid for array %s.",
-                                    index,
-                                    id
-                                )
-                            );
-                        }
-                    } else {
-                        mips.printError(
-                            String.format(
-                                "Variable %s is not an array " +
-                                "and may not have an index.",
-                                id
-                            )
-                        );
-                    }
-                } else {
-                    if (isArray(s)) {
-                        mips.printError(
-                            String.format(
-                                "Missing index for array %s.",
-                                id
-                            )
-                        );
-                    } else {
-                        index = 0;
-                    }
-                }
-            }
+            index = setArrayOption(id, s, node.getArrayOption());
             node.getArrayOption().apply(this);
         }
         if (node.getEquals() != null) {
@@ -1006,58 +758,24 @@ class PrintTree extends DepthFirstAdapter {
         String id = "";
         Symbol s = null;
         int index = -1;
-        Boolean errorOfSomeType = false;
         if (node.getId() != null) {
             node.getId().apply(this);
             id = node.getId().getText();
-            if (!symbolTable.contains(id)) {
-                mips.printError(
-                    String.format(
-                        "Variable %s has not been declared.",
-                        id
-                    )
-                );
-            } else {
-                s = symbolTable.getSymbol(id);
-            }
+            s = getSymbol(id);
         }
         if (node.getArrayOption() != null) {
-            if (node.getArrayOption() instanceof AArrayArrayOption) {
-                if (isArray(s)) {
-                    index = Integer.parseInt(
-                        ((AArrayArrayOption) node.getArrayOption()).getInt().getText()
-                    );
-                    if ((index < 0) || (index >= ((Array) s).getSize())) {
-                        mips.printError(
-                            String.format(
-                                "%d is not a valid index for array %s.",
-                                index,
-                                id
-                            )
-                        );
-                        errorOfSomeType = true;
-                    }
-                } else {
-                    mips.printError(
-                        String.format(
-                            "Variable %s is not an array.",
-                            id
-                        )
-                    );
-                    errorOfSomeType = true;
-                }
-            }
+            index = setArrayOption(id, s, node.getArrayOption());
             node.getArrayOption().apply(this);
         }
         if (node.getEquals() != null) {
             node.getEquals().apply(this);
         }
         if (node.getExpr() != null) {
-            if(!errorOfSomeType && s.getType().equals("REAL")){
+            if(index > -1 && s.getType().equals("REAL")){
                 isFloat = true;
             }
             node.getExpr().apply(this);
-            if (!errorOfSomeType) {
+            if (index > -1) {
                 if (s.getType().equals("STRING")) {
                     mips.sw("$s0", s.getOffset(), "$sp");
                 } else {
@@ -1107,15 +825,8 @@ class PrintTree extends DepthFirstAdapter {
         Symbol s = null;
         int index = -1;
         if (node.getId() != null) {
-            if (!symbolTable.contains(id)) {
-                mips.printError(
-                    String.format(
-                        "Variable %s has not been declared.",
-                        id
-                    )
-                );
-            } else {
-                s = symbolTable.getSymbol(id);
+            s = getSymbol(id);
+            if (s != null) {
                 if (!s.getType().equals("STRING")) {
                     mips.printError(
                         String.format(
@@ -1130,46 +841,14 @@ class PrintTree extends DepthFirstAdapter {
             node.getId().apply(this);
         }
         if (node.getArrayOption() != null) {
-            if (symbolTable.contains(id)) {
-                if (node.getArrayOption() instanceof AEpsilonArrayOption) {
-                    if (isArray(s)) {
-                        mips.printError("No array index specified.");
-                    } else {
-                        index = 0;
-                    }
-                } else {
-                    if (isArray(s)) {
-                        int num = Integer.parseInt(
-                            ((AArrayArrayOption) node.getArrayOption()).getInt().getText()
-                        );
-                        if ((((Array) s).getSize() > num)) {
-                            index = num;
-                        } else {
-                            mips.printError(
-                                String.format(
-                                    "Index %d for array %s is invalid.",
-                                    num,
-                                    id
-                                )
-                            );
-                        }
-                    } else {
-                        mips.printError(
-                            String.format(
-                                "Variable %s is not an array.",
-                                id
-                            )
-                        );
-                    }
-                }
-            }
+            index = setArrayOption(id, s, node.getArrayOption());
             node.getArrayOption().apply(this);
         }
         if (node.getEquals() != null) {
             node.getEquals().apply(this);
         }
         if (node.getAnychars() != null) {
-            if (index != -1) {
+            if (index > -1) {
                 mips.la("$t0", mips.addString(node.getAnychars().getText()));
                 if (isArray(s)) {
                     mips.lw("$t1", s.getOffset(), "$sp");
@@ -1199,22 +878,17 @@ class PrintTree extends DepthFirstAdapter {
         }
         if (node.getMoreIds() != null) {
             Node childNode = null;
-            if(node.getMoreIds() instanceof AMoreIdsMoreIds){
+            if (node.getMoreIds() instanceof AMoreIdsMoreIds) {
                 childNode = node.getMoreIds();
-                while(childNode instanceof AMoreIdsMoreIds){
+                while (childNode instanceof AMoreIdsMoreIds) {
                     id.add(((AMoreIdsMoreIds) childNode).getId().getText());
                     childNode = ((AMoreIdsMoreIds) childNode).getMoreIds();
                 }
             }
             node.getMoreIds().apply(this);
-            for(int i = 0; i < id.size(); i++){
-                if(symbolTable.declaredAtCurrentScope(id.get(i))){
-                    mips.printError(
-                        String.format(
-                            "Variable %s has already been declared in this scope.",
-                            id.get(i)
-                        )
-                    );
+            for (int i = 0; i < id.size(); i++) {
+                if (symbolTable.declaredAtCurrentScope(id.get(i))) {
+                    errorVariableAlreadyDeclared(id.get(i));
                 }
             }
         }
@@ -1222,7 +896,7 @@ class PrintTree extends DepthFirstAdapter {
             node.getColon().apply(this);
         }
         if (node.getType() != null) {
-            if(node.getType() instanceof ATypesType){
+            if (node.getType() instanceof ATypesType) {
                 type = ((ATypesType) node.getType()).getTypeDecl().getText();
             } else {
                 mips.printError(
@@ -1235,17 +909,19 @@ class PrintTree extends DepthFirstAdapter {
             node.getType().apply(this);
         }
         if (node.getArrayOption() != null) {
-            if(node.getArrayOption() instanceof AArrayArrayOption){
+            if (node.getArrayOption() instanceof AArrayArrayOption) {
                 size = Integer.parseInt(
                     ((AArrayArrayOption) node.getArrayOption()).getInt().getText()
                 );
                 if (size < 1) {
                     mips.printError(
                         String.format(
-                            "%d is not a valid array size.",
-                            size
+                            "Size %d is invalid for array %s.",
+                            size,
+                            id
                         )
                     );
+                    size = -1;
                 }
             } else {
                 size = 0;
@@ -1253,20 +929,17 @@ class PrintTree extends DepthFirstAdapter {
             node.getArrayOption().apply(this);
         }
         if (node.getSemicolon() != null) {
-            if (size > -1) {
-                //if it is not an array
-                if (size == 0) {
-                    for(int i = 0; i < id.size(); i++){
-                        symbolTable.add(id.get(i), new Variable(type, offset));
-                        offset -= 4;
-                    }
-                } else {
-                    for(int i = 0; i < id.size(); i++){
-                        mips.la("$t0", mips.addWords(size));
-                        mips.sw("$t0", offset, "$sp");
-                        symbolTable.add(id.get(i), new Array(type, offset, size));
-                        offset -= 4;
-                    }
+            if (size >= 1) {
+                for (int i = 0; i < id.size(); i++) {
+                    mips.la("$t0", mips.addWords(size));
+                    mips.sw("$t0", offset, "$sp");
+                    symbolTable.add(id.get(i), new Array(type, offset, size));
+                    offset -= 4;
+                }
+            } else if (size == 0) {
+                for (int i = 0; i < id.size(); i++) {
+                    symbolTable.add(id.get(i), new Variable(type, offset));
+                    offset -= 4;
                 }
             }
             node.getSemicolon().apply(this);
@@ -1278,6 +951,7 @@ class PrintTree extends DepthFirstAdapter {
         String falselabel = mips.getLabel();
         boolean isConstant = false;
         boolean constant = false;
+        Symbol s = null;
         if (node.getIf() != null) {
             node.getIf().apply(this);
         }
@@ -1288,11 +962,11 @@ class PrintTree extends DepthFirstAdapter {
             node.getBoolid().apply(this);
             if(node.getBoolid() instanceof AIdBoolid){
                 String id = ((AIdBoolid) node.getBoolid()).getId().getText();
-                if (symbolTable.contains(id)) {
-                    Variable var = (Variable) symbolTable.getSymbol(id);
-                    if (((Variable) var).getType().equals("BOOLEAN")) {
+                s = getSymbol(id);
+                if (s != null) {
+                    if (s.getType().equals("BOOLEAN")) {
                         mips.incLabel();
-                        mips.lw("$t0", var.getOffset(), "$sp");
+                        mips.lw("$t0", s.getOffset(), "$sp");
                         mips.beq("$zero", "$t0", falselabel);
                     } else {
                         mips.printError(
@@ -1300,17 +974,10 @@ class PrintTree extends DepthFirstAdapter {
                                 "Variable %s has type %s which " +
                                 "cannot be converted to BOOLEAN.",
                                 id,
-                                var.getType()
+                                s.getType()
                             )
                         );
                     }
-                } else {
-                    mips.printError(
-                        String.format(
-                            "Variable %s has not been declared.",
-                            id
-                        )
-                    );
                 }
             } else {
                 ABoolBoolid node2 = (ABoolBoolid) node.getBoolid();
@@ -1355,6 +1022,7 @@ class PrintTree extends DepthFirstAdapter {
         String endlabel = mips.getLabel();
         boolean isConstant = false;
         boolean constant = false;
+        Symbol s = null;
         if (node.getIf() != null) {
             node.getIf().apply(this);
         }
@@ -1364,31 +1032,25 @@ class PrintTree extends DepthFirstAdapter {
         if (node.getBoolid() != null) {
             if(node.getBoolid() instanceof AIdBoolid){
                 String id = ((AIdBoolid) node.getBoolid()).getId().getText();
-                if (symbolTable.contains(id)) {
-                    mips.incLabel();
+                s = getSymbol(id);
+                if (s == null) {
+                    mips.decLabel();
                 } else {
-                    mips.decLabel();
-                    mips.printError(
-                        String.format(
-                            "Variable %s has not been declared.",
-                            id
-                        )
-                    );
+                    mips.incLabel();
+                    if(s.getType().equals("BOOLEAN")){
+                        mips.decLabel();
+                        mips.printError(
+                            String.format(
+                                "Variable %s has type %s which" +
+                                "cannot be converted to BOOLEAN.",
+                                id,
+                                s.getType()
+                            )
+                        );
+                    }
+                    mips.lw("$t0", s.getOffset(), "$sp");
+                    mips.beq("$zero", "$t0", falselabel);
                 }
-                Variable var = (Variable) symbolTable.getSymbol(id);
-                if(!var.getType().toString().equals("BOOLEAN")){
-                    mips.decLabel();
-                    mips.printError(
-                        String.format(
-                            "Variable %s has type %s which" +
-                            "cannot be converted to BOOLEAN.",
-                            id,
-                            var.getType()
-                        )
-                    );
-                }
-                mips.lw("$t0", var.getOffset(), "$sp");
-                mips.beq("$zero", "$t0", falselabel);
             } else {
                 ABoolBoolid node2 = (ABoolBoolid) node.getBoolid();
                 if (node2.getBoolean() instanceof ATrueBoolean) {
@@ -1458,7 +1120,7 @@ class PrintTree extends DepthFirstAdapter {
         String falselabel = mips.getLabel();
         boolean isConstant = false;
         boolean constant = false;
-        Variable var = null;
+        Symbol s = null;
         if (node.getWhile() != null) {
             node.getWhile().apply(this);
         }
@@ -1468,11 +1130,13 @@ class PrintTree extends DepthFirstAdapter {
         if (node.getBoolid() != null) {
             if (node.getBoolid() instanceof AIdBoolid) {
                 String id = ((AIdBoolid) node.getBoolid()).getId().getText();
-                if (symbolTable.contains(id)) {
-                    var = (Variable) symbolTable.getSymbol(id);
-                    if (var.getType().equals("BOOLEAN")) {
+                s = getSymbol(id);
+                if (s == null) {
+                    mips.decLabel();
+                } else {
+                    if (s.getType().equals("BOOLEAN")) {
                         mips.incLabel();
-                        mips.lw("$t0", var.getOffset(), "$sp");
+                        mips.lw("$t0", s.getOffset(), "$sp");
                         mips.beq("$zero", "$t0", falselabel);
                         mips.addLabel(truelabel);
                     } else {
@@ -1482,18 +1146,10 @@ class PrintTree extends DepthFirstAdapter {
                                 "Variable %s has type %s which " +
                                 "cannot be converted to BOOLEAN.",
                                 id,
-                                var.getType()
+                                s.getType()
                             )
                         );
                     }
-                } else {
-                    mips.decLabel();
-                    mips.printError(
-                        String.format(
-                            "Variable %s has not been declared.",
-                            id
-                        )
-                    );
                 }
             } else {
                 ABoolBoolid ABoolBoolidNode = (ABoolBoolid) node.getBoolid();
@@ -1524,7 +1180,7 @@ class PrintTree extends DepthFirstAdapter {
                 mips.j(truelabel);
             } else if (!isConstant) {
                 node.getStmtseq().apply(this);
-                mips.lw("$t0", var.getOffset(), "$sp");
+                mips.lw("$t0", s.getOffset(), "$sp");
                 mips.bne("$zero", "$t0", truelabel);
                 mips.j(falselabel);
             }
@@ -1591,55 +1247,11 @@ class PrintTree extends DepthFirstAdapter {
         int index = -1;
         if (node.getId() != null) {
             id = node.getId().getText();
-            if (symbolTable.contains(id)) {
-                s = symbolTable.getSymbol(id);
-            } else {
-                mips.printError(
-                    String.format(
-                        "Variable %s has not been declared.",
-                        id
-                    )
-                );
-            }
+            s = getSymbol(id);
             node.getId().apply(this);
         }
         if (node.getArrayOption() != null) {
-            if (isArray(s)) {
-                if(node.getArrayOption() instanceof AArrayArrayOption){
-                    index = Integer.parseInt(
-                        ((AArrayArrayOption) node.getArrayOption()).getInt().getText()
-                    );
-                    if ((index < 0) || (index >= ((Array) s).getSize())) {
-                        mips.printError(
-                            String.format(
-                                "Index %d is invalid for array %s.",
-                                index,
-                                id
-                            )
-                        );
-                        index = -1;
-                    }
-                } else {
-                    mips.printError(
-                        String.format(
-                            "No index given for array %s.",
-                            id
-                        )
-                    );
-                }
-            } else {
-                if(node.getArrayOption() instanceof AEpsilonArrayOption){
-                    index = 0;
-                } else {
-                    mips.printError(
-                        String.format(
-                            "Variable %s is not an array " +
-                            "and may not be given an index.",
-                            id
-                        )
-                    );
-                }
-            }
+            index = setArrayOption(id, s, node.getArrayOption());
             node.getArrayOption().apply(this);
         }
         if (node.getEquals() != null) {
@@ -1655,7 +1267,7 @@ class PrintTree extends DepthFirstAdapter {
             node.getRparen().apply(this);
         }
         if (node.getSemicolon() != null) {
-            if (index != -1) {
+            if (index > -1) {
                 if (isArray(s)) {
                     switch (s.getType()) {
                         case "REAL":
@@ -1753,82 +1365,18 @@ class PrintTree extends DepthFirstAdapter {
         }
         if (node.getId() != null) {
             id = node.getId().getText();
-            if (symbolTable.contains(id)) {
-                s = symbolTable.getSymbol(id);
-            } else {
-                mips.printError(
-                    String.format(
-                        "Variable %s has not been declared.",
-                        id
-
-                    )
-                );
-            }
+            s = getSymbol(id);
             node.getId().apply(this);
         }
         if (node.getArrayOption() != null) {
-            if (symbolTable.contains(id)) {
-                if (isArray(s)) {
-                    if (node.getArrayOption() instanceof AArrayArrayOption) {
-                        index = Integer.parseInt(
-                            ((AArrayArrayOption) node.getArrayOption()).getInt().getText()
-                        );
-                        if (index >= 0 && index < (((Array) s).getSize())) {
-                            if (((Array) s).isInitializedAt(index)) {
-                                mips.lw("$t0", s.getOffset(), "$sp");
-                            } else {
-                                mips.printError(
-                                    String.format(
-                                        "Array %s has not been initialized at index %d.",
-                                        id,
-                                        index
-                                    )
-                                );
-                            }
-                        } else {
-                            mips.printError(
-                                String.format(
-                                    "Index %d is not valid for array %s.",
-                                    index,
-                                    id
-                                )
-                            );
-                        }
-                    } else {
-                        mips.printError(
-                            String.format(
-                                "No index specified for array %s.",
-                                id
-                            )
-                        );
-                    }
-                } else {
-                    if (node.getArrayOption() instanceof AEpsilonArrayOption) {
-                        if (!((Variable) s).isInitialized()) {
-                            mips.printError(
-                                String.format(
-                                    "Variable %s has not been initialized.",
-                                    id
-                                )
-                            );
-                        }
-                    } else {
-                        mips.printError(
-                            String.format(
-                                "Variable %s is not an array.",
-                                id
-                            )
-                        );
-                    }
-                }
-            }
+            index = getArrayOption(id, s, node.getArrayOption());
             node.getArrayOption().apply(this);
         }
         if (node.getRparen() != null) {
             node.getRparen().apply(this);
         }
         if (node.getSemicolon() != null) {
-            if (symbolTable.contains(id)) {
+            if (index > -1) {
                 switch (s.getType()) {
                     case "REAL":
                         mips.li("$v0", 2);
@@ -1889,57 +1437,11 @@ class PrintTree extends DepthFirstAdapter {
         int index = -1;
         if (node.getId() != null) {
             id = node.getId().getText();
-            s = symbolTable.getSymbol(id);
-            if (s == null) {
-                mips.printError(
-                    String.format(
-                        "Variable %s has not been declared.",
-                        id
-                    )
-                );
-            }
+            s = getSymbol(id);
             node.getId().apply(this);
         }
         if (node.getArrayOption() != null) {
-            if (s != null) {
-                if (node.getArrayOption() instanceof AArrayArrayOption) {
-                    if (isArray(s)) {
-                        index = Integer.parseInt(
-                            ((AArrayArrayOption) node.getArrayOption()).getInt().getText()
-                        );
-                        if (index < 0 || index >= ((Array) s).getSize()) {
-                            mips.printError(
-                                String.format(
-                                    "Index %d is not valid for array %s.",
-                                    index,
-                                    id
-                                )
-                            );
-                            index = -1;
-                        }
-                    } else {
-                            mips.printError(
-                                String.format(
-                                    "Variable %s is not an array " +
-                                    "and may not have an index.",
-                                    id
-                                )
-                            );
-                    }
-                } else {
-                    if (isArray(s)) {
-                        mips.printError(
-                            String.format(
-                                "Variable %s is an array " +
-                                "and must have a valid index.",
-                                id
-                            )
-                        );
-                    } else {
-                        index = 0;
-                    }
-                }
-            }
+            index = getArrayOption(id, s, node.getArrayOption());
             node.getArrayOption().apply(this);
         }
         if (node.getIncr() != null) {
@@ -1995,57 +1497,11 @@ class PrintTree extends DepthFirstAdapter {
         int index = -1;
         if (node.getId() != null) {
             id = node.getId().getText();
-            s = symbolTable.getSymbol(id);
-            if (s == null) {
-                mips.printError(
-                    String.format(
-                        "Variable %s has not been declared.",
-                        id
-                    )
-                );
-            }
+            s = getSymbol(id);
             node.getId().apply(this);
         }
         if (node.getArrayOption() != null) {
-            if (s != null) {
-                if (node.getArrayOption() instanceof AArrayArrayOption) {
-                    if (isArray(s)) {
-                        index = Integer.parseInt(
-                            ((AArrayArrayOption) node.getArrayOption()).getInt().getText()
-                        );
-                        if (index < 0 || index >= ((Array) s).getSize()) {
-                            mips.printError(
-                                String.format(
-                                    "Index %d is not valid for array %s.",
-                                    index,
-                                    id
-                                )
-                            );
-                            index = -1;
-                        }
-                    } else {
-                            mips.printError(
-                                String.format(
-                                    "Variable %s is not an array " +
-                                    "and may not have an index.",
-                                    id
-                                )
-                            );
-                    }
-                } else {
-                    if (isArray(s)) {
-                        mips.printError(
-                            String.format(
-                                "Variable %s is an array " +
-                                "and must have a valid index.",
-                                id
-                            )
-                        );
-                    } else {
-                        index = 0;
-                    }
-                }
-            }
+            index = getArrayOption(id, s, node.getArrayOption());
             node.getArrayOption().apply(this);
         }
         if (node.getDecr() != null) {
@@ -2227,15 +1683,8 @@ class PrintTree extends DepthFirstAdapter {
         int index = -1;
         if (node.getId() != null) {
             id = node.getId().getText();
-            s = symbolTable.getSymbol(id);
-            if (s == null) {
-                mips.printError(
-                    String.format(
-                        "Variable %s has not been declared.",
-                        id
-                    )
-                );
-            } else {
+            s = getSymbol(id);
+            if (s != null) {
                 if(s.getType().equals("BOOLEAN")){
                     index = 0;
                 } else {
@@ -2252,43 +1701,7 @@ class PrintTree extends DepthFirstAdapter {
             node.getId().apply(this);
         }
         if (node.getArrayOption() != null) {
-            if (s != null) {
-                if (node.getArrayOption() instanceof AArrayArrayOption){
-                    if (isArray(s)) {
-                        index = Integer.parseInt(
-                            ((AArrayArrayOption) node.getArrayOption()).getInt().getText()
-                        );
-                        if ((index < 0) || (index >= ((Array) s).getSize())) {
-                            mips.printError(
-                                String.format(
-                                    "Index %d is invalid for array %s.",
-                                    index,
-                                    id
-                                )
-                            );
-                        }
-                    } else {
-                        mips.printError(
-                            String.format(
-                                "Variable %s is not an array " +
-                                "and may not have an index.",
-                                id
-                            )
-                        );
-                    }
-                } else {
-                    if (isArray(s)) {
-                        mips.printError(
-                            String.format(
-                                "Missing index for array %s.",
-                                id
-                            )
-                        );
-                    } else {
-                        index = 0;
-                    }
-                }
-            }
+            index = setArrayOption(id, s, node.getArrayOption());
             node.getArrayOption().apply(this);
         }
         if (node.getEquals() != null) {
@@ -2843,7 +2256,7 @@ class PrintTree extends DepthFirstAdapter {
         Symbol s = null;
         if (node.getId() != null) {
             id = node.getId().getText();
-            s = symbolTable.getSymbol(id);
+            s = getSymbol(id);
             if (s == null) {
                 mips.printError(
                     String.format(
@@ -2896,15 +2309,8 @@ class PrintTree extends DepthFirstAdapter {
         Symbol s = null;
         if (node.getId() != null) {
             id = node.getId().getText();
-            s = symbolTable.getSymbol(id);
-            if (s == null) {
-                mips.printError(
-                    String.format(
-                        "Variable %s has not been declared.",
-                        id
-                    )
-                );
-            } else {
+            s = getSymbol(id);
+            if (s != null) {
                 if (((Variable) s).isInitialized()) {
                     String type = s.getType();
                     if(type.equals("STRING") || type.equals("BOOLEAN") || type.equals("VOID")){
@@ -3078,7 +2484,123 @@ class PrintTree extends DepthFirstAdapter {
         }
     }
 
-    public boolean isArray(Symbol symbol) {
+    private boolean isArray(Symbol symbol) {
         return symbol instanceof Array;
+    }
+
+    private void errorClassAlreadyDeclared(String id) {
+        mips.printError(
+            String.format(
+                "Class %s has already been declared.",
+                id
+            )
+        );
+    }
+    private void errorFunctionAlreadyDeclared(String id) {
+        mips.printError(
+            String.format(
+                "Function %s has already been declared.",
+                id
+            )
+        );
+    }
+    private void errorMethodAlreadyDeclared(String id) {
+        mips.printError(
+            String.format(
+                "Method %s has already been declared.",
+                id
+            )
+        );
+    }
+    private void errorVariableAlreadyDeclared(String id) {
+        mips.printError(
+            String.format(
+                "Variable %s has already been declared.",
+                id
+            )
+        );
+    }
+    private Symbol getSymbol(String id) {
+        Symbol s = symbolTable.getSymbol(id);
+        if (s == null) {
+            mips.printError(
+                String.format(
+                    "Variable %s has not been declared.",
+                    id
+                )
+            );
+        }
+        return s;
+    }
+    private int setArrayOption(String id, Symbol s, PArrayOption ao) {
+        if (s != null) {
+            if (isArray(s)) {
+                if (ao instanceof AArrayArrayOption) {
+                    int index = Integer.parseInt(
+                        ((AArrayArrayOption) ao).getInt().getText()
+                    );
+                    if (((Array) s).isOutOfBounds(index)) {
+                        mips.printError(
+                            String.format(
+                                "Index %d is invalid for array %s.",
+                                index,
+                                id
+                            )
+                        );
+                    } else {
+                        return index;
+                    }
+                } else {
+                    mips.printError(
+                        String.format(
+                            "No index specified for array %s.",
+                            id
+                        )
+                    );
+                }
+            } else {
+                if (ao instanceof AEpsilonArrayOption) {
+                    return 0;
+                } else {
+                    mips.printError(
+                        String.format(
+                            "Variable %s is not an array " +
+                            "and may not be given an index.",
+                            id
+                        )
+                    );
+                }
+            }
+        }
+        return -1;
+    }
+    private int getArrayOption(String id, Symbol s, PArrayOption ao) {
+        int index = setArrayOption(id, s, ao);
+        if (index > -1) {
+            if (isArray(s)) {
+                if (((Array) s).isInitializedAt(index)) {
+                    mips.lw("$t0", s.getOffset(), "$sp");
+                } else {
+                    mips.printError(
+                        String.format(
+                            "Array %s has not been " +
+                            "initialized at index %d.",
+                            id,
+                            index
+                        )
+                    );
+                    index = -1;
+                }
+            } else if (!((Variable) s).isInitialized()) {
+                mips.printError(
+                    String.format(
+                        "Variable %s has not been initialized.",
+                        id
+                    )
+                );
+                index = -1;
+            }
+        }
+        return index;
     }
 }
