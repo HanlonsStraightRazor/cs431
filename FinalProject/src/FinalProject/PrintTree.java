@@ -17,6 +17,7 @@ class PrintTree extends DepthFirstAdapter {
     private int offset;
     private boolean isFloat;
     private String breakLabel;
+    private boolean isExprStringOrVoidOrBool;
     /*
      * Constructor. Initializes non final class variables.
      */
@@ -26,6 +27,7 @@ class PrintTree extends DepthFirstAdapter {
         mips = new MIPS();
         offset = 0;
         isFloat = false;
+        isExprStringOrVoidOrBool = false;
         breakLabel = "shouldNotShowUp";
     }
 
@@ -1057,7 +1059,7 @@ class PrintTree extends DepthFirstAdapter {
             node.getExpr().apply(this);
             if (!errorOfSomeType) {
                 if (s.getType().equals("STRING")) {
-                    mips.printError("Cannot store numerical types into STRING.");
+                    mips.sw("$s0", s.getOffset(), "$sp");
                 } else {
                     if ((s.getType().equals("BOOLEAN")
                             || s.getType().equals("INT"))
@@ -2172,26 +2174,25 @@ class PrintTree extends DepthFirstAdapter {
 
     @Override
     public void caseAReturnStmt(AReturnStmt node) {
+
         if (node.getReturn() != null) {
             node.getReturn().apply(this);
         }
+        Function currentFunc = globalSet.getCurrentFunction();
         if (node.getExprOrBool() != null) {
-            if (node.getExprOrBool() instanceof AExprOrBool) {
-                //TODO: Add value to S0 when expr works
-            }
-            else if (node.getExprOrBool() instanceof ABoolExprOrBool) {
-                if(((ABoolExprOrBool)node.getExprOrBool()).getBoolean() instanceof AFalseBoolean) {
-                    mips.li("$s0", 0);
-                } else {
-                    mips.li("$s0", 1);
-                }
-            }
-            else {
-                mips.printError(
-                    "Return type is not an expression or boolean."
-                );
-            }
             node.getExprOrBool().apply(this);
+            if(node.getExprOrBool() instanceof ABoolExprOrBool){
+                
+            }
+            if(isFloat){
+                if(currentFunc.getReturnType().equals("REAL")){
+                    mips.mfc1("$v0","$f0");
+                } else {
+                    mips.printError("Function " + currentFunc.getLabel() + " is trying to return a REAL");
+                }
+            } else {
+                mips.move("$v0","$s0");
+            }
         }
         if (node.getSemicolon() != null) {
             node.getSemicolon().apply(this);
@@ -2571,6 +2572,7 @@ class PrintTree extends DepthFirstAdapter {
 
     @Override
     public void caseAAddExpr(AAddExpr node) {
+        isExprStringOrVoidOrBool = false;
         boolean addition = true;
         boolean isFloatAfterFirstExpr = false;
         if (node.getExpr() != null) {
@@ -2592,6 +2594,9 @@ class PrintTree extends DepthFirstAdapter {
         }
         if (node.getTerm() != null) {
             node.getTerm().apply(this);
+            if(isExprStringOrVoidOrBool){
+                mips.printError("Trying to add or subtract a variable of type VOID, STRING, or BOOLEAN.");
+            }
             offset += 4;
             if (isFloat) {
                 if(isFloatAfterFirstExpr){
@@ -2619,6 +2624,7 @@ class PrintTree extends DepthFirstAdapter {
 
     @Override
     public void caseATermExpr(ATermExpr node) {
+        isExprStringOrVoidOrBool = false;
         if (node.getTerm() != null) {
             node.getTerm().apply(this);
         }
@@ -2647,6 +2653,9 @@ class PrintTree extends DepthFirstAdapter {
         }
         if (node.getFactor() != null) {
             node.getFactor().apply(this);
+            if(isExprStringOrVoidOrBool){
+                mips.printError("Trying to multiply or divide a variable of type VOID, STRING, or BOOLEAN.");
+            }
             offset += 4;
             if (isFloat) {
                 if(isFloatAfterFirstExpr){
@@ -2815,6 +2824,10 @@ class PrintTree extends DepthFirstAdapter {
                         id
                     )
                 );
+            }
+            String type = s.getType();
+            if(type.equals("STRING") || type.equals("BOOLEAN") || type.equals("VOID")){
+                isExprStringOrVoidOrBool = true;
             }
             node.getId().apply(this);
         }

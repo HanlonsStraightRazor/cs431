@@ -48,7 +48,7 @@ class GlobalSet {
         currentFunction = null;
     }
 
-    public Function getCurrentFunction(String id) {
+    public Function getCurrentFunction() {
         return currentFunction;
     }
 
