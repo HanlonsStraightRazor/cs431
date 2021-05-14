@@ -2879,6 +2879,10 @@ class PrintTree extends DepthFirstAdapter {
                 );
             } else {
                 if (((Variable) s).isInitialized()) {
+                    String type = s.getType();
+                    if(type.equals("STRING") || type.equals("BOOLEAN") || type.equals("VOID")){
+                        isExprStringOrVoidOrBool = true;
+                    }
                     if (isFloat || s.getType().equals("REAL")) {
                         isFloat = true;
                         if(s.getType().equals("REAL")){
