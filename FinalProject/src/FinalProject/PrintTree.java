@@ -483,6 +483,9 @@ class PrintTree extends DepthFirstAdapter {
 
     @Override
     public void caseAPrintStmtMethodstmtseq(APrintStmtMethodstmtseq node) {
+        String id = "";
+        Symbol s = null;
+        int index = -1;
         if (node.getPut() != null) {
             node.getPut().apply(this);
         }
@@ -490,15 +493,132 @@ class PrintTree extends DepthFirstAdapter {
             node.getLparen().apply(this);
         }
         if (node.getId() != null) {
+            id = node.getId().getText();
+            if (symbolTable.contains(id)) {
+                s = symbolTable.getSymbol(id);
+            } else {
+                mips.printError(
+                    String.format(
+                        "Variable %s has not been declared.",
+                        id
+
+                    )
+                );
+            }
             node.getId().apply(this);
         }
         if (node.getArrayOption() != null) {
+            if (symbolTable.contains(id)) {
+                if (isArray(s)) {
+                    if (node.getArrayOption() instanceof AArrayArrayOption) {
+                        index = Integer.parseInt(
+                            ((AArrayArrayOption) node.getArrayOption()).getInt().getText()
+                        );
+                        if (index >= 0 && index < (((Array) s).getSize())) {
+                            if (((Array) s).isInitializedAt(index)) {
+                                mips.lw("$t0", s.getOffset(), "$sp");
+                            } else {
+                                mips.printError(
+                                    String.format(
+                                        "Array %s has not been initialized at index %d.",
+                                        id,
+                                        index
+                                    )
+                                );
+                            }
+                        } else {
+                            mips.printError(
+                                String.format(
+                                    "Index %d is not valid for array %s.",
+                                    index,
+                                    id
+                                )
+                            );
+                        }
+                    } else {
+                        mips.printError(
+                            String.format(
+                                "No index specified for array %s.",
+                                id
+                            )
+                        );
+                    }
+                } else {
+                    if (node.getArrayOption() instanceof AEpsilonArrayOption) {
+                        if (!((Variable) s).isInitialized()) {
+                            mips.printError(
+                                String.format(
+                                    "Variable %s has not been initialized.",
+                                    id
+                                )
+                            );
+                        }
+                    } else {
+                        mips.printError(
+                            String.format(
+                                "Variable %s is not an array.",
+                                id
+                            )
+                        );
+                    }
+                }
+            }
             node.getArrayOption().apply(this);
         }
         if (node.getRparen() != null) {
             node.getRparen().apply(this);
         }
         if (node.getSemicolon() != null) {
+            if (symbolTable.contains(id)) {
+                switch (s.getType()) {
+                    case "REAL":
+                        mips.li("$v0", 2);
+                        if (isArray(s)) {
+                            mips.lwc1("$f12", 4 * index, "$t0");
+                        } else {
+                            mips.lwc1("$f12", s.getOffset(), "$sp");
+                        }
+                        break;
+                    case "STRING":
+                        mips.li("$v0", 4);
+                        if (isArray(s)) {
+                            mips.lw("$a0", 4 * index, "$t0");
+                        } else {
+                            mips.lw("$a0", s.getOffset(), "$sp");
+                        }
+                        break;
+                    case "BOOLEAN":
+                        mips.li("$v0", 4);
+                        if (isArray(s)) {
+                            mips.lw("$t0", 4 * index, "$t0");
+                        } else {
+                            mips.lw("$t0", s.getOffset(), "$sp");
+                        }
+                        String falselabel = mips.getLabel();
+                        mips.incLabel();
+                        String endlabel   = mips.getLabel();
+                        mips.incLabel();
+                        mips.beq("$zero", "$t0", falselabel);
+                        mips.la("$a0", "TRUE");
+                        mips.j(endlabel);
+                        mips.addLabel(falselabel);
+                        mips.la("$a0", "FALSE");
+                        mips.addLabel(endlabel);
+                        break;
+                    default:
+                        mips.li("$v0", 1);
+                        if (isArray(s)) {
+                            mips.lw("$a0", 4 * index, "$t0");
+                        } else {
+                            mips.lw("$a0", s.getOffset(), "$sp");
+                        }
+                }
+                mips.syscall();
+                // Print newline
+                mips.li("$v0", 11);
+                mips.li("$a0", 0xA);
+                mips.syscall();
+            }
             node.getSemicolon().apply(this);
         }
     }
@@ -530,10 +650,62 @@ class PrintTree extends DepthFirstAdapter {
 
     @Override
     public void caseAAssignIncMethodstmtseq(AAssignIncMethodstmtseq node) {
+        String id = "";
+        Symbol s = null;
+        int index = -1;
         if (node.getId() != null) {
+            id = node.getId().getText();
+            s = symbolTable.getSymbol(id);
+            if (s == null) {
+                mips.printError(
+                    String.format(
+                        "Variable %s has not been declared.",
+                        id
+                    )
+                );
+            }
             node.getId().apply(this);
         }
         if (node.getArrayOption() != null) {
+            if (s != null) {
+                if (node.getArrayOption() instanceof AArrayArrayOption) {
+                    if (isArray(s)) {
+                        index = Integer.parseInt(
+                            ((AArrayArrayOption) node.getArrayOption()).getInt().getText()
+                        );
+                        if (index < 0 || index >= ((Array) s).getSize()) {
+                            mips.printError(
+                                String.format(
+                                    "Index %d is not valid for array %s.",
+                                    index,
+                                    id
+                                )
+                            );
+                            index = -1;
+                        }
+                    } else {
+                            mips.printError(
+                                String.format(
+                                    "Variable %s is not an array " +
+                                    "and may not have an index.",
+                                    id
+                                )
+                            );
+                    }
+                } else {
+                    if (isArray(s)) {
+                        mips.printError(
+                            String.format(
+                                "Variable %s is an array " +
+                                "and must have a valid index.",
+                                id
+                            )
+                        );
+                    } else {
+                        index = 0;
+                    }
+                }
+            }
             node.getArrayOption().apply(this);
         }
         if (node.getIncr() != null) {
@@ -542,14 +714,104 @@ class PrintTree extends DepthFirstAdapter {
         if (node.getSemicolon() != null) {
             node.getSemicolon().apply(this);
         }
+        if (index > -1) {
+            if (s.getType().equals("INT") || s.getType().equals("VOID")) {
+                if (isArray(s)) {
+                    mips.lw("$t0", s.getOffset(), "$sp");
+                    mips.lw("$t1", 4 * index, "$t0");
+                    mips.addi("$t1", "$t1", 1);
+                    mips.sw("$t1", 4 * index, "$t0");
+                } else {
+                    mips.lw("$t0", s.getOffset(), "$sp");
+                    mips.addi("$t0", "$t0", 1);
+                    mips.sw("$t0", s.getOffset(), "$sp");
+                }
+            } else if (s.getType().equals("REAL")) {
+                if (isArray(s)) {
+                    mips.lw("$t0", s.getOffset(), "$sp");
+                    mips.lwc1("$f0", 4 * index, "$t0");
+                    mips.li("$t1", Float.floatToIntBits((float) 1.0));
+                    mips.mtc1("$t1", "$f1");
+                    mips.add_s("$f0", "$f0", "$f1");
+                    mips.swc1("$f0", 4 * index, "$t0");
+                } else {
+                    mips.lwc1("$f0", s.getOffset(), "$sp");
+                    mips.li("$t0", Float.floatToIntBits((float) 1.0));
+                    mips.mtc1("$t0", "$f1");
+                    mips.add_s("$f0", "$f0", "$f1");
+                    mips.swc1("$f0", s.getOffset(), "$sp");
+                }
+            } else {
+                mips.printError(
+                    String.format(
+                        "Variable %s has type %s " +
+                        "which cannot be incremented.",
+                        id,
+                        s.getType()
+                    )
+                );
+            }
+        }
     }
 
     @Override
     public void caseAAssignDecMethodstmtseq(AAssignDecMethodstmtseq node) {
+        String id = "";
+        Symbol s = null;
+        int index = -1;
         if (node.getId() != null) {
+            id = node.getId().getText();
+            s = symbolTable.getSymbol(id);
+            if (s == null) {
+                mips.printError(
+                    String.format(
+                        "Variable %s has not been declared.",
+                        id
+                    )
+                );
+            }
             node.getId().apply(this);
         }
         if (node.getArrayOption() != null) {
+            if (s != null) {
+                if (node.getArrayOption() instanceof AArrayArrayOption) {
+                    if (isArray(s)) {
+                        index = Integer.parseInt(
+                            ((AArrayArrayOption) node.getArrayOption()).getInt().getText()
+                        );
+                        if (index < 0 || index >= ((Array) s).getSize()) {
+                            mips.printError(
+                                String.format(
+                                    "Index %d is not valid for array %s.",
+                                    index,
+                                    id
+                                )
+                            );
+                            index = -1;
+                        }
+                    } else {
+                            mips.printError(
+                                String.format(
+                                    "Variable %s is not an array " +
+                                    "and may not have an index.",
+                                    id
+                                )
+                            );
+                    }
+                } else {
+                    if (isArray(s)) {
+                        mips.printError(
+                            String.format(
+                                "Variable %s is an array " +
+                                "and must have a valid index.",
+                                id
+                            )
+                        );
+                    } else {
+                        index = 0;
+                    }
+                }
+            }
             node.getArrayOption().apply(this);
         }
         if (node.getDecr() != null) {
@@ -557,6 +819,44 @@ class PrintTree extends DepthFirstAdapter {
         }
         if (node.getSemicolon() != null) {
             node.getSemicolon().apply(this);
+        }
+        if (index > -1) {
+            if (s.getType().equals("INT") || s.getType().equals("VOID")) {
+                if (isArray(s)) {
+                    mips.lw("$t0", s.getOffset(), "$sp");
+                    mips.lw("$t1", 4 * index, "$t0");
+                    mips.addi("$t1", "$t1", -1);
+                    mips.sw("$t1", 4 * index, "$t0");
+                } else {
+                    mips.lw("$t0", s.getOffset(), "$sp");
+                    mips.addi("$t0", "$t0", -1);
+                    mips.sw("$t0", s.getOffset(), "$sp");
+                }
+            } else if (s.getType().equals("REAL")) {
+                if (isArray(s)) {
+                    mips.lw("$t0", s.getOffset(), "$sp");
+                    mips.lwc1("$f0", 4 * index, "$t0");
+                    mips.li("$t1", Float.floatToIntBits((float) -1.0));
+                    mips.mtc1("$t1", "$f1");
+                    mips.add_s("$f0", "$f0", "$f1");
+                    mips.swc1("$f0", 4 * index, "$t0");
+                } else {
+                    mips.lwc1("$f0", s.getOffset(), "$sp");
+                    mips.li("$t0", Float.floatToIntBits((float) -1.0));
+                    mips.mtc1("$t0", "$f1");
+                    mips.add_s("$f0", "$f0", "$f1");
+                    mips.swc1("$f0", s.getOffset(), "$sp");
+                }
+            } else {
+                mips.printError(
+                    String.format(
+                        "Variable %s has type %s " +
+                        "which cannot be decremented.",
+                        id,
+                        s.getType()
+                    )
+                );
+            }
         }
     }
 
@@ -590,10 +890,73 @@ class PrintTree extends DepthFirstAdapter {
 
     @Override
     public void caseAAssignBooleanMethodstmtseq(AAssignBooleanMethodstmtseq node) {
+        String id = "";
+        Symbol s = null;
+        int index = -1;
         if (node.getId() != null) {
+            id = node.getId().getText();
+            s = symbolTable.getSymbol(id);
+            if (s == null) {
+                mips.printError(
+                    String.format(
+                        "Variable %s has not been declared.",
+                        id
+                    )
+                );
+            } else {
+                if(s.getType().equals("BOOLEAN")){
+                    index = 0;
+                } else {
+                    mips.printError(
+                        String.format(
+                            "Variable %s has type %s " +
+                            "which cannot be converted to BOOLEAN.",
+                            id,
+                            s.getType()
+                        )
+                    );
+                }
+            }
             node.getId().apply(this);
         }
         if (node.getArrayOption() != null) {
+            if (s != null) {
+                if (node.getArrayOption() instanceof AArrayArrayOption){
+                    if (isArray(s)) {
+                        index = Integer.parseInt(
+                            ((AArrayArrayOption) node.getArrayOption()).getInt().getText()
+                        );
+                        if ((index < 0) || (index >= ((Array) s).getSize())) {
+                            mips.printError(
+                                String.format(
+                                    "Index %d is invalid for array %s.",
+                                    index,
+                                    id
+                                )
+                            );
+                        }
+                    } else {
+                        mips.printError(
+                            String.format(
+                                "Variable %s is not an array " +
+                                "and may not have an index.",
+                                id
+                            )
+                        );
+                    }
+                } else {
+                    if (isArray(s)) {
+                        mips.printError(
+                            String.format(
+                                "Missing index for array %s.",
+                                id
+                            )
+                        );
+                    } else {
+                        index = 0;
+                    }
+                }
+            }
             node.getArrayOption().apply(this);
         }
         if (node.getEquals() != null) {
@@ -601,6 +964,25 @@ class PrintTree extends DepthFirstAdapter {
         }
         if (node.getBoolean() != null) {
             node.getBoolean().apply(this);
+            if (index > -1) {
+                if (isArray(s)) {
+                    mips.lw("$t0", s.getOffset(), "$sp");
+                    if (isFloat) {
+                        mips.cvt_w_s("$f0", "$f0");
+                        mips.mfc1("$f0", "$s0");
+                    }
+                    mips.sw("$s0", 4 * index, "$t0");
+                    ((Array) s).initializeAt(index);
+                } else {
+                    if (isFloat) {
+                        mips.cvt_w_s("$f0", "$f0");
+                        mips.mfc1("$f0", "$s0");
+                    }
+                    mips.sw("$s0", s.getOffset(), "$sp");
+                    ((Variable) s).initialize();
+                }
+            }
+            isFloat = false;
         }
         if (node.getSemicolon() != null) {
             node.getSemicolon().apply(this);

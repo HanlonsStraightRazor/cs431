@@ -17,8 +17,8 @@ REDO
  - [ ] var_decl methodstmtseq
  - [ ] assign_equals (expression) methodstmtseq
  - [ ] assign_string methodstmtseq
- - [ ] print_stmt methodstmtseq
+ - [x] print_stmt methodstmtseq
  - [ ] assign_read_in methodstmtseq
- - [ ] assign_inc methodstmtseq
- - [ ] assign_dec methodstmtseq
- - [ ] assign_boolean methodstmtseq
+ - [x] assign_inc methodstmtseq
+ - [x] assign_dec methodstmtseq
+ - [x] assign_boolean methodstmtseq
