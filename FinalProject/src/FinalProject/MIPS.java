@@ -54,7 +54,7 @@ class MIPS {
 
     public String getCode() {
         if (errors) {
-            return null;
+            return "";
         }
         return strings.toString() + words.toString() + main.toString() + text.toString();
     }
