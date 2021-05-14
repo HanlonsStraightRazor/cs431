@@ -97,12 +97,14 @@ class PrintTree extends DepthFirstAdapter {
     public void caseAMethodDeclClassmethodstmt(AMethodDeclClassmethodstmt node) {
         int offset = this.offset;
         String id = node.getId().getText();
+        boolean mainTwice = false;
         String type = node.getType() instanceof AIdType
             ? ((AIdType) node.getType()).getId().getText()
             : ((ATypesType) node.getType()).getTypeDecl().getText();
         if (id.equals("MAIN")) {
-            if(globalSet.hasMainMethodDecl()){
+            if(globalSet.containsFunction("MAIN")){
                 mips.printError("MAIN has already been declared.");
+                mainTwice = true;
             }
             if(!type.equals("VOID")){
                 mips.printError(
@@ -122,7 +124,6 @@ class PrintTree extends DepthFirstAdapter {
                     )
                 );
             }
-            globalSet.mainMethodCalled();
             mips.setMain(true);
         } else {
             mips.addLabel();
@@ -135,6 +136,17 @@ class PrintTree extends DepthFirstAdapter {
         if (node.getId() != null) {
             node.getId().apply(this);
         }
+        if(globalSet.containsFunction(id) && mainTwice == false){
+            mips.printError(
+                String.format(
+                    "Method %s has already been declared.",
+                    id
+                )
+            );
+        }
+        Function newFunction = new Function(id, type);
+        globalSet.addFunction(id, newFunction);
+        globalSet.setCurrentFunction(id);
         if (node.getLparen() != null) {
             node.getLparen().apply(this);
         }
@@ -164,6 +176,7 @@ class PrintTree extends DepthFirstAdapter {
             mips.addi("$sp", "$sp", -1 * offset);
             mips.jr("$ra");
         }
+        globalSet.clearCurrentFunction();
     }
 
     //global variables
@@ -236,20 +249,36 @@ class PrintTree extends DepthFirstAdapter {
     //method decl in classes
     @Override
     public void caseAMethodDeclMethodstmtseq(AMethodDeclMethodstmtseq node) {
-        mips.addLabel();
         int offset = this.offset;
+        String id = node.getId().getText();
+        String type = node.getType() instanceof AIdType
+            ? ((AIdType) node.getType()).getId().getText()
+            : ((ATypesType) node.getType()).getTypeDecl().getText();
+        mips.addLabel();
         this.offset = 0;
         mips.addi("$sp", "$sp", offset);
         if (node.getType() != null) {
             node.getType().apply(this);
         }
         if (node.getId() != null) {
+            node.getId().apply(this);
             if (node.getId().getText().equals("MAIN")) {
                 mips.printError(
                     "The main method may not be declared inside of a class."
                 );
             }
-            node.getId().apply(this);
+            else if(globalSet.getCurrentClass().containsMethod(id)){
+                mips.printError(
+                    String.format(
+                        "Method %s has already been declared.",
+                        id
+                    )
+                );
+            } else {
+                Function newFunction = new Function(id, type);
+                globalSet.getCurrentClass().addMethod(id, newFunction);
+                globalSet.getCurrentClass().setCurrentMethod(id);
+            }
         }
         if (node.getLparen() != null) {
             node.getLparen().apply(this);
@@ -274,6 +303,7 @@ class PrintTree extends DepthFirstAdapter {
         this.offset = offset;
         mips.addi("$sp", "$sp", -1 * offset);
         mips.jr("$ra");
+        globalSet.getCurrentClass().clearCurrentMethod();
     }
 
     //var decl in a class

@@ -5,6 +5,12 @@ class Function {
     private String returnType;
     private Symbol[] symbols;
 
+    public Function(String label, String returnType) {
+        this.label = label;
+        this.returnType = returnType;
+        symbols = null;
+    }
+
     public Function(String label, String returnType, Symbol[] symbols) {
         this.label = label;
         this.returnType = returnType;
@@ -21,5 +27,9 @@ class Function {
 
     public Symbol[] getSymbols() {
         return symbols;
+    }
+
+    public void setSymbols(Symbol[] symbols){
+        this.symbols = symbols;
     }
 }

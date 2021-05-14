@@ -5,14 +5,12 @@ import java.util.HashMap;
 class GlobalSet {
     private Class currentClass;
     private Function currentFunction;
-    private Function mainMethod;
     private HashMap<String, Class> classes;
     private HashMap<String, Function> functions;
 
     public GlobalSet() {
         currentClass = null;
         currentFunction = null;
-        mainMethod = null;
 
         classes = new HashMap<>();
         functions = new HashMap<>();
@@ -26,7 +24,7 @@ class GlobalSet {
         currentClass = null;
     }
 
-    public Class getCurrentClass(String id) {
+    public Class getCurrentClass() {
         return currentClass;
     }
 
@@ -64,17 +62,5 @@ class GlobalSet {
 
     public Function getFunction(String id) {
         return functions.get(id);
-    }
-
-    public void mainMethodCalled() {
-        mainMethod = currentFunction;
-    }
-
-    public boolean hasMainMethodDecl() {
-        if(mainMethod != null) {
-            return true;
-        } else {
-            return false;
-        }
     }
 }

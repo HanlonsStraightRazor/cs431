@@ -19,7 +19,7 @@ class Class {
         currentMethod = getMethod(id);
     }
 
-    public void clearCurrentMethod(String id) {
+    public void clearCurrentMethod() {
         currentMethod = null;
     }
 
