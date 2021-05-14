@@ -3,16 +3,22 @@ TODO
  - [ ] global objects
  - [ ] global methods
  - [ ] Use VOID MAIN method as entry point
- - [ ] decl_object
+
+ - [ ] decl_object methodstmtseq
+ - [ ] decl_object stmt
+
+ - [ ] method_call_in_class stmt
+ - [ ] method_call stmt
+ - [ ] return stmt
 ----
 REDO
 ----
- - [ ] classmethodstmt var_decl
- - [ ] methodstmtseq var_decl
- - [ ] methodstmtseq assign_equals (expression)
- - [ ] methodstmtseq assign_string
- - [ ] methodstmtseq print_stmt
- - [ ] methodstmtseq assign_read_in
- - [ ] methodstmtseq assign_inc
- - [ ] methodstmtseq assign_dec
- - [ ] methodstmtseq assign_boolean
+ - [done] var_decl classmethodstmt
+ - [ ] var_decl methodstmtseq
+ - [ ] assign_equals (expression) methodstmtseq
+ - [ ] assign_string methodstmtseq
+ - [x] print_stmt methodstmtseq
+ - [ ] assign_read_in methodstmtseq
+ - [x] assign_inc methodstmtseq
+ - [x] assign_dec methodstmtseq
+ - [x] assign_boolean methodstmtseq
