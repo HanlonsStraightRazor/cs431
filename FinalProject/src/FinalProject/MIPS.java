@@ -132,17 +132,9 @@ class MIPS {
     }
 
     public String addLabel() {
-        String label = String.format(
-            "%s%d",
-            LABELPREFIX,
-            labelnum++
-        );
-        append(
-            String.format(
-                "%s:\n",
-                label
-            )
-        );
+        String label = getLabel();
+        incLabel();
+        addLabel(label);
         return label;
     }
 
@@ -408,12 +400,23 @@ class MIPS {
         );
     }
 
-    public void mult(String dest, String lhs, String rhs) {
+    public void mul(String dest, String lhs, String rhs) {
         append(
             String.format(
                 "%smult %s, %s, %s,\n",
                 DELIMITER,
                 dest,
+                lhs,
+                rhs
+            )
+        );
+    }
+
+    public void mult(String lhs, String rhs) {
+        append(
+            String.format(
+                "%smul %s, %s,\n",
+                DELIMITER,
                 lhs,
                 rhs
             )
@@ -438,6 +441,17 @@ class MIPS {
                 "%smflo %s\n",
                 DELIMITER,
                 dest
+            )
+        );
+    }
+
+    public void div(String lhs, String rhs) {
+        append(
+            String.format(
+                "%sdiv %s, %s,\n",
+                DELIMITER,
+                lhs,
+                rhs
             )
         );
     }

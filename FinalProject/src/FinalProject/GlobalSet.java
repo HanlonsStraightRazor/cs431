@@ -3,12 +3,17 @@ package FinalProject;
 import java.util.HashMap;
 
 class GlobalSet {
+    private String currentClassName;
+    private String currentFunctionName;
     private Class currentClass;
     private Function currentFunction;
     private HashMap<String, Class> classes;
     private HashMap<String, Function> functions;
 
     public GlobalSet() {
+        currentClassName = "";
+        currentFunctionName = "";
+
         currentClass = null;
         currentFunction = null;
 
@@ -18,10 +23,18 @@ class GlobalSet {
 
     public void setCurrentClass(String id) {
         currentClass = getClass(id);
+        if (currentClass != null) {
+            currentClassName = id;
+        }
     }
 
     public void clearCurrentClass() {
+        currentClassName = "";
         currentClass = null;
+    }
+
+    public String getCurrentClassName() {
+        return currentClassName;
     }
 
     public Class getCurrentClass() {
@@ -42,10 +55,18 @@ class GlobalSet {
 
     public void setCurrentFunction(String id) {
         currentFunction = getFunction(id);
+        if (currentFunction != null) {
+            currentFunctionName = id;
+        }
     }
 
     public void clearCurrentFunction() {
+        currentFunctionName = "";
         currentFunction = null;
+    }
+
+    public String getCurrentFunctionName() {
+        return currentFunctionName;
     }
 
     public Function getCurrentFunction() {
