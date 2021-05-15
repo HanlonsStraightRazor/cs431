@@ -3,12 +3,14 @@ package FinalProject;
 import java.util.HashMap;
 
 class Class {
+    private String currentMethodName;
     private Function currentMethod;
 
     private HashMap<String, Function> methods;
     private HashMap<String, Symbol> symbols;
 
     public Class() {
+        currentMethodName = "";
         currentMethod = null;
 
         methods = new HashMap<>();
@@ -17,13 +19,21 @@ class Class {
 
     public void setCurrentMethod(String id) {
         currentMethod = getMethod(id);
+        if (currentMethod != null) {
+            currentMethodName = id;
+        }
     }
 
     public void clearCurrentMethod() {
+        currentMethodName = "";
         currentMethod = null;
     }
 
-    public Function getCurrentMethod(String id) {
+    public String getCurrentMethodName() {
+        return currentMethodName;
+    }
+
+    public Function getCurrentMethod() {
         return currentMethod;
     }
 
