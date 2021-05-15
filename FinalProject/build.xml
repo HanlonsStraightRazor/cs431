@@ -48,6 +48,12 @@
             classpath="${build}"
             input="${input}/prog1.txt"
             output="${output}/prog1.s"/>
+        <echo message="TEST 2..."/>
+        <java
+            classname="${ant.project.name}.Main"
+            classpath="${build}"
+            input="${input}/prog2.txt"
+            output="${output}/prog2.s"/>
     </target>
 
     <target name="all">
