@@ -27,7 +27,7 @@ class PrintTree extends DepthFirstAdapter {
         symbolTable = new SymbolTable();
         mips = new MIPS();
         offset = 0;
-        type = "FLOAT";
+        type = "REAL";
         breakLabel = "shouldNotShowUp";
         argsNum = 0;
     }
@@ -1949,7 +1949,7 @@ class PrintTree extends DepthFirstAdapter {
         if (!(type.equals("INT") || type.equals("REAL"))) {
             mips.printError(
                 String.format(
-                    "Expecting type %s, not INT or FLOAT.",
+                    "Expecting type %s, not INT or REAL.",
                     type
                 )
             );
@@ -2000,7 +2000,7 @@ class PrintTree extends DepthFirstAdapter {
         if (!(type.equals("INT") || type.equals("REAL"))) {
             mips.printError(
                 String.format(
-                    "Expecting type %s, not INT or FLOAT.",
+                    "Expecting type %s, not INT or REAL.",
                     type
                 )
             );
@@ -2107,7 +2107,7 @@ class PrintTree extends DepthFirstAdapter {
             if (!type.equals("REAL")) {
                 mips.printError(
                     String.format(
-                        "Expecting type %s, not FLOAT.",
+                        "Expecting type %s, not REAL.",
                         type
                     )
                 );

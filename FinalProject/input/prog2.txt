@@ -1,10 +1,10 @@
 BEGIN
   globalVarInt : INT;
-  globalVarFloat : FLOAT;
+  globalVarReal : REAL;
 
-  INT MethodDec(ArgFloat : FLOAT, ArgInt : INT ) {
+  INT MethodDec(ArgReal : REAL, ArgInt : INT ) {
     globalVarInt := ArgInt;
-    globalVarFloat := ArgFloat;
+    globalVarReal := ArgReal;
   }
 
   VOID MAIN() {
