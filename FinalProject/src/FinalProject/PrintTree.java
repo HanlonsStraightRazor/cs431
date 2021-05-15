@@ -355,14 +355,14 @@ class PrintTree extends DepthFirstAdapter {
             if (isArray(s)) {
                 mips.lw("$t0", s.getOffset(), "$sp");
                 if (type.equals("REAL")) {
-                    mips.sw("$f0", 4 * index, "$t0");
+                    mips.swc1("$f0", 4 * index, "$t0");
                 } else {
                     mips.sw("$s0", 4 * index, "$t0");
                 }
                 ((Array) s).initializeAt(index);
             } else {
                 if (type.equals("REAL")) {
-                    mips.sw("$f0", s.getOffset(), "$sp");
+                    mips.swc1("$f0", s.getOffset(), "$sp");
                 } else {
                     mips.sw("$s0", s.getOffset(), "$sp");
                 }
@@ -1908,7 +1908,7 @@ class PrintTree extends DepthFirstAdapter {
             Function currentFunction = globalSet.getCurrentFunction();
             Symbol currentSymbol = currentFunction.getSymbol(argsNum);
             if(currentSymbol.getType().equals("REAL")){
-                mips.sw("$f0", currentSymbol.getOffset(), "$sp");
+                mips.swc1("$f0", currentSymbol.getOffset(), "$sp");
             } else {
                 mips.sw("$s0", currentSymbol.getOffset(), "$sp");
             }
