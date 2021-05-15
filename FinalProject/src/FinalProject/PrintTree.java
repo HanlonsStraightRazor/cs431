@@ -18,6 +18,7 @@ class PrintTree extends DepthFirstAdapter {
     private boolean isFloat;
     private String breakLabel;
     private boolean isExprStringOrVoidOrBool;
+    private int argsNum;
     /*
      * Constructor. Initializes non final class variables.
      */
@@ -29,6 +30,7 @@ class PrintTree extends DepthFirstAdapter {
         isFloat = false;
         isExprStringOrVoidOrBool = false;
         breakLabel = "shouldNotShowUp";
+        argsNum = 0;
     }
 
     @Override
@@ -131,8 +133,6 @@ class PrintTree extends DepthFirstAdapter {
             );
         } else {
             globalSet.addFunction(id, new Function(mips.addLabel(), type));
-            this.offset = 0;
-            mips.addi("$sp", "$sp", offset);
         }
         
         if (node.getType() != null) {
@@ -153,19 +153,15 @@ class PrintTree extends DepthFirstAdapter {
         }
         if (node.getLcurly() != null) {
             symbolTable.incScope();
-            //globalSet.getCurrentFunction(); this works fine
-            //FIXME
-            globalSet.getCurrentFunction().getSize();
-            /*
-            if(globalSet.getCurrentFunction().getSize() == 0){
-                mips.printError("0 is the value");
+            if (!id.equals("MAIN")) {
+                for(int i = 0; i < globalSet.getCurrentFunction().getSize(); i++) {
+                    Symbol s = globalSet.getCurrentFunction().getSymbol(i);
+                    if(s instanceof Variable){
+                        ((Variable)s).initialize();
+                    }
+                    symbolTable.add(globalSet.getCurrentFunction().getSymbolName(i), s);
+                }
             }
-            */
-            /*
-            for(int i = 0; i < globalSet.getCurrentFunction().getSize(); i++) {
-                symbolTable.add(argsNames.get(i), argsSymbols.get(i));
-            }
-            */
             node.getLcurly().apply(this);
         }
         if (node.getStmtseq() != null) {
@@ -180,8 +176,6 @@ class PrintTree extends DepthFirstAdapter {
             mips.syscall();
             mips.setMain(false);
         } else {
-            this.offset = offset;
-            mips.addi("$sp", "$sp", -1 * offset);
             mips.jr("$ra");
         }
         globalSet.clearCurrentFunction();
@@ -1596,6 +1590,7 @@ class PrintTree extends DepthFirstAdapter {
             node.getId().apply(this);
             if(globalSet.containsFunction(node.getId().getText())){
                 curFunction = globalSet.getFunction(node.getId().getText());
+                globalSet.setCurrentFunction(node.getId().getText());
             } else {
                 mips.printError("Method call " + node.getId().getText() + " has not been declared.");
             }
@@ -1612,6 +1607,8 @@ class PrintTree extends DepthFirstAdapter {
         if (node.getSemicolon() != null) {
             node.getSemicolon().apply(this);
         }
+        argsNum = 0;
+        globalSet.clearCurrentFunction();
         if(curFunction != null){
             mips.jal(globalSet.getFunction(node.getId().getText()).getLabel());
         }
@@ -2054,6 +2051,14 @@ class PrintTree extends DepthFirstAdapter {
     public void caseAVarListVarListTwo(AVarListVarListTwo node) {
         if (node.getExprOrBool() != null) {
             node.getExprOrBool().apply(this);
+            Function currentFunction = globalSet.getCurrentFunction();
+            Symbol currentSymbol = currentFunction.getSymbol(argsNum);
+            if(currentSymbol.getType().equals("REAL")){
+                mips.sw("$f0", currentSymbol.getOffset(), "$sp");
+            } else {
+                mips.sw("$s0", currentSymbol.getOffset(), "$sp");
+            }
+            argsNum++;
         }
         if (node.getMoreVarListTwo() != null) {
             node.getMoreVarListTwo().apply(this);

@@ -4,21 +4,20 @@ import java.util.*;
 class Function {
     private String label;
     private String returnType;
+    private int numOfArgs;
     private ArrayList<Symbol> symbols;
     private ArrayList<String> symbolsNames;
 
     public Function(String label, String returnType) {
         this.label = label;
         this.returnType = returnType;
+        numOfArgs = 0;
         symbols = new ArrayList<Symbol>();
         symbolsNames = new ArrayList<String>();
     }
-
-    public Function(String label, String returnType, ArrayList<Symbol> symbols, ArrayList<String> symbolsNames) {
-        this.label = label;
-        this.returnType = returnType;
-        this.symbols = symbols;
-        this.symbolsNames = symbolsNames;
+    
+    public int getNumOfArgs(){
+        return numOfArgs;
     }
 
     public int getSize() {

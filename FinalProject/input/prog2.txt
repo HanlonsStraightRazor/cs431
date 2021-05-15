@@ -1,21 +1,15 @@
 BEGIN
-  globalVar : INT;
+  globalVarInt : INT;
+  globalVarFloat : FLOAT;
 
-  CLASS ClassDefTest {
-    classVarDec : INT;
-    classVarDec := 1;
-  }
-
-  INT MethodDec() {
-    methodVarDec : INT;
-    methodVarDec := 2;
-    globalVar := 6;
+  INT MethodDec(ArgFloat : FLOAT, ArgInt : INT ) {
+    globalVarInt := ArgInt;
+    globalVarFloat := ArgFloat;
   }
 
   VOID MAIN() {
     mainVarDec : INT;
     mainVarDec := 4;
-    MethodDec();
-    mainVarDec := 5;
+    MethodDec(6.2, 3);
  }
 END
