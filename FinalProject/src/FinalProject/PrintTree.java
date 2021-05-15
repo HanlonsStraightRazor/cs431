@@ -122,27 +122,25 @@ class PrintTree extends DepthFirstAdapter {
                 );
             }
             mips.setMain(true);
-        } else {
-            mips.addLabel();
-            this.offset = 0;
-            mips.addi("$sp", "$sp", offset);
-        }
-        if (node.getType() != null) {
-            node.getType().apply(this);
-        }
-        if (node.getId() != null) {
-            node.getId().apply(this);
-        }
-        if(globalSet.containsFunction(id) && mainTwice == false){
+        } else if(globalSet.containsFunction(id) && mainTwice == false){
             mips.printError(
                 String.format(
                     "Method %s has already been declared.",
                     id
                 )
             );
+        } else {
+            globalSet.addFunction(id, new Function(mips.addLabel(), type));
+            this.offset = 0;
+            mips.addi("$sp", "$sp", offset);
         }
-        Function newFunction = new Function(id, type);
-        globalSet.addFunction(id, newFunction);
+        
+        if (node.getType() != null) {
+            node.getType().apply(this);
+        }
+        if (node.getId() != null) {
+            node.getId().apply(this);
+        }
         globalSet.setCurrentFunction(id);
         if (node.getLparen() != null) {
             node.getLparen().apply(this);
@@ -1602,7 +1600,7 @@ class PrintTree extends DepthFirstAdapter {
             node.getSemicolon().apply(this);
         }
         if(curFunction != null){
-            mips.j(curFunction.getLabel());
+            mips.jal(globalSet.getFunction(node.getId().getText()).getLabel());
         }
     }
 
