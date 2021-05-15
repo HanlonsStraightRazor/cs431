@@ -1,14 +1,50 @@
 BEGIN
-    globalVarInt : INT;
-    globalVarReal : REAL;
+  globalVarInt : INT;
+  globalVarIntTwo : INT;
+  globalVarReal : REAL;
+  globalVarString : STRING;
+  globalVarBool : BOOLEAN;
+  globalVarVoid : VOID;
 
-    INT retOne() {
-        globalVarInt := 1;
-        PUT(globalVarInt);
-        RETURN 1;
-    }
+  CLASS ClassDec {
+    classDecVarInt : INT;
+    classDecVarReal : REAL;
+    classDecVarInt := 71;
+    classDecVarReal := 3.26;
+  }
 
-    VOID MAIN() {
-        retOne();
-    }
+  INT MethodIntDec(ArgInt : INT, ArgIntTwo : INT ) {
+    globalVarInt := ArgInt;
+    ArgIntTwo := ArgIntTwo;
+    RETURN 2;
+  }
+
+  VOID MethodVoidDec() {
+    globalVarInt := 2;
+    globalVarIntTwo := 3;
+  }
+
+  REAL MethodRealDec() {
+    RETURN 2.14 + 1;
+  }
+
+  BOOLEAN MethodBoolDec() {
+    RETURN TRUE;
+  }
+
+  STRING MethodStringDec() {
+    globalVarString := "testing";
+    RETURN globalVarString;
+  }
+
+  VOID MAIN() {
+    mainVarDec : INT;
+    mainVarDec := 4;
+    MethodIntDec(6, 3);
+    MethodVoidDec();
+    MethodRealDec();
+    MethodBoolDec();
+    MethodStringDec();
+ }
+
 END

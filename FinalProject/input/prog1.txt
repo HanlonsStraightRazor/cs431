@@ -1,128 +1,50 @@
 BEGIN
-  VOID MAIN() {
+  globalVarInt : INT;
+  globalVarIntTwo : INT;
+  globalVarReal : REAL;
+  globalVarString : STRING;
+  globalVarBool : BOOLEAN;
+  globalVarVoid : VOID;
 
-    singleIntVarDec    : INT;
-    singleRealVarDec   : REAL;
-    singleStringVarDec : STRING;
-    singleBoolVarDec   : BOOLEAN;
-    singleVoidVarDec   : VOID;
-
-    singleIntVarDec    := 4;
-    singleRealVarDec   := 4.2;
-    singleStringVarDec := "String Init";
-    singleBoolVarDec   := TRUE;
-
-    multIntVarDecOne, multIntVarDecTwo       : INT;
-    multRealVarDecOne, multRealVarDecTwo     : REAL;
-    multStringVarDecOne, multStringVarDecTwo, multStringVarDecThree : STRING;
-    multBoolVarDecOne, multBoolVarDecTwo     : BOOLEAN;
-    multVoidVarDecOne, multVoidVarDecTwo     : VOID;
-
-    multIntVarDecOne      := 4 + 6;
-    multIntVarDecOne--;
-    multIntVarDecTwo      := 15 - multIntVarDecOne;
-    multIntVarDecTwo++;
-    singleIntVarDec       := singleIntVarDec * multIntVarDecOne;
-    singleIntVarDec       := (singleIntVarDec / 2) - 3 + 2;
-    multRealVarDecOne     := 4.236 + 3.275;
-    multRealVarDecOne--;
-    multRealVarDecTwo     := 6.21 - 3.21;
-    multRealVarDecTwo++;
-    singleRealVarDec      := multRealVarDecOne * multRealVarDecTwo;
-    singleRealVarDec      := singleRealVarDec / multRealVarDecTwo;
-    multStringVarDecThree := "Multi String Int";
-    multBoolVarDecOne     := FALSE;
-    multBoolVarDecTwo     := multBoolVarDecOne;
-
-    singleIntVarDecArray    : INT[6];
-    singleRealVarDecArray   : REAL[3];
-    singleStringVarDecArray : STRING[5];
-    singleBoolVarDecArray   : BOOLEAN[9];
-
-    singleIntVarDecArray[3] := 4 + 6;
-    singleIntVarDecArray[2] := 2 - 1;
-    singleRealVarDecArray[1] := 3.21 * 2;
-    singleRealVarDecArray[2] := 4.21 / 2.1;
-
-    multIntVarDecOneArray, multIntVarDecTwoArray       : INT[2];
-    multRealVarDecOneArray, multRealVarDecTwoArray     : REAL[3];
-    multStringVarDecOneArray, multStringVarDecTwoArray : STRING[4];
-    multBoolVarDecOneArray, multBoolVarDecTwoArray     : BOOLEAN[5];
-
-    multIntVarDecOneArray[1] := 2 + 2 + 2 + 2;
-    multRealVarDecTwoArray[1]   := 2.1 / 1 + 5;
-    multStringVarDecOneArray[2] := "hello world";
-    multStringVarDecOneArray[1] := "multStringVarDecOneArray[1]";
-    multBoolVarDecTwoArray[1] := FALSE;
-    multBoolVarDecTwoArray[2] := TRUE;
-    multBoolVarDecTwoArray[3] := FALSE;
-
-    IF(1 == 1) THEN {
-      multIntVarDecOne++;
-    }
-    IF(1 != 1) THEN {
-      multIntVarDecOne--;
-    }
-    IF(3 > 2) THEN {
-      multIntVarDecOne++;
-    } ELSE {
-      multIntVarDecTwo--;
-    }
-    IF(6 < 5) THEN {
-      multIntVarDecOne++;
-    } ELSE {
-      multIntVarDecTwo--;
-    }
-
-    SWITCH(multIntVarDecOne + 1){
-      CASE(0): multIntVarDecOne := 0;
-               BREAK;
-      CASE(1): multIntVarDecOne := 1;
-               BREAK;
-      CASE(2): multIntVarDecOne := 2;
-               BREAK;
-      DEFAULT: multIntVarDecOne := 5;
-    }
-
-    SWITCH(TRUE){
-      CASE(0): multIntVarDecOne := 0;
-               BREAK;
-      CASE(1): multIntVarDecOne := 100;
-               BREAK;
-      DEFAULT: multIntVarDecOne := 5;
-    }
-
-    prompts    : STRING[5];
-    prompts[0] := "Enter an int";
-    prompts[1] := "Enter a real";
-    prompts[2] := "Enter a string";
-    prompts[3] := "Enter a boolean";
-    prompts[4] := "You entered:";
-
-    one   :  INT;
-    two   :  REAL;
-    three :  STRING;
-    four  :  BOOLEAN;
-
-    PUT(prompts[0]);
-    one   := GET();
-    PUT(prompts[4]);
-    PUT(one);
-
-    PUT(prompts[1]);
-    two   := GET();
-    PUT(prompts[4]);
-    PUT(two);
-
-    PUT(prompts[2]);
-    three := GET();
-    PUT(prompts[4]);
-    PUT(three);
-
-    PUT(prompts[3]);
-    four  := GET();
-    PUT(prompts[4]);
-    PUT(four);
-
+  CLASS ClassDec {
+    classDecVarInt : INT;
+    classDecVarReal : REAL;
+    classDecVarInt := 71;
+    classDecVarReal := 3.26;
   }
+
+  INT MethodIntDec(ArgInt : INT, ArgIntTwo : INT ) {
+    globalVarInt := ArgInt;
+    ArgIntTwo := ArgIntTwo;
+    RETURN 2;
+  }
+
+  VOID MethodVoidDec() {
+    globalVarInt := 2;
+    globalVarIntTwo := 3;
+  }
+
+  REAL MethodRealDec() {
+    RETURN 2.14 + 1;
+  }
+
+  BOOLEAN MethodBoolDec() {
+    RETURN TRUE;
+  }
+
+  STRING MethodStringDec() {
+    globalVarString := "testing";
+    RETURN globalVarString;
+  }
+
+  VOID MAIN() {
+    mainVarDec : INT;
+    mainVarDec := 4;
+    MethodIntDec(6, 3);
+    MethodVoidDec();
+    MethodRealDec();
+    MethodBoolDec();
+    MethodStringDec();
+ }
+
 END
