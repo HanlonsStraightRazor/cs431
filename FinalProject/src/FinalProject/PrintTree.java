@@ -153,6 +153,19 @@ class PrintTree extends DepthFirstAdapter {
         }
         if (node.getLcurly() != null) {
             symbolTable.incScope();
+            //globalSet.getCurrentFunction(); this works fine
+            //FIXME
+            globalSet.getCurrentFunction().getSize();
+            /*
+            if(globalSet.getCurrentFunction().getSize() == 0){
+                mips.printError("0 is the value");
+            }
+            */
+            /*
+            for(int i = 0; i < globalSet.getCurrentFunction().getSize(); i++) {
+                symbolTable.add(argsNames.get(i), argsSymbols.get(i));
+            }
+            */
             node.getLcurly().apply(this);
         }
         if (node.getStmtseq() != null) {
@@ -1956,17 +1969,58 @@ class PrintTree extends DepthFirstAdapter {
 
     @Override
     public void caseAMoreIdsVarlist(AMoreIdsVarlist node) {
+        String idVal = "";
+        Symbol s = null;
+        String type = "";
+        int size = -1;
         if (node.getId() != null) {
+            idVal = node.getId().getText();
             node.getId().apply(this);
         }
         if (node.getColon() != null) {
             node.getColon().apply(this);
         }
         if (node.getType() != null) {
+            if (node.getType() instanceof ATypesType) {
+                type = ((ATypesType) node.getType()).getTypeDecl().getText();
+            } else {
+                mips.printError(
+                    String.format(
+                        "Invalid type %s.",
+                        ((AIdType) node.getType()).getId().getText()
+                    )
+                );
+            }
             node.getType().apply(this);
         }
         if (node.getArrayOption() != null) {
+            if (node.getArrayOption() instanceof AArrayArrayOption) {
+                size = Integer.parseInt(
+                    ((AArrayArrayOption) node.getArrayOption()).getInt().getText()
+                );
+                if (size < 1) {
+                    mips.printError(
+                        String.format(
+                            "Size %d is invalid for array %s.",
+                            size,
+                            idVal
+                        )
+                    );
+                    size = -1;
+                }
+            } else {
+                size = 0;
+            }
             node.getArrayOption().apply(this);
+        }
+        if (size >= 1) {
+            mips.la("$t0", mips.addWords(size));
+            mips.sw("$t0", offset, "$sp");
+            globalSet.getCurrentFunction().addSymbol(idVal, new Array(type, offset, size));
+            offset -= 4;
+        } else if (size == 0) {
+            globalSet.getCurrentFunction().addSymbol(idVal, new Variable(type, offset));
+            offset -= 4;
         }
         if (node.getMoreVarlist() != null) {
             node.getMoreVarlist().apply(this);
