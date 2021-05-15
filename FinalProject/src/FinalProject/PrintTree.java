@@ -15,9 +15,8 @@ class PrintTree extends DepthFirstAdapter {
     private SymbolTable symbolTable;
     private MIPS mips;
     private int offset;
-    private boolean isFloat;
     private String breakLabel;
-    private boolean isExprStringOrVoidOrBool;
+    private String type;
     /*
      * Constructor. Initializes non final class variables.
      */
@@ -26,8 +25,7 @@ class PrintTree extends DepthFirstAdapter {
         symbolTable = new SymbolTable();
         mips = new MIPS();
         offset = 0;
-        isFloat = false;
-        isExprStringOrVoidOrBool = false;
+        type = "FLOAT";
         breakLabel = "shouldNotShowUp";
     }
 
@@ -95,9 +93,7 @@ class PrintTree extends DepthFirstAdapter {
         int offset = this.offset;
         String id = node.getId().getText();
         boolean mainTwice = false;
-        String type = node.getType() instanceof AIdType
-            ? ((AIdType) node.getType()).getId().getText()
-            : ((ATypesType) node.getType()).getTypeDecl().getText();
+        String type = checkType(node.getType());
         if (id.equals("MAIN")) {
             if(globalSet.containsFunction("MAIN")){
                 mips.printError("MAIN has already been declared.");
@@ -180,10 +176,10 @@ class PrintTree extends DepthFirstAdapter {
     @Override
     public void caseAVarDeclClassmethodstmt(AVarDeclClassmethodstmt node) {
         ArrayList<String> id = new ArrayList<String>();
+        id.add(node.getId().getText());
         Symbol s = null;
-        String type = "";
+        String type = checkType(node.getType());
         if (node.getId() != null) {
-            id.add(node.getId().getText());
             node.getId().apply(this);
         }
         if (node.getMoreIds() != null) {
@@ -206,16 +202,6 @@ class PrintTree extends DepthFirstAdapter {
             node.getColon().apply(this);
         }
         if (node.getType() != null) {
-            if (node.getType() instanceof ATypesType) {
-                type = ((ATypesType) node.getType()).getTypeDecl().getText();
-            } else {
-                mips.printError(
-                    String.format(
-                        "Invalid type %s.",
-                        ((AIdType) node.getType()).getId().getText()
-                    )
-                );
-            }
             node.getType().apply(this);
         }
         if (node.getSemicolon() != null) {
@@ -243,9 +229,7 @@ class PrintTree extends DepthFirstAdapter {
     public void caseAMethodDeclMethodstmtseq(AMethodDeclMethodstmtseq node) {
         int offset = this.offset;
         String id = node.getId().getText();
-        String type = node.getType() instanceof AIdType
-            ? ((AIdType) node.getType()).getId().getText()
-            : ((ATypesType) node.getType()).getTypeDecl().getText();
+        String type = checkType(node.getType());
         mips.addLabel();
         this.offset = 0;
         mips.addi("$sp", "$sp", offset);
@@ -258,8 +242,7 @@ class PrintTree extends DepthFirstAdapter {
                 mips.printError(
                     "The main method may not be declared inside of a class."
                 );
-            }
-            else if(globalSet.getCurrentClass().containsMethod(id)){
+            } else if(globalSet.getCurrentClass().containsMethod(id)){
                 mips.printError(
                     String.format(
                         "Method %s has already been declared.",
@@ -303,7 +286,7 @@ class PrintTree extends DepthFirstAdapter {
     public void caseAVarDeclMethodstmtseq(AVarDeclMethodstmtseq node) {
         ArrayList<String> id = new ArrayList<String>();
         Symbol s = null;
-        String type = "";
+        String type = checkType(node.getType());
         if (node.getId() != null) {
             id.add(node.getId().getText());
             node.getId().apply(this);
@@ -328,16 +311,6 @@ class PrintTree extends DepthFirstAdapter {
             node.getColon().apply(this);
         }
         if (node.getType() != null) {
-            if (node.getType() instanceof ATypesType) {
-                type = ((ATypesType) node.getType()).getTypeDecl().getText();
-            } else {
-                mips.printError(
-                    String.format(
-                        "Invalid type %s.",
-                        ((AIdType) node.getType()).getId().getText()
-                    )
-                );
-            }
             node.getType().apply(this);
         }
         if (node.getSemicolon() != null) {
@@ -351,72 +324,52 @@ class PrintTree extends DepthFirstAdapter {
 
     @Override
     public void caseAAssignEqualsMethodstmtseq(AAssignEqualsMethodstmtseq node) {
-        String id = "";
-        Symbol s = null;
-        int index = -1;
+        String id = node.getId().getText();
+        Symbol s = getSymbol(id);
+        int index = setArrayOption(id, s, node.getArrayOption());
+        if (index > -1) {
+            type = s.getType();
+        }
         if (node.getId() != null) {
             node.getId().apply(this);
-            id = node.getId().getText();
-            s = getSymbol(id);
         }
         if (node.getArrayOption() != null) {
-            index = setArrayOption(id, s, node.getArrayOption());
             node.getArrayOption().apply(this);
         }
         if (node.getEquals() != null) {
             node.getEquals().apply(this);
         }
         if (node.getExpr() != null) {
-            if(index > -1 && s.getType().equals("REAL")){
-                isFloat = true;
-            }
             node.getExpr().apply(this);
-            if (index > -1) {
-                if (s.getType().equals("STRING")) {
-                    mips.printError("Cannot store numerical types into STRING.");
-                } else {
-                    if ((s.getType().equals("BOOLEAN")
-                            || s.getType().equals("INT"))
-                            && isFloat) {
-                        mips.printError(
-                            String.format(
-                                "Variable %s has type %s which " +
-                                "cannot be converted to REAL.",
-                                id,
-                                s.getType()
-                            )
-                        );
-                    } else {
-                        if (isArray(s)) {
-                            mips.lw("$t0", s.getOffset(), "$sp");
-                            if (isFloat) {
-                                mips.swc1("$f0", 4 * index, "$t0");
-                            } else {
-                                mips.sw("$s0", 4 * index, "$t0");
-                            }
-                            ((Array) s).initializeAt(index);
-                            symbolTable.add(id, s);
-                        } else {
-                            if (isFloat) {
-                                mips.swc1("$f0", s.getOffset(), "$sp");
-                            } else {
-                                mips.sw("$s0", s.getOffset(), "$sp");
-                            }
-                            ((Variable) s).initialize();
-                            symbolTable.add(id, (Variable) s);
-                        }
-                    }
-                }
-            }
-            isFloat = false;
         }
         if (node.getSemicolon() != null) {
             node.getSemicolon().apply(this);
+        }
+        if (index > -1) {
+            if (isArray(s)) {
+                mips.lw("$t0", s.getOffset(), "$sp");
+                if (type.equals("REAL")) {
+                    mips.sw("$f0", 4 * index, "$t0");
+                } else {
+                    mips.sw("$s0", 4 * index, "$t0");
+                }
+                ((Array) s).initializeAt(index);
+            } else {
+                if (type.equals("REAL")) {
+                    mips.sw("$f0", s.getOffset(), "$sp");
+                } else {
+                    mips.sw("$s0", s.getOffset(), "$sp");
+                }
+                ((Variable) s).initialize();
+            }
         }
     }
 
     @Override
     public void caseAAssignStringMethodstmtseq(AAssignStringMethodstmtseq node) {
+        String id = node.getId().getText();
+        Symbol s = getSymbol(id);
+        int index = setArrayOption(id, s, node.getArrayOption());
         if (node.getId() != null) {
             node.getId().apply(this);
         }
@@ -432,13 +385,35 @@ class PrintTree extends DepthFirstAdapter {
         if (node.getSemicolon() != null) {
             node.getSemicolon().apply(this);
         }
+        if (index > -1) {
+            if (type.equals("STRING")) {
+                mips.la("$t0", mips.addString(node.getAnychars().getText()));
+                if (isArray(s)) {
+                    mips.lw("$t1", s.getOffset(), "$sp");
+                    mips.sw("$t0", 4 * index, "$t1");
+                    ((Array) s).initializeAt(index);
+                } else {
+                    mips.sw("$t0", s.getOffset(), "$sp");
+                    ((Variable) s).initialize();
+                }
+            } else {
+                mips.printError(
+                    String.format(
+                        "Variable %s is type %s. " +
+                        "Must be type STRING.",
+                        id,
+                        s.getType()
+                    )
+                );
+            }
+        }
     }
 
     @Override
     public void caseAPrintStmtMethodstmtseq(APrintStmtMethodstmtseq node) {
-        String id = "";
-        Symbol s = null;
-        int index = -1;
+        String id = node.getId().getText();
+        Symbol s = getSymbol(id);
+        int index = getArrayOption(id, s, node.getArrayOption());
         if (node.getPut() != null) {
             node.getPut().apply(this);
         }
@@ -446,69 +421,66 @@ class PrintTree extends DepthFirstAdapter {
             node.getLparen().apply(this);
         }
         if (node.getId() != null) {
-            id = node.getId().getText();
-            s = getSymbol(id);
             node.getId().apply(this);
         }
         if (node.getArrayOption() != null) {
-            index = getArrayOption(id, s, node.getArrayOption());
             node.getArrayOption().apply(this);
         }
         if (node.getRparen() != null) {
             node.getRparen().apply(this);
         }
         if (node.getSemicolon() != null) {
-            if (index > -1) {
-                switch (s.getType()) {
-                    case "REAL":
-                        mips.li("$v0", 2);
-                        if (isArray(s)) {
-                            mips.lwc1("$f12", 4 * index, "$t0");
-                        } else {
-                            mips.lwc1("$f12", s.getOffset(), "$sp");
-                        }
-                        break;
-                    case "STRING":
-                        mips.li("$v0", 4);
-                        if (isArray(s)) {
-                            mips.lw("$a0", 4 * index, "$t0");
-                        } else {
-                            mips.lw("$a0", s.getOffset(), "$sp");
-                        }
-                        break;
-                    case "BOOLEAN":
-                        mips.li("$v0", 4);
-                        if (isArray(s)) {
-                            mips.lw("$t0", 4 * index, "$t0");
-                        } else {
-                            mips.lw("$t0", s.getOffset(), "$sp");
-                        }
-                        String falselabel = mips.getLabel();
-                        mips.incLabel();
-                        String endlabel   = mips.getLabel();
-                        mips.incLabel();
-                        mips.beq("$zero", "$t0", falselabel);
-                        mips.la("$a0", "TRUE");
-                        mips.j(endlabel);
-                        mips.addLabel(falselabel);
-                        mips.la("$a0", "FALSE");
-                        mips.addLabel(endlabel);
-                        break;
-                    default:
-                        mips.li("$v0", 1);
-                        if (isArray(s)) {
-                            mips.lw("$a0", 4 * index, "$t0");
-                        } else {
-                            mips.lw("$a0", s.getOffset(), "$sp");
-                        }
-                }
-                mips.syscall();
-                // Print newline
-                mips.li("$v0", 11);
-                mips.li("$a0", 0xA);
-                mips.syscall();
-            }
             node.getSemicolon().apply(this);
+        }
+        if (index > -1) {
+            switch (s.getType()) {
+                case "REAL":
+                    mips.li("$v0", 2);
+                    if (isArray(s)) {
+                        mips.lwc1("$f12", 4 * index, "$t0");
+                    } else {
+                        mips.lwc1("$f12", s.getOffset(), "$sp");
+                    }
+                    break;
+                case "STRING":
+                    mips.li("$v0", 4);
+                    if (isArray(s)) {
+                        mips.lw("$a0", 4 * index, "$t0");
+                    } else {
+                        mips.lw("$a0", s.getOffset(), "$sp");
+                    }
+                    break;
+                case "BOOLEAN":
+                    mips.li("$v0", 4);
+                    if (isArray(s)) {
+                        mips.lw("$t0", 4 * index, "$t0");
+                    } else {
+                        mips.lw("$t0", s.getOffset(), "$sp");
+                    }
+                    String falselabel = mips.getLabel();
+                    mips.incLabel();
+                    String endlabel   = mips.getLabel();
+                    mips.incLabel();
+                    mips.beq("$zero", "$t0", falselabel);
+                    mips.la("$a0", "TRUE");
+                    mips.j(endlabel);
+                    mips.addLabel(falselabel);
+                    mips.la("$a0", "FALSE");
+                    mips.addLabel(endlabel);
+                    break;
+                default:
+                    mips.li("$v0", 1);
+                    if (isArray(s)) {
+                        mips.lw("$a0", 4 * index, "$t0");
+                    } else {
+                        mips.lw("$a0", s.getOffset(), "$sp");
+                    }
+            }
+            mips.syscall();
+            // Print newline
+            mips.li("$v0", 11);
+            mips.li("$a0", 0xA);
+            mips.syscall();
         }
     }
 
@@ -539,16 +511,13 @@ class PrintTree extends DepthFirstAdapter {
 
     @Override
     public void caseAAssignIncMethodstmtseq(AAssignIncMethodstmtseq node) {
-        String id = "";
-        Symbol s = null;
-        int index = -1;
+        String id = node.getId().getText();
+        Symbol s = getSymbol(id);
+        int index = getArrayOption(id, s, node.getArrayOption());
         if (node.getId() != null) {
-            id = node.getId().getText();
-            s = getSymbol(id);
             node.getId().apply(this);
         }
         if (node.getArrayOption() != null) {
-            index = getArrayOption(id, s, node.getArrayOption());
             node.getArrayOption().apply(this);
         }
         if (node.getIncr() != null) {
@@ -599,16 +568,13 @@ class PrintTree extends DepthFirstAdapter {
 
     @Override
     public void caseAAssignDecMethodstmtseq(AAssignDecMethodstmtseq node) {
-        String id = "";
-        Symbol s = null;
-        int index = -1;
+        String id = node.getId().getText();
+        Symbol s = getSymbol(id);
+        int index = getArrayOption(id, s, node.getArrayOption());
         if (node.getId() != null) {
-            id = node.getId().getText();
-            s = getSymbol(id);
             node.getId().apply(this);
         }
         if (node.getArrayOption() != null) {
-            index = getArrayOption(id, s, node.getArrayOption());
             node.getArrayOption().apply(this);
         }
         if (node.getDecr() != null) {
@@ -687,30 +653,19 @@ class PrintTree extends DepthFirstAdapter {
 
     @Override
     public void caseAAssignBooleanMethodstmtseq(AAssignBooleanMethodstmtseq node) {
-        String id = "";
-        Symbol s = null;
-        int index = -1;
+        String id = node.getId().getText();
+        Symbol s = getSymbol(id);
+        int index = setArrayOption(id, s, node.getArrayOption());
+        if (s != null) {
+            type = s.getType();
+        }
+        if (index > -1) {
+            type = s.getType();
+        }
         if (node.getId() != null) {
-            id = node.getId().getText();
-            s = getSymbol(id);
-            if (s != null) {
-                if(s.getType().equals("BOOLEAN")){
-                    index = 0;
-                } else {
-                    mips.printError(
-                        String.format(
-                            "Variable %s has type %s " +
-                            "which cannot be converted to BOOLEAN.",
-                            id,
-                            s.getType()
-                        )
-                    );
-                }
-            }
             node.getId().apply(this);
         }
         if (node.getArrayOption() != null) {
-            index = setArrayOption(id, s, node.getArrayOption());
             node.getArrayOption().apply(this);
         }
         if (node.getEquals() != null) {
@@ -718,28 +673,27 @@ class PrintTree extends DepthFirstAdapter {
         }
         if (node.getBoolean() != null) {
             node.getBoolean().apply(this);
-            if (index > -1) {
-                if (isArray(s)) {
-                    mips.lw("$t0", s.getOffset(), "$sp");
-                    if (isFloat) {
-                        mips.cvt_w_s("$f0", "$f0");
-                        mips.mfc1("$f0", "$s0");
-                    }
-                    mips.sw("$s0", 4 * index, "$t0");
-                    ((Array) s).initializeAt(index);
-                } else {
-                    if (isFloat) {
-                        mips.cvt_w_s("$f0", "$f0");
-                        mips.mfc1("$f0", "$s0");
-                    }
-                    mips.sw("$s0", s.getOffset(), "$sp");
-                    ((Variable) s).initialize();
-                }
-            }
-            isFloat = false;
         }
         if (node.getSemicolon() != null) {
             node.getSemicolon().apply(this);
+        }
+        if (index > -1) {
+            if (isArray(s)) {
+                mips.lw("$t0", s.getOffset(), "$sp");
+                if (type.equals("REAL")) {
+                    mips.cvt_w_s("$f0", "$f0");
+                    mips.mfc1("$f0", "$s0");
+                }
+                mips.sw("$s0", 4 * index, "$t0");
+                ((Array) s).initializeAt(index);
+            } else {
+                if (type.equals("REAL")) {
+                    mips.cvt_w_s("$f0", "$f0");
+                    mips.mfc1("$f0", "$s0");
+                }
+                mips.sw("$s0", s.getOffset(), "$sp");
+                ((Variable) s).initialize();
+            }
         }
     }
 
@@ -755,100 +709,70 @@ class PrintTree extends DepthFirstAdapter {
 
     @Override
     public void caseAAssignExprStmt(AAssignExprStmt node) {
-        String id = "";
-        Symbol s = null;
-        int index = -1;
+        String id = node.getId().getText();
+        Symbol s = getSymbol(id);
+        int index = setArrayOption(id, s, node.getArrayOption());
+        if (index > -1) {
+            type = s.getType();
+        }
         if (node.getId() != null) {
             node.getId().apply(this);
-            id = node.getId().getText();
-            s = getSymbol(id);
         }
         if (node.getArrayOption() != null) {
-            index = setArrayOption(id, s, node.getArrayOption());
             node.getArrayOption().apply(this);
         }
         if (node.getEquals() != null) {
             node.getEquals().apply(this);
         }
         if (node.getExpr() != null) {
-            if(index > -1 && s.getType().equals("REAL")){
-                isFloat = true;
-            }
             node.getExpr().apply(this);
-            if (index > -1) {
-                if (s.getType().equals("STRING")) {
-                    mips.sw("$s0", s.getOffset(), "$sp");
-                } else {
-                    if ((s.getType().equals("BOOLEAN")
-                            || s.getType().equals("INT"))
-                            && isFloat) {
-                        mips.printError(
-                            String.format(
-                                "Variable %s has type %s which " +
-                                "cannot be converted to REAL.",
-                                id,
-                                s.getType()
-                            )
-                        );
-                    } else {
-                        if (isArray(s)) {
-                            mips.lw("$t0", s.getOffset(), "$sp");
-                            if (isFloat) {
-                                mips.swc1("$f0", 4 * index, "$t0");
-                            } else {
-                                mips.sw("$s0", 4 * index, "$t0");
-                            }
-                            ((Array) s).initializeAt(index);
-                            symbolTable.add(id, s);
-                        } else {
-                            if (isFloat) {
-                                mips.swc1("$f0", s.getOffset(), "$sp");
-                            } else {
-                                mips.sw("$s0", s.getOffset(), "$sp");
-                            }
-                            ((Variable) s).initialize();
-                            symbolTable.add(id, (Variable) s);
-                        }
-                    }
-                }
-            }
-            isFloat = false;
         }
         if (node.getSemicolon() != null) {
             node.getSemicolon().apply(this);
+        }
+        if (index > -1) {
+            if (isArray(s)) {
+                mips.lw("$t0", s.getOffset(), "$sp");
+                if (s.getType().equals("REAL")) {
+                    mips.swc1("$f0", 4 * index, "$t0");
+                } else {
+                    mips.sw("$s0", 4 * index, "$t0");
+                }
+                ((Array) s).initializeAt(index);
+            } else {
+                if (s.getType().equals("REAL")) {
+                    mips.swc1("$f0", s.getOffset(), "$sp");
+                } else {
+                    mips.sw("$s0", s.getOffset(), "$sp");
+                }
+                ((Variable) s).initialize();
+            }
+            symbolTable.add(id, s);
         }
     }
 
     @Override
     public void caseAAssignStringStmt(AAssignStringStmt node) {
         String id = node.getId().getText();
-        Symbol s = null;
-        int index = -1;
+        Symbol s = getSymbol(id);
+        int index = setArrayOption(id, s, node.getArrayOption());
         if (node.getId() != null) {
-            s = getSymbol(id);
-            if (s != null) {
-                if (!s.getType().equals("STRING")) {
-                    mips.printError(
-                        String.format(
-                            "Variable %s is type %s. " +
-                            "Must be type STRING.",
-                            id,
-                            s.getType()
-                        )
-                    );
-                }
-            }
             node.getId().apply(this);
         }
         if (node.getArrayOption() != null) {
-            index = setArrayOption(id, s, node.getArrayOption());
             node.getArrayOption().apply(this);
         }
         if (node.getEquals() != null) {
             node.getEquals().apply(this);
         }
         if (node.getAnychars() != null) {
-            if (index > -1) {
+            node.getAnychars().apply(this);
+        }
+        if (node.getSemicolon() != null) {
+            node.getSemicolon().apply(this);
+        }
+        if (index > -1) {
+            if (s.getType().equals("STRING")) {
                 mips.la("$t0", mips.addString(node.getAnychars().getText()));
                 if (isArray(s)) {
                     mips.lw("$t1", s.getOffset(), "$sp");
@@ -858,22 +782,26 @@ class PrintTree extends DepthFirstAdapter {
                     mips.sw("$t0", s.getOffset(), "$sp");
                     ((Variable) s).initialize();
                 }
+            } else {
+                mips.printError(
+                    String.format(
+                        "Variable %s is type %s. " +
+                        "Must be type STRING.",
+                        id,
+                        s.getType()
+                    )
+                );
             }
-            node.getAnychars().apply(this);
-        }
-        if (node.getSemicolon() != null) {
-            node.getSemicolon().apply(this);
         }
     }
 
     @Override
     public void caseAVarDeclStmt(AVarDeclStmt node) {
         ArrayList<String> id = new ArrayList<String>();
-        Symbol s = null;
-        String type = "";
+        id.add(node.getId().getText());
+        String type = checkType(node.getType());
         int size = -1;
         if (node.getId() != null) {
-            id.add(node.getId().getText());
             node.getId().apply(this);
         }
         if (node.getMoreIds() != null) {
@@ -896,16 +824,6 @@ class PrintTree extends DepthFirstAdapter {
             node.getColon().apply(this);
         }
         if (node.getType() != null) {
-            if (node.getType() instanceof ATypesType) {
-                type = ((ATypesType) node.getType()).getTypeDecl().getText();
-            } else {
-                mips.printError(
-                    String.format(
-                        "Invalid type %s.",
-                        ((AIdType) node.getType()).getId().getText()
-                    )
-                );
-            }
             node.getType().apply(this);
         }
         if (node.getArrayOption() != null) {
@@ -929,20 +847,20 @@ class PrintTree extends DepthFirstAdapter {
             node.getArrayOption().apply(this);
         }
         if (node.getSemicolon() != null) {
-            if (size >= 1) {
-                for (int i = 0; i < id.size(); i++) {
-                    mips.la("$t0", mips.addWords(size));
-                    mips.sw("$t0", offset, "$sp");
-                    symbolTable.add(id.get(i), new Array(type, offset, size));
-                    offset -= 4;
-                }
-            } else if (size == 0) {
-                for (int i = 0; i < id.size(); i++) {
-                    symbolTable.add(id.get(i), new Variable(type, offset));
-                    offset -= 4;
-                }
-            }
             node.getSemicolon().apply(this);
+        }
+        if (size >= 1) {
+            for (int i = 0; i < id.size(); i++) {
+                mips.la("$t0", mips.addWords(size));
+                mips.sw("$t0", offset, "$sp");
+                symbolTable.add(id.get(i), new Array(type, offset, size));
+                offset -= 4;
+            }
+        } else if (size == 0) {
+            for (int i = 0; i < id.size(); i++) {
+                symbolTable.add(id.get(i), new Variable(type, offset));
+                offset -= 4;
+            }
         }
     }
 
@@ -1242,16 +1160,13 @@ class PrintTree extends DepthFirstAdapter {
 
     @Override
     public void caseAGetStmt(AGetStmt node) {
-        String id = "";
-        Symbol s = null;
-        int index = -1;
+        String id = node.getId().getText();
+        Symbol s = getSymbol(id);
+        int index = setArrayOption(id, s, node.getArrayOption());
         if (node.getId() != null) {
-            id = node.getId().getText();
-            s = getSymbol(id);
             node.getId().apply(this);
         }
         if (node.getArrayOption() != null) {
-            index = setArrayOption(id, s, node.getArrayOption());
             node.getArrayOption().apply(this);
         }
         if (node.getEquals() != null) {
@@ -1267,96 +1182,96 @@ class PrintTree extends DepthFirstAdapter {
             node.getRparen().apply(this);
         }
         if (node.getSemicolon() != null) {
-            if (index > -1) {
-                if (isArray(s)) {
-                    switch (s.getType()) {
-                        case "REAL":
-                            mips.lw("$t0", s.getOffset(), "$sp");
-                            mips.li("$v0", 6);
-                            mips.syscall();
-                            mips.swc1("$f0", 4 * index, "$t0");
-                            break;
-                        case "STRING":
-                            String label = mips.addWords(100);
-                            mips.lw("$t0", s.getOffset(), "$sp");
-                            mips.li("$v0", 8);
-                            mips.la("$a0", label);
-                            mips.li("$a1", 399);
-                            mips.syscall();
-                            mips.la("$t1", label);
-                            mips.sw("$t1", 4 * index, "$t0");
-                            break;
-                        case "BOOLEAN":
-                            String falselabel = mips.getLabel();
-                            mips.incLabel();
-                            String endlabel   = mips.getLabel();
-                            mips.incLabel();
-                            mips.lw("$t0", s.getOffset(), "$sp");
-                            mips.li("$v0", 5);
-                            mips.syscall();
-                            mips.beq("$zero", "$v0", falselabel);
-                            mips.li("$t1", 1);
-                            mips.j(endlabel);
-                            mips.addLabel(falselabel);
-                            mips.li("$t1", 0);
-                            mips.addLabel(endlabel);
-                            mips.sw("$t1", 4 * index, "$t0");
-                            break;
-                        default:
-                            mips.lw("$t0", s.getOffset(), "$sp");
-                            mips.li("$v0", 5);
-                            mips.syscall();
-                            mips.sw("$v0", 4 * index, "$t0");
-                    }
-                    ((Array) s).initializeAt(index);
-                } else {
-                    switch (s.getType()) {
-                        case "REAL":
-                            mips.li("$v0", 6);
-                            mips.syscall();
-                            mips.swc1("$f0", s.getOffset(), "$sp");
-                            break;
-                        case "STRING":
-                            String label = mips.addWords(100);
-                            mips.li("$v0", 8);
-                            mips.la("$a0", label);
-                            mips.li("$a1", 399);
-                            mips.syscall();
-                            mips.la("$t0", label);
-                            mips.sw("$t0", s.getOffset(), "$sp");
-                            break;
-                        case "BOOLEAN":
-                            String falselabel = mips.getLabel();
-                            mips.incLabel();
-                            String endlabel   = mips.getLabel();
-                            mips.incLabel();
-                            mips.li("$v0", 5);
-                            mips.syscall();
-                            mips.beq("$zero", "$v0", falselabel);
-                            mips.li("$t0", 1);
-                            mips.j(endlabel);
-                            mips.addLabel(falselabel);
-                            mips.li("$t0", 0);
-                            mips.addLabel(endlabel);
-                            mips.sw("$t0", s.getOffset(), "$sp");
-                            break;
-                        default:
-                            mips.li("$v0", 5);
-                            mips.syscall();
-                            mips.sw("$v0", s.getOffset(), "$sp");
-                    }
-                    ((Variable) s).initialize();
-                }
-            }
             node.getSemicolon().apply(this);
+        }
+        if (index > -1) {
+            if (isArray(s)) {
+                switch (s.getType()) {
+                    case "REAL":
+                        mips.lw("$t0", s.getOffset(), "$sp");
+                        mips.li("$v0", 6);
+                        mips.syscall();
+                        mips.swc1("$f0", 4 * index, "$t0");
+                        break;
+                    case "STRING":
+                        String label = mips.addWords(100);
+                        mips.lw("$t0", s.getOffset(), "$sp");
+                        mips.li("$v0", 8);
+                        mips.la("$a0", label);
+                        mips.li("$a1", 399);
+                        mips.syscall();
+                        mips.la("$t1", label);
+                        mips.sw("$t1", 4 * index, "$t0");
+                        break;
+                    case "BOOLEAN":
+                        String falselabel = mips.getLabel();
+                        mips.incLabel();
+                        String endlabel   = mips.getLabel();
+                        mips.incLabel();
+                        mips.lw("$t0", s.getOffset(), "$sp");
+                        mips.li("$v0", 5);
+                        mips.syscall();
+                        mips.beq("$zero", "$v0", falselabel);
+                        mips.li("$t1", 1);
+                        mips.j(endlabel);
+                        mips.addLabel(falselabel);
+                        mips.li("$t1", 0);
+                        mips.addLabel(endlabel);
+                        mips.sw("$t1", 4 * index, "$t0");
+                        break;
+                    default:
+                        mips.lw("$t0", s.getOffset(), "$sp");
+                        mips.li("$v0", 5);
+                        mips.syscall();
+                        mips.sw("$v0", 4 * index, "$t0");
+                }
+                ((Array) s).initializeAt(index);
+            } else {
+                switch (s.getType()) {
+                    case "REAL":
+                        mips.li("$v0", 6);
+                        mips.syscall();
+                        mips.swc1("$f0", s.getOffset(), "$sp");
+                        break;
+                    case "STRING":
+                        String label = mips.addWords(100);
+                        mips.li("$v0", 8);
+                        mips.la("$a0", label);
+                        mips.li("$a1", 399);
+                        mips.syscall();
+                        mips.la("$t0", label);
+                        mips.sw("$t0", s.getOffset(), "$sp");
+                        break;
+                    case "BOOLEAN":
+                        String falselabel = mips.getLabel();
+                        mips.incLabel();
+                        String endlabel   = mips.getLabel();
+                        mips.incLabel();
+                        mips.li("$v0", 5);
+                        mips.syscall();
+                        mips.beq("$zero", "$v0", falselabel);
+                        mips.li("$t0", 1);
+                        mips.j(endlabel);
+                        mips.addLabel(falselabel);
+                        mips.li("$t0", 0);
+                        mips.addLabel(endlabel);
+                        mips.sw("$t0", s.getOffset(), "$sp");
+                        break;
+                    default:
+                        mips.li("$v0", 5);
+                        mips.syscall();
+                        mips.sw("$v0", s.getOffset(), "$sp");
+                }
+                ((Variable) s).initialize();
+            }
         }
     }
 
     @Override
     public void caseAPutStmt(APutStmt node) {
-        String id = "";
-        Symbol s = null;
-        int index = -1;
+        String id = node.getId().getText();
+        Symbol s = getSymbol(id);
+        int index = getArrayOption(id, s, node.getArrayOption());
         if (node.getPut() != null) {
             node.getPut().apply(this);
         }
@@ -1364,84 +1279,78 @@ class PrintTree extends DepthFirstAdapter {
             node.getLparen().apply(this);
         }
         if (node.getId() != null) {
-            id = node.getId().getText();
-            s = getSymbol(id);
             node.getId().apply(this);
         }
         if (node.getArrayOption() != null) {
-            index = getArrayOption(id, s, node.getArrayOption());
             node.getArrayOption().apply(this);
         }
         if (node.getRparen() != null) {
             node.getRparen().apply(this);
         }
         if (node.getSemicolon() != null) {
-            if (index > -1) {
-                switch (s.getType()) {
-                    case "REAL":
-                        mips.li("$v0", 2);
-                        if (isArray(s)) {
-                            mips.lwc1("$f12", 4 * index, "$t0");
-                        } else {
-                            mips.lwc1("$f12", s.getOffset(), "$sp");
-                        }
-                        break;
-                    case "STRING":
-                        mips.li("$v0", 4);
-                        if (isArray(s)) {
-                            mips.lw("$a0", 4 * index, "$t0");
-                        } else {
-                            mips.lw("$a0", s.getOffset(), "$sp");
-                        }
-                        break;
-                    case "BOOLEAN":
-                        mips.li("$v0", 4);
-                        if (isArray(s)) {
-                            mips.lw("$t0", 4 * index, "$t0");
-                        } else {
-                            mips.lw("$t0", s.getOffset(), "$sp");
-                        }
-                        String falselabel = mips.getLabel();
-                        mips.incLabel();
-                        String endlabel   = mips.getLabel();
-                        mips.incLabel();
-                        mips.beq("$zero", "$t0", falselabel);
-                        mips.la("$a0", "TRUE");
-                        mips.j(endlabel);
-                        mips.addLabel(falselabel);
-                        mips.la("$a0", "FALSE");
-                        mips.addLabel(endlabel);
-                        break;
-                    default:
-                        mips.li("$v0", 1);
-                        if (isArray(s)) {
-                            mips.lw("$a0", 4 * index, "$t0");
-                        } else {
-                            mips.lw("$a0", s.getOffset(), "$sp");
-                        }
-                }
-                mips.syscall();
-                // Print newline
-                mips.li("$v0", 11);
-                mips.li("$a0", 0xA);
-                mips.syscall();
-            }
             node.getSemicolon().apply(this);
+        }
+        if (index > -1) {
+            switch (s.getType()) {
+                case "REAL":
+                    mips.li("$v0", 2);
+                    if (isArray(s)) {
+                        mips.lwc1("$f12", 4 * index, "$t0");
+                    } else {
+                        mips.lwc1("$f12", s.getOffset(), "$sp");
+                    }
+                    break;
+                case "STRING":
+                    mips.li("$v0", 4);
+                    if (isArray(s)) {
+                        mips.lw("$a0", 4 * index, "$t0");
+                    } else {
+                        mips.lw("$a0", s.getOffset(), "$sp");
+                    }
+                    break;
+                case "BOOLEAN":
+                    mips.li("$v0", 4);
+                    if (isArray(s)) {
+                        mips.lw("$t0", 4 * index, "$t0");
+                    } else {
+                        mips.lw("$t0", s.getOffset(), "$sp");
+                    }
+                    String falselabel = mips.getLabel();
+                    mips.incLabel();
+                    String endlabel   = mips.getLabel();
+                    mips.incLabel();
+                    mips.beq("$zero", "$t0", falselabel);
+                    mips.la("$a0", "TRUE");
+                    mips.j(endlabel);
+                    mips.addLabel(falselabel);
+                    mips.la("$a0", "FALSE");
+                    mips.addLabel(endlabel);
+                    break;
+                default:
+                    mips.li("$v0", 1);
+                    if (isArray(s)) {
+                        mips.lw("$a0", 4 * index, "$t0");
+                    } else {
+                        mips.lw("$a0", s.getOffset(), "$sp");
+                    }
+            }
+            mips.syscall();
+            // Print newline
+            mips.li("$v0", 11);
+            mips.li("$a0", 0xA);
+            mips.syscall();
         }
     }
 
     @Override
     public void caseAIncrStmt(AIncrStmt node) {
-        String id = "";
-        Symbol s = null;
-        int index = -1;
+        String id = node.getId().getText();
+        Symbol s = getSymbol(id);
+        int index = getArrayOption(id, s, node.getArrayOption());
         if (node.getId() != null) {
-            id = node.getId().getText();
-            s = getSymbol(id);
             node.getId().apply(this);
         }
         if (node.getArrayOption() != null) {
-            index = getArrayOption(id, s, node.getArrayOption());
             node.getArrayOption().apply(this);
         }
         if (node.getIncr() != null) {
@@ -1492,16 +1401,13 @@ class PrintTree extends DepthFirstAdapter {
 
     @Override
     public void caseADecrStmt(ADecrStmt node) {
-        String id = "";
-        Symbol s = null;
-        int index = -1;
+        String id = node.getId().getText();
+        Symbol s = getSymbol(id);
+        int index = getArrayOption(id, s, node.getArrayOption());
         if (node.getId() != null) {
-            id = node.getId().getText();
-            s = getSymbol(id);
             node.getId().apply(this);
         }
         if (node.getArrayOption() != null) {
-            index = getArrayOption(id, s, node.getArrayOption());
             node.getArrayOption().apply(this);
         }
         if (node.getDecr() != null) {
@@ -1586,7 +1492,12 @@ class PrintTree extends DepthFirstAdapter {
             if(globalSet.containsFunction(node.getId().getText())){
                 curFunction = globalSet.getFunction(node.getId().getText());
             } else {
-                mips.printError("Method call " + node.getId().getText() + " has not been declared.");
+                mips.printError(
+                    String.format(
+                        "Method call %s has not been declared.",
+                        node.getId().getText()
+                    )
+                );
             }
         }
         if (node.getLparen() != null) {
@@ -1602,7 +1513,7 @@ class PrintTree extends DepthFirstAdapter {
             node.getSemicolon().apply(this);
         }
         if(curFunction != null){
-            mips.j(curFunction.getLabel());
+            mips.jal(curFunction.getLabel());
         }
     }
 
@@ -1639,98 +1550,41 @@ class PrintTree extends DepthFirstAdapter {
 
     @Override
     public void caseAReturnStmt(AReturnStmt node) {
-        String returnType = "";
-        if(globalSet.getCurrentClass() == null){
-            //if in global function decl
-            returnType = globalSet.getCurrentFunction().getReturnType();
-        } else {
-            //FIXME : a method in a class
-            //returnType = globalSet.getCurrentFunction().getReturnType();
-        }
+        String name = globalSet.getCurrentClass() == null ?
+            globalSet.getCurrentFunctionName() :
+            globalSet.getCurrentClass().getCurrentMethodName();
+        String returnType = globalSet.getCurrentClass() == null ?
+            globalSet.getCurrentFunction().getReturnType() :
+            globalSet.getCurrentClass().getCurrentMethod().getReturnType();
+        type = returnType;
         if (node.getReturn() != null) {
             node.getReturn().apply(this);
         }
-        Function currentFunc = globalSet.getCurrentFunction();
         if (node.getExprOrBool() != null) {
             node.getExprOrBool().apply(this);
-            if(node.getExprOrBool() instanceof ABoolExprOrBool){
-                if(returnType.equals("BOOLEAN")){
-                    //FIXME
-                } else {
-                    mips.printError("Trying to return a boolean value instead of a " + returnType);
-                }
-            } else if(returnType.equals("INT")){
-                if(isExprStringOrVoidOrBool){
-                    mips.printError("Trying to return a value other then of type INT");
-                } else {
-                    //FIXME
-                }
-            } else if(returnType.equals("REAL")){
-                if(isExprStringOrVoidOrBool){
-                    mips.printError("Trying to return a value other then of type REAL");
-                } else {
-                    //FIXME
-                }
-            } else if(returnType.equals("VOID")){
-                if(isExprStringOrVoidOrBool){
-                    //FIXME
-                } else {
-                    mips.printError("Trying to return a value other then of type VOID");
-                }
-            } else if(returnType.equals("STRING")){
-                if(isExprStringOrVoidOrBool){
-                    //FIXME
-                } else {
-                    mips.printError("Trying to return a value other then of type STRING");
-                }
-            } else if(returnType.equals("BOOLEAN")){
-                if(isExprStringOrVoidOrBool){
-                    //FIXME
-                } else {
-                    mips.printError("Trying to return a value other then of type BOOLEAN");
-                }
-            }
-            if(isFloat){
-                if(currentFunc.getReturnType().equals("REAL")){
-                    mips.mfc1("$v0","$f0");
-                } else {
-                    mips.printError("Function " + currentFunc.getLabel() + " is trying to return a REAL");
-                }
-            } else {
-                mips.move("$v0","$s0");
-            }
         }
         if (node.getSemicolon() != null) {
             node.getSemicolon().apply(this);
+        }
+        if (returnType.equals("REAL")) {
+            mips.mfc1("$v0", "$f0");
+        } else {
+            mips.move("$v0", "$s0");
         }
     }
 
     @Override
     public void caseAAssignBooleanStmt(AAssignBooleanStmt node) {
-        String id = "";
-        Symbol s = null;
-        int index = -1;
+        String id = node.getId().getText();
+        Symbol s = getSymbol(id);
+        int index = setArrayOption(id, s, node.getArrayOption());
+        if (s != null) {
+            type = s.getType();
+        }
         if (node.getId() != null) {
-            id = node.getId().getText();
-            s = getSymbol(id);
-            if (s != null) {
-                if(s.getType().equals("BOOLEAN")){
-                    index = 0;
-                } else {
-                    mips.printError(
-                        String.format(
-                            "Variable %s has type %s " +
-                            "which cannot be converted to BOOLEAN.",
-                            id,
-                            s.getType()
-                        )
-                    );
-                }
-            }
             node.getId().apply(this);
         }
         if (node.getArrayOption() != null) {
-            index = setArrayOption(id, s, node.getArrayOption());
             node.getArrayOption().apply(this);
         }
         if (node.getEquals() != null) {
@@ -1738,28 +1592,27 @@ class PrintTree extends DepthFirstAdapter {
         }
         if (node.getBoolean() != null) {
             node.getBoolean().apply(this);
-            if (index > -1) {
-                if (isArray(s)) {
-                    mips.lw("$t0", s.getOffset(), "$sp");
-                    if (isFloat) {
-                        mips.cvt_w_s("$f0", "$f0");
-                        mips.mfc1("$f0", "$s0");
-                    }
-                    mips.sw("$s0", 4 * index, "$t0");
-                    ((Array) s).initializeAt(index);
-                } else {
-                    if (isFloat) {
-                        mips.cvt_w_s("$f0", "$f0");
-                        mips.mfc1("$f0", "$s0");
-                    }
-                    mips.sw("$s0", s.getOffset(), "$sp");
-                    ((Variable) s).initialize();
-                }
-            }
-            isFloat = false;
         }
         if (node.getSemicolon() != null) {
             node.getSemicolon().apply(this);
+        }
+        if (index > -1) {
+            if (isArray(s)) {
+                mips.lw("$t0", s.getOffset(), "$sp");
+                if (type.equals("REAL")) {
+                    mips.cvt_w_s("$f0", "$f0");
+                    mips.mfc1("$f0", "$s0");
+                }
+                mips.sw("$s0", 4 * index, "$t0");
+                ((Array) s).initializeAt(index);
+            } else {
+                if (type.equals("REAL")) {
+                    mips.cvt_w_s("$f0", "$f0");
+                    mips.mfc1("$f0", "$s0");
+                }
+                mips.sw("$s0", s.getOffset(), "$sp");
+                ((Variable) s).initialize();
+            }
         }
     }
 
@@ -2013,7 +1866,6 @@ class PrintTree extends DepthFirstAdapter {
         if (node.getExpr() != null) {
             node.getExpr().apply(this);
         }
-        isFloat = false;
     }
 
     @Override
@@ -2035,43 +1887,32 @@ class PrintTree extends DepthFirstAdapter {
 
     @Override
     public void caseAAddExpr(AAddExpr node) {
-        isExprStringOrVoidOrBool = false;
-        boolean addition = true;
-        boolean isFloatAfterFirstExpr = false;
+        boolean addition = node.getAddop() instanceof APlusAddop;
+        if (!(type.equals("INT") || type.equals("REAL"))) {
+            mips.printError(
+                String.format(
+                    "Expecting type %s, not INT or FLOAT.",
+                    type
+                )
+            );
+        }
         if (node.getExpr() != null) {
             node.getExpr().apply(this);
-            if(isExprStringOrVoidOrBool){
-                mips.printError("Trying to add or subtract a variable of type VOID, STRING, or BOOLEAN.");
-            }
-            if (isFloat) {
+            if (type.equals("REAL")) {
                 mips.swc1("$f0", offset, "$sp");
-                isFloatAfterFirstExpr = true;
             } else {
                 mips.sw("$s0", offset, "$sp");
-                isFloatAfterFirstExpr = false;
             }
             offset -= 4;
         }
         if (node.getAddop() != null) {
-            if (node.getAddop() instanceof AMinusAddop) {
-                addition = false;
-            }
             node.getAddop().apply(this);
         }
         if (node.getTerm() != null) {
             node.getTerm().apply(this);
-            if(isExprStringOrVoidOrBool){
-                mips.printError("Trying to add or subtract a variable of type VOID, STRING, or BOOLEAN.");
-            }
             offset += 4;
-            if (isFloat) {
-                if(isFloatAfterFirstExpr){
-                    mips.l_s("$f1", offset, "$sp");
-                } else {
-                    mips.lw("$s0", offset, "$sp");
-                    mips.mtc1("$s0", "$f1");
-                    mips.cvt_s_w("$f1", "$f1");
-                }
+            if (type.equals("REAL")) {
+                mips.l_s("$f1", offset, "$sp");
                 if (addition) {
                     mips.add_s("$f0", "$f1", "$f0");
                 } else {
@@ -2090,7 +1931,6 @@ class PrintTree extends DepthFirstAdapter {
 
     @Override
     public void caseATermExpr(ATermExpr node) {
-        isExprStringOrVoidOrBool = false;
         if (node.getTerm() != null) {
             node.getTerm().apply(this);
         }
@@ -2098,55 +1938,43 @@ class PrintTree extends DepthFirstAdapter {
 
     @Override
     public void caseAMultTerm(AMultTerm node) {
-        boolean isFloatAfterFirstExpr = false;
-        boolean divison = true;
+        boolean multiplication = node.getMultop().getText().equals("*");
+        if (!(type.equals("INT") || type.equals("REAL"))) {
+            mips.printError(
+                String.format(
+                    "Expecting type %s, not INT or FLOAT.",
+                    type
+                )
+            );
+        }
         if (node.getTerm() != null) {
             node.getTerm().apply(this);
-            if(isExprStringOrVoidOrBool){
-                mips.printError("Trying to multiply or divide a variable of type VOID, STRING, or BOOLEAN.");
-            }
-            if (isFloat) {
-                mips.s_s("$f0", offset, "$sp");
-                isFloatAfterFirstExpr = true;
+            if (type.equals("REAL")) {
+                mips.swc1("$f0", offset, "$sp");
             } else {
                 mips.sw("$s0", offset, "$sp");
-                isFloatAfterFirstExpr = false;
             }
             offset -= 4;
         }
         if (node.getMultop() != null) {
-            if (node.getMultop().getText().equals("*")) {
-                divison = false;
-            }
             node.getMultop().apply(this);
         }
         if (node.getFactor() != null) {
             node.getFactor().apply(this);
-            if(isExprStringOrVoidOrBool){
-                mips.printError("Trying to multiply or divide a variable of type VOID, STRING, or BOOLEAN.");
-            }
             offset += 4;
-            if (isFloat) {
-                if(isFloatAfterFirstExpr){
-                    mips.l_s("$f1", offset, "$sp");
-                } else {
-                    mips.lw("$t2", offset, "$sp");
-                    mips.mtc1("$t2", "$f1");
-                    mips.cvt_s_w("$f1", "$f1");
-                }
-                if (divison) {
-                    mips.div_s("$f0", "$f1", "$f0");
-                } else {
+            if (type.equals("REAL")) {
+                mips.l_s("$f1", offset, "$sp");
+                if (multiplication) {
                     mips.mul_s("$f0", "$f1", "$f0");
+                } else {
+                    mips.div_s("$f0", "$f1", "$f0");
                 }
             } else {
                 mips.lw("$t0", offset, "$sp");
-                if (divison) {
-                    mips.div("$s0", "$t0", "$s0");
-                    mips.mflo("$s0");
+                if (multiplication) {
+                    mips.mul("$s0", "$t0", "$s0");
                 } else {
-                    mips.mult("", "$t0", "$s0");
-                    mips.mflo("$s0");
+                    mips.div("$s0", "$t0", "$s0");
                 }
             }
         }
@@ -2178,15 +2006,13 @@ class PrintTree extends DepthFirstAdapter {
             node.getNegop().apply(this);
         }
         if (node.getFactor() != null) {
-            if (isFloat) {
+            if (type.equals("REAL")) {
+                mips.li("$t0", -1);
+                mips.mul("$s0", "$t0", "$s0");
+            } else {
                 mips.li("$t2", Float.floatToIntBits((float) -1.0));
                 mips.mtc1("$t2", "$f1");
-                mips.mult("$f0", "$f1", "$f0");
-                mips.mflo("$f0");
-            } else {
-                mips.li("$t0", -1);
-                mips.mult("$f0", "$t0", "$s0");
-                mips.mflo("$s0");
+                mips.mul_s("$f0", "$f1", "$f0");
             }
             node.getFactor().apply(this);
         }
@@ -2195,7 +2021,7 @@ class PrintTree extends DepthFirstAdapter {
     @Override
     public void caseAIntFactor(AIntFactor node) {
         if (node.getInt() != null) {
-            if (isFloat) {
+            if (type.equals("REAL")) {
                 mips.li(
                     "$t0",
                     Float.floatToIntBits(
@@ -2220,7 +2046,14 @@ class PrintTree extends DepthFirstAdapter {
     @Override
     public void caseARealFactor(ARealFactor node) {
         if (node.getReal() != null) {
-            isFloat = true;
+            if (!type.equals("REAL")) {
+                mips.printError(
+                    String.format(
+                        "Expecting type %s, not FLOAT.",
+                        type
+                    )
+                );
+            }
             mips.li(
                 "$t1",
                 Float.floatToIntBits(
@@ -2281,87 +2114,99 @@ class PrintTree extends DepthFirstAdapter {
 
     @Override
     public void caseAArrayArrayOrId(AArrayArrayOrId node) {
-        String id = "";
-        Symbol s = null;
+        String id = node.getId().getText();
+        Symbol s = getSymbol(id);
+        int index = Integer.parseInt(node.getInt().getText());
         if (node.getId() != null) {
-            id = node.getId().getText();
-            s = getSymbol(id);
-            if (s == null) {
-                mips.printError(
-                    String.format(
-                        "Variable %s has not been declared.",
-                        id
-                    )
-                );
-            }
-            String type = s.getType();
-            if(type.equals("STRING") || type.equals("BOOLEAN") || type.equals("VOID")){
-                isExprStringOrVoidOrBool = true;
-            }
             node.getId().apply(this);
         }
         if (node.getLbracket() != null) {
             node.getLbracket().apply(this);
         }
         if (node.getInt() != null) {
-            if (s != null) {
-                int index = Integer.parseInt(node.getInt().getText());
-                if (((Array) s).isInitializedAt(index)) {
-                    mips.lw("$t0", s.getOffset(), "$sp");
-                    if (isFloat || s.getType().equals("REAL")) {
-                        isFloat = true;
-                        mips.lwc1("$f0", 4 * index, "$t0");
-                    } else {
-                        mips.lw("$s0", 4 * index, "$t0");
-                    }
-                } else {
-                    mips.printError(
-                        String.format(
-                            "Array %s has not been " +
-                            "initialized at index %d.",
-                            id,
-                            index
-                        )
-                    );
-                }
-            }
             node.getInt().apply(this);
         }
         if (node.getRbracket() != null) {
             node.getRbracket().apply(this);
         }
-    }
-
-    @Override
-    public void caseAIdArrayOrId(AIdArrayOrId node) {
-        String id = "";
-        Symbol s = null;
-        if (node.getId() != null) {
-            id = node.getId().getText();
-            s = getSymbol(id);
-            if (s != null) {
-                if (((Variable) s).isInitialized()) {
-                    String type = s.getType();
-                    if(type.equals("STRING") || type.equals("BOOLEAN") || type.equals("VOID")){
-                        isExprStringOrVoidOrBool = true;
-                    }
-                    if (isFloat || s.getType().equals("REAL")) {
-                        isFloat = true;
-                        if(s.getType().equals("REAL")){
-                            mips.lwc1("$f0", s.getOffset(), "$sp");
+        if (s != null) {
+            if (wider(type, s.getType())) {
+                if ((index >= 0) && (index < ((Array) s).getSize())) {
+                    if (((Array) s).isInitializedAt(index)) {
+                        mips.lw("$t0", s.getOffset(), "$sp");
+                        if (type.equals("REAL")) {
+                            mips.lwc1("$f0", 4 * index, "$t0");
+                            if (!s.getType().equals("REAL")) {
+                                mips.cvt_s_w("$f0", "$f0");
+                            }
                         } else {
-                            mips.lw("$t2", s.getOffset(), "$sp");
-                            mips.mtc1("$t2", "$f0");
-                            mips.cvt_s_w("$f0", "$f0");
+                            mips.lw("$s0", 4 * index, "$t0");
                         }
                     } else {
-                        mips.lw("$s0", s.getOffset(), "$sp");
+                        mips.printError(
+                            String.format(
+                                "Array %s has not been " +
+                                "initialized at index %d.",
+                                id,
+                                index
+                            )
+                        );
                     }
                 } else {
                     mips.printError(
                         String.format(
-                            "Variable %s has not been initialized.",
+                            "Index %d is not valid for array %s.",
+                            index,
                             id
+                        )
+                    );
+                }
+            } else {
+                mips.printError(
+                    String.format(
+                        "Expecting type compatible with %s. " +
+                        "Array %s is type %s.",
+                        type,
+                        id,
+                        s.getType()
+                    )
+                );
+            }
+        }
+    }
+
+    @Override
+    public void caseAIdArrayOrId(AIdArrayOrId node) {
+        String id = node.getId().getText();
+        Symbol s = getSymbol(id);
+        if (node.getId() != null) {
+            if (s != null) {
+                if (wider(type, s.getType())) {
+                    if (((Variable) s).isInitialized()) {
+                        if (type.equals("REAL")) {
+                            mips.lwc1("$f0", s.getOffset(), "$sp");
+                            if (!s.getType().equals("REAL")) {
+                                mips.cvt_s_w("$f0", "$f0");
+                            }
+                        } else {
+                            mips.lw("$s0", s.getOffset(), "$sp");
+                        }
+                    } else {
+                        mips.printError(
+                            String.format(
+                                "Variable %s has not been initialized.",
+                                id
+                            )
+                        );
+                    }
+                } else {
+                    mips.printError(
+                        String.format(
+                            "Expecting type compatible with %s. " +
+                            "Variable %s is type %s.",
+                            type,
+                            id,
+                            s.getType()
                         )
                     );
                 }
@@ -2373,7 +2218,7 @@ class PrintTree extends DepthFirstAdapter {
     @Override
     public void caseATrueBoolean(ATrueBoolean node) {
         if (node.getTrue() != null) {
-            if (isFloat) {
+            if (type.equals("REAL")) {
                 mips.li("$t0", Float.floatToIntBits((float) 1.0));
                 mips.mtc1("$f0", "$t0");
             } else {
@@ -2386,7 +2231,7 @@ class PrintTree extends DepthFirstAdapter {
     @Override
     public void caseAFalseBoolean(AFalseBoolean node) {
         if (node.getFalse() != null) {
-            if (isFloat) {
+            if (type.equals("REAL")) {
                 mips.li("$t0", Float.floatToIntBits((float) 0.0));
                 mips.mtc1("$f0", "$t0");
             } else {
@@ -2398,26 +2243,20 @@ class PrintTree extends DepthFirstAdapter {
 
     @Override
     public void caseAConditionalBoolean(AConditionalBoolean node) {
-        String cond = "";
         if (node.getFirst() != null) {
-            isFloat = false;
+            type = "REAL";
             node.getFirst().apply(this);
-            if (isFloat) {
-                mips.swc1("$f0", offset, "$sp");
-            } else {
-                mips.sw("$s0", offset, "$sp");
-            }
+            mips.swc1("$f0", offset, "$sp");
             offset -= 4;
         }
         if (node.getCond() != null) {
-            cond = node.getCond().getText();
             node.getCond().apply(this);
         }
         if (node.getSec() != null) {
             node.getSec().apply(this);
-            if (isFloat) {
+            if (type.equals("REAL")) {
                 mips.lwc1("$f1", offset, "$sp");
-                switch (cond) {
+                switch (node.getCond().getText()) {
                     case "==":
                         mips.c_eq_s("$f1", "$f0");
                         break;
@@ -2443,7 +2282,7 @@ class PrintTree extends DepthFirstAdapter {
                 mips.movf("$s0", "$zero");
             } else {
                 mips.lw("$t0", offset, "$sp");
-                switch (cond) {
+                switch (node.getCond().getText()) {
                     case "==":
                         mips.seq("$s0", "$t0", "$s0");
                         break;
@@ -2467,7 +2306,6 @@ class PrintTree extends DepthFirstAdapter {
                 }
             }
             offset += 4;
-            isFloat = false;
         }
     }
 
@@ -2631,5 +2469,44 @@ class PrintTree extends DepthFirstAdapter {
             }
         }
         return index;
+    }
+
+    private void errorWrongReturnType(String functionName, String returnType) {
+        mips.printError(
+            String.format(
+                "Wrong return type for function %s. " +
+                "Expected %s.",
+                functionName,
+                returnType
+            )
+        );
+    }
+
+    private String checkType(PType t) {
+        String type = t instanceof AIdType
+            ? ((AIdType) t).getId().getText()
+            : ((ATypesType) t).getTypeDecl().getText();
+        if ((t instanceof AIdType)
+                && (!globalSet.containsClass(type))) {
+            mips.printError(
+                String.format(
+                    "Invalid type %s.",
+                    type
+                )
+            );
+        }
+        return type;
+    }
+
+    private boolean wider(String wide, String narrow) {
+        if (wide.equals(narrow)) {
+            return true;
+        } else if (wide.equals("REAL") &&
+                (narrow.equals("INT") || narrow.equals("BOOLEAN"))) {
+            return true;
+        } else if (wide.equals("INT") && narrow.equals("BOOLEAN")) {
+            return true;
+        }
+        return false;
     }
 }
