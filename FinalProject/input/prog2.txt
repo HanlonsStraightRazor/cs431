@@ -1,50 +1,36 @@
 BEGIN
-  globalVarInt : INT;
-  globalVarIntTwo : INT;
-  globalVarReal : REAL;
-  globalVarString : STRING;
-  globalVarBool : BOOLEAN;
-  globalVarVoid : VOID;
-
   CLASS ClassDec {
-    classDecVarInt : INT;
-    classDecVarReal : REAL;
-    classDecVarInt := 71;
-    classDecVarReal := 3.26;
+    VOID MAIN() {
+    }
+    VOID MethodDupInClass() {
+    }
+    VOID MethodDupInClass() {
+    }
   }
 
-  INT MethodIntDec(ArgInt : INT, ArgIntTwo : INT ) {
-    globalVarInt := ArgInt;
-    ArgIntTwo := ArgIntTwo;
-    RETURN 2;
+
+  VOID DupMethod() {
   }
 
-  VOID MethodVoidDec() {
-    globalVarInt := 2;
-    globalVarIntTwo := 3;
+  INT DupMethod() {
   }
 
-  REAL MethodRealDec() {
-    RETURN 2.14 + 1;
-  }
-
-  BOOLEAN MethodBoolDec() {
-    RETURN TRUE;
-  }
-
-  STRING MethodStringDec() {
-    globalVarString := "testing";
-    RETURN globalVarString;
-  }
 
   VOID MAIN() {
-    mainVarDec : INT;
-    mainVarDec := 4;
-    MethodIntDec(6, 3);
-    MethodVoidDec();
-    MethodRealDec();
-    MethodBoolDec();
-    MethodStringDec();
- }
+    mainVarDec : BOOLEAN;
+    mainVarDec++;
+    mainVarDec--;
+    mainVarDec := "not a string";
+    mainArrayDec : INT [5];
+    mainArrayDec[6] := 7;
+    mainArrayDec[3] := mainArrayDec[2];
+    mainVarDecInt : INT;
+    mainVarDecInt := TRUE;
+    FakeMethodCall();
+
+  }
+
+  INT MAIN(ArgInt : INT) {
+  }
 
 END

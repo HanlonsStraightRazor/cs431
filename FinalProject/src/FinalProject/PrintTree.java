@@ -965,7 +965,7 @@ class PrintTree extends DepthFirstAdapter {
                         mips.decLabel();
                         mips.printError(
                             String.format(
-                                "Variable %s has type %s which" +
+                                "Variable %s has type %s which " +
                                 "cannot be converted to BOOLEAN.",
                                 id,
                                 s.getType()
