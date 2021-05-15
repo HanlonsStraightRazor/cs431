@@ -11,7 +11,6 @@ BEGIN
     singleRealVarDec   := 4.2;
     singleStringVarDec := "String Init";
     singleBoolVarDec   := TRUE;
-    singleVoidVarDec   := 3;
 
     multIntVarDecOne, multIntVarDecTwo       : INT;
     multRealVarDecOne, multRealVarDecTwo     : REAL;
@@ -34,13 +33,11 @@ BEGIN
     multStringVarDecThree := "Multi String Int";
     multBoolVarDecOne     := FALSE;
     multBoolVarDecTwo     := multBoolVarDecOne;
-    multVoidVarDecTwo     := 3;
 
     singleIntVarDecArray    : INT[6];
     singleRealVarDecArray   : REAL[3];
     singleStringVarDecArray : STRING[5];
     singleBoolVarDecArray   : BOOLEAN[9];
-    singleVoidVarDecArray   : VOID[2];
 
     singleIntVarDecArray[3] := 4 + 6;
     singleIntVarDecArray[2] := 2 - 1;
@@ -51,7 +48,6 @@ BEGIN
     multRealVarDecOneArray, multRealVarDecTwoArray     : REAL[3];
     multStringVarDecOneArray, multStringVarDecTwoArray : STRING[4];
     multBoolVarDecOneArray, multBoolVarDecTwoArray     : BOOLEAN[5];
-    multVoidVarDecOneArray, multVoidVarDecTwoArray     : VOID[6];
 
     multIntVarDecOneArray[1] := 2 + 2 + 2 + 2;
     multRealVarDecTwoArray[1]   := 2.1 / 1 + 5;
@@ -60,88 +56,73 @@ BEGIN
     multBoolVarDecTwoArray[1] := FALSE;
     multBoolVarDecTwoArray[2] := TRUE;
     multBoolVarDecTwoArray[3] := FALSE;
-    multVoidVarDecOneArray[2] := 1;
 
-    IF(multVoidVarDecTwo > 3) THEN {
-      multVoidVarDecTwo := 6;
-    }
-    IF(multVoidVarDecTwo > 2) THEN {
-      multVoidVarDecTwo := 1;
-    }
     IF(1 == 1) THEN {
       multIntVarDecOne++;
     }
     IF(1 != 1) THEN {
-      multVoidVarDecTwo := 10;
+      multIntVarDecOne--;
     }
     IF(3 > 2) THEN {
-      multVoidVarDecTwo := 11;
+      multIntVarDecOne++;
     } ELSE {
-      multVoidVarDecTwo := 9;
+      multIntVarDecTwo--;
     }
     IF(6 < 5) THEN {
-      multVoidVarDecTwo := 8;
+      multIntVarDecOne++;
     } ELSE {
-      multVoidVarDecTwo := 7;
+      multIntVarDecTwo--;
     }
 
-    multVoidVarDecTwo := 1;
-    SWITCH(multVoidVarDecTwo + 1){
-      CASE(0): multVoidVarDecTwo := 0;
+    SWITCH(multIntVarDecOne + 1){
+      CASE(0): multIntVarDecOne := 0;
                BREAK;
-      CASE(1): multVoidVarDecTwo := 1;
+      CASE(1): multIntVarDecOne := 1;
                BREAK;
-      CASE(2): multVoidVarDecTwo := 2;
+      CASE(2): multIntVarDecOne := 2;
                BREAK;
-      DEFAULT: multVoidVarDecTwo := 5;
+      DEFAULT: multIntVarDecOne := 5;
     }
 
     SWITCH(TRUE){
-      CASE(0): multVoidVarDecTwo := 0;
+      CASE(0): multIntVarDecOne := 0;
                BREAK;
-      CASE(1): multVoidVarDecTwo := 100;
+      CASE(1): multIntVarDecOne := 100;
                BREAK;
-      DEFAULT: multVoidVarDecTwo := 5;
+      DEFAULT: multIntVarDecOne := 5;
     }
 
-    prompts    : STRING[6];
+    prompts    : STRING[5];
     prompts[0] := "Enter an int";
     prompts[1] := "Enter a real";
     prompts[2] := "Enter a string";
     prompts[3] := "Enter a boolean";
-    prompts[4] := "Enter a void";
-    prompts[5] := "You entered:";
+    prompts[4] := "You entered:";
 
     one   :  INT;
     two   :  REAL;
     three :  STRING;
     four  :  BOOLEAN;
-    five  :  VOID;
 
     PUT(prompts[0]);
     one   := GET();
-    PUT(prompts[5]);
+    PUT(prompts[4]);
     PUT(one);
 
     PUT(prompts[1]);
     two   := GET();
-    PUT(prompts[5]);
+    PUT(prompts[4]);
     PUT(two);
 
     PUT(prompts[2]);
     three := GET();
-    PUT(prompts[5]);
+    PUT(prompts[4]);
     PUT(three);
 
     PUT(prompts[3]);
     four  := GET();
-    PUT(prompts[5]);
-    PUT(four);
-
     PUT(prompts[4]);
-    five  := GET();
-    PUT(prompts[5]);
-    PUT(five);
+    PUT(four);
 
   }
 END

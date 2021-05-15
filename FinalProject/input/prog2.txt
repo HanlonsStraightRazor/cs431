@@ -1,21 +1,14 @@
 BEGIN
-  globalVar : INT;
+    globalVarInt : INT;
+    globalVarReal : REAL;
 
-  CLASS ClassDefTest {
-    classVarDec : INT;
-    classVarDec := 1;
-  }
+    INT retOne() {
+        globalVarInt := 1;
+        PUT(globalVarInt);
+        RETURN 1;
+    }
 
-  INT MethodDec() {
-    methodVarDec : INT;
-    methodVarDec := 2;
-    globalVar := 6;
-  }
-
-  VOID MAIN() {
-    mainVarDec : INT;
-    mainVarDec := 4;
-    MethodDec();
-    mainVarDec := 5;
- }
+    VOID MAIN() {
+        retOne();
+    }
 END
