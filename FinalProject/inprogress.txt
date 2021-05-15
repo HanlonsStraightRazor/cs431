@@ -1,0 +1,2 @@
+ - GET statements don't work with arrays: line 1237
+ - FOR loops don't work: line 1006
