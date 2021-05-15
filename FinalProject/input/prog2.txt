@@ -9,13 +9,13 @@ BEGIN
   INT MethodDec() {
     methodVarDec : INT;
     methodVarDec := 2;
+    globalVar := 6;
   }
 
   VOID MAIN() {
-    stringTest : STRING;
-    stringTestTwo : STRING;
-    stringTest := "something";
-    stringTestTwo := "some2";
-    stringTest := stringTestTwo;
+    mainVarDec : INT;
+    mainVarDec := 4;
+    MethodDec();
+    mainVarDec := 5;
  }
 END

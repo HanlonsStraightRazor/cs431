@@ -1580,8 +1580,14 @@ class PrintTree extends DepthFirstAdapter {
 
     @Override
     public void caseAMethodCallStmt(AMethodCallStmt node) {
+        Function curFunction = null;
         if (node.getId() != null) {
             node.getId().apply(this);
+            if(globalSet.containsFunction(node.getId().getText())){
+                curFunction = globalSet.getFunction(node.getId().getText());
+            } else {
+                mips.printError("Method call " + node.getId().getText() + " has not been declared.");
+            }
         }
         if (node.getLparen() != null) {
             node.getLparen().apply(this);
@@ -1594,6 +1600,9 @@ class PrintTree extends DepthFirstAdapter {
         }
         if (node.getSemicolon() != null) {
             node.getSemicolon().apply(this);
+        }
+        if(curFunction != null){
+            mips.j(curFunction.getLabel());
         }
     }
 
@@ -1649,17 +1658,37 @@ class PrintTree extends DepthFirstAdapter {
                     //FIXME
                 } else {
                     mips.printError("Trying to return a boolean value instead of a " + returnType);
-                } else if(returnType.equals("VOID")){
-
-                } else if(returnType.equals("INT")){
-
-                } else if(returnType.equals("REAL")){
-
-                } else if(returnType.equals("STRING")){
-
                 }
-            } else {
-
+            } else if(returnType.equals("INT")){
+                if(isExprStringOrVoidOrBool){
+                    mips.printError("Trying to return a value other then of type INT");
+                } else {
+                    //FIXME
+                }
+            } else if(returnType.equals("REAL")){
+                if(isExprStringOrVoidOrBool){
+                    mips.printError("Trying to return a value other then of type REAL");
+                } else {
+                    //FIXME
+                }
+            } else if(returnType.equals("VOID")){
+                if(isExprStringOrVoidOrBool){
+                    //FIXME
+                } else {
+                    mips.printError("Trying to return a value other then of type VOID");
+                }
+            } else if(returnType.equals("STRING")){
+                if(isExprStringOrVoidOrBool){
+                    //FIXME
+                } else {
+                    mips.printError("Trying to return a value other then of type STRING");
+                }
+            } else if(returnType.equals("BOOLEAN")){
+                if(isExprStringOrVoidOrBool){
+                    //FIXME
+                } else {
+                    mips.printError("Trying to return a value other then of type BOOLEAN");
+                }
             }
             if(isFloat){
                 if(currentFunc.getReturnType().equals("REAL")){
