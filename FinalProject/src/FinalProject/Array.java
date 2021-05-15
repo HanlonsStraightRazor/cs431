@@ -11,6 +11,9 @@ class Array extends Symbol {
             b = false;
         }
     }
+    public boolean isOutOfBounds(int index) {
+        return index < 0 || index >= size;
+    }
     public int getSize() {
         return size;
     }

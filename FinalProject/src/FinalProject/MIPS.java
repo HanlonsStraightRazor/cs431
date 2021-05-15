@@ -593,4 +593,14 @@ class MIPS {
             )
         );
     }
+
+    public void jal(String label) {
+        append(
+            String.format(
+                "%sjal %s\n",
+                DELIMITER,
+                label
+            )
+        );
+    }
 }

@@ -1,19 +1,21 @@
 BEGIN
   globalVar : INT;
-  INT MAIN() {
-    methodVarDec : INT;
-    methodVarDec := 1;
-  }
 
   CLASS ClassDefTest {
     classVarDec : INT;
     classVarDec := 1;
   }
 
+  INT MethodDec() {
+    methodVarDec : INT;
+    methodVarDec := 2;
+    globalVar := 6;
+  }
+
   VOID MAIN() {
-    globalVar := 3;
-    numints, numintsTwo   :  INT;
-    numints := 3 + globalVar;
-    numintsTwo := 4 + globalVar;
+    mainVarDec : INT;
+    mainVarDec := 4;
+    MethodDec();
+    mainVarDec := 5;
  }
 END
