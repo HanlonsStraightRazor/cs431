@@ -1,15 +1,14 @@
 BEGIN
-  globalVarInt : INT;
-  globalVarReal : REAL;
+    globalVarInt : INT;
+    globalVarReal : REAL;
 
-  INT MethodDec(ArgReal : REAL, ArgInt : INT ) {
-    globalVarInt := ArgInt;
-    globalVarReal := ArgReal;
-  }
+    INT retOne() {
+        globalVarInt := 1;
+        PUT(globalVarInt);
+        RETURN 1;
+    }
 
-  VOID MAIN() {
-    mainVarDec : INT;
-    mainVarDec := 4;
-    MethodDec(6.2, 3);
- }
+    VOID MAIN() {
+        retOne();
+    }
 END
